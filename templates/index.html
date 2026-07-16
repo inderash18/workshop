@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI NEXT GEN RESEARCH WORKSHOP 2026</title>
+    <meta name="description" content="AI Research Lab Selection Portal. Not Everyone Gets Selected. Applying to become one of the 30 selected minds.">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Camera Preview Specific styling */
+        .camera-preview-container {
+            width: 100%;
+            height: 180px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        #webcam-setup-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .setup-status-overlay {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            font-family: var(--font-mono);
+        }
+        .security-check-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .security-check-card {
+            padding: 1rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+        .check-name {
+            font-family: var(--font-futuristic);
+            letter-spacing: 1px;
+        }
+        .check-status {
+            font-family: var(--font-mono);
+            font-weight: bold;
+        }
+        .status-checking { color: var(--accent-yellow); }
+        .status-passed { color: var(--accent-green); }
+        .status-failed { color: var(--accent-red); }
+
+        /* Floating Video Feed during assessment */
+        #floating-webcam-feed {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 150px;
+            height: 110px;
+            border-radius: 8px;
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            z-index: 999;
+            object-fit: cover;
+            background: black;
+            pointer-events: none;
+            display: none;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Screenshot Watermark */
+        #dynamic-watermark {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.015);
+            display: none;
+            user-select: none;
+            white-space: nowrap;
+        }
+        
+        .watermark-text {
+            position: absolute;
+            animation: moveWatermark 25s infinite linear;
+            transform: rotate(-15deg);
+        }
+
+        @keyframes moveWatermark {
+            0% { top: -5%; left: -5%; }
+            50% { top: 95%; left: 95%; }
+            100% { top: -5%; left: -5%; }
+        }
+
+        /* Screen blur on violation */
+        .blur-overlay {
+            filter: blur(25px) !important;
+            transition: filter 0.3s ease;
+        }
+
+        /* Grid for Level 1 shapes */
+        .shape-match-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .shape-card-grid {
+            border: 1px solid var(--card-border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.01);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .shape-card-grid:hover {
+            border-color: var(--accent-indigo);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        .shape-card-grid.selected {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.08);
+        }
+        
+        /* Disqualification screen */
+        .disqualified-container {
+            max-width: 600px;
+            margin: 10vh auto;
+            text-align: center;
+            padding: 4rem 3rem;
+            border-color: rgba(239, 68, 68, 0.3);
+            background: rgba(239, 68, 68, 0.03);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <!-- Transparent screenshot protection watermark -->
+    <div id="dynamic-watermark">
+        <span class="watermark-text" id="watermark-content">AI26-0000 // SECURE SESSION ASSESSMENT</span>
+    </div>
+
+    <!-- Floating Live Webcam Feed (Monitored) -->
+    <video id="floating-webcam-feed" autoplay muted playsinline></video>
+
+    <div class="container" id="main-content-wrapper">
+        <!-- HEADER -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AI NEXT GEN</span>
+            </div>
+            <div class="selection-ratio" id="selection-rate">
+                <span>●</span> SELECTION RATE: 7%
+            </div>
+        </header>
+
+        <!-- 1. LANDING PANEL -->
+        <div id="landing-view" class="view-panel active">
+            <div class="landing-hero">
+                <span class="pre-title">MIT Media Lab & OpenAI Inspired</span>
+                <h1 class="hero-title">AI NEXT GEN RESEARCH WORKSHOP 2026</h1>
+                <div class="tagline">"Not Everyone Gets Selected."</div>
+                <p class="hero-description">
+                    This is not a registration form. You are applying to become one of the selected students. 
+                    Only the brightest minds will be selected for our exclusive 2-day workshop covering LLMs, Agent pipelines, and fine-tuning mechanics.
+                </p>
+
+                <div class="hero-stats">
+                    <div class="glass-panel stat-card">
+                        <div class="stat-value">30</div>
+                        <div class="stat-label">Total Seats</div>
+                    </div>
+                    <div class="glass-panel stat-card">
+                        <div class="stat-value" id="days-countdown">02d:00h</div>
+                        <div class="stat-label">Assessment Timer</div>
+                    </div>
+                    <div class="glass-panel stat-card">
+                        <div class="stat-value">7.2%</div>
+                        <div class="stat-label">Selection Rate</div>
+                    </div>
+                </div>
+
+                <button class="btn-futuristic" id="btn-landing-apply">
+                    Apply for Selection
+                    <span style="font-size: 1.2rem;">➔</span>
+                </button>
+            </div>
+
+            <!-- Syllabus details -->
+            <div class="topics-section">
+                <h2 class="section-title">2-Day Intensive Syllabus</h2>
+                <div class="topics-grid">
+                    <div class="glass-panel topic-card">
+                        <div class="topic-icon">🧠</div>
+                        <h3 class="topic-title">AI & ML Foundations</h3>
+                        <p class="topic-desc">Core architectures, neural networks, and mathematical models guiding machine decisions.</p>
+                    </div>
+                    <div class="glass-panel topic-card">
+                        <div class="topic-icon">⚡</div>
+                        <h3 class="topic-title">Generative AI & LLMs</h3>
+                        <p class="topic-desc">Understanding Transformer mechanisms, context windows, and modern model optimization.</p>
+                    </div>
+                    <div class="glass-panel topic-card">
+                        <div class="topic-icon">🔍</div>
+                        <h3 class="topic-title">RAG Systems</h3>
+                        <p class="topic-desc">Designing retrieval-augmented systems with vector databases and semantic indexing.</p>
+                    </div>
+                    <div class="glass-panel topic-card">
+                        <div class="topic-icon">🤖</div>
+                        <h3 class="topic-title">Autonomous AI Agents</h3>
+                        <p class="topic-desc">Building multi-agent pipelines capable of planning, executing, and self-correcting.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dynamic Leaderboard -->
+            <div class="glass-panel leaderboard-panel">
+                <h2 class="section-title" style="margin-bottom: 1.5rem; text-align: left;">Live Leaderboard</h2>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th class="leaderboard-rank">Rank</th>
+                            <th>Candidate</th>
+                            <th>College</th>
+                            <th class="leaderboard-score">Final Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-muted);">Syncing rankings with server...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. REGISTRATION PANEL -->
+        <div id="register-view" class="view-panel glass-panel">
+            <h2 class="form-title">CANDIDATE SIGN IN</h2>
+            <p class="form-subtitle">Register your details to generate your secure candidate credentials.</p>
+
+            <form id="registration-form">
+                <div class="form-group-grid">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" required placeholder="e.g., Alex Johnson">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Academic Email</label>
+                        <input type="email" id="email" required placeholder="e.g., alex@college.edu">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" required placeholder="e.g., +91 9444455555">
+                    </div>
+                    <div class="form-group">
+                        <label for="college">College / University</label>
+                        <input type="text" id="college" required placeholder="e.g., IIT Madras">
+                    </div>
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <input type="text" id="department" required placeholder="e.g., Computer Science">
+                    </div>
+                    <div class="form-group">
+                        <label for="year">Year of Study</label>
+                        <select id="year" required>
+                            <option value="" disabled selected>Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="roll_number">Roll / Student ID</label>
+                        <input type="text" id="roll_number" required placeholder="e.g., CS2026-98">
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn Profile <span style="color: var(--text-muted); font-size: 0.7rem;">(Optional)</span></label>
+                        <input type="url" id="linkedin" placeholder="https://linkedin.com/in/...">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="github">GitHub Profile <span style="color: var(--text-muted); font-size: 0.7rem;">(Optional)</span></label>
+                        <input type="url" id="github" placeholder="https://github.com/...">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-futuristic btn-secondary" id="btn-register-back">Back</button>
+                    <button type="submit" class="btn-futuristic">Register & Verify</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 3. PRE-TEST SECURITY CHECK PANEL -->
+        <div id="security-view" class="view-panel glass-panel">
+            <h2 class="form-title" style="color: var(--accent-cyan);">PRE-ASSESSMENT SETUP</h2>
+            <p class="form-subtitle">Perform device and authorization validations before engaging assessment.</p>
+
+            <div class="camera-preview-container">
+                <video id="webcam-setup-feed" autoplay muted playsinline></video>
+                <div class="setup-status-overlay" id="setup-camera-label">Webcam preview offline</div>
+            </div>
+
+            <div class="security-check-grid">
+                <div class="security-check-card">
+                    <span class="check-name">Webcam Access</span>
+                    <span class="check-status status-checking" id="chk-webcam">Checking...</span>
+                </div>
+                <div class="security-check-card">
+                    <span class="check-name">Microphone Access</span>
+                    <span class="check-status status-checking" id="chk-mic">Checking...</span>
+                </div>
+                <div class="security-check-card">
+                    <span class="check-name">Location Verification</span>
+                    <span class="check-status status-checking" id="chk-location">Checking...</span>
+                </div>
+                <div class="security-check-card">
+                    <span class="check-name">Cookie Authorization</span>
+                    <span class="check-status status-checking" id="chk-cookies">Checking...</span>
+                </div>
+                <div class="security-check-card">
+                    <span class="check-name">Resolution Check</span>
+                    <span class="check-status status-checking" id="chk-resolution">Checking...</span>
+                </div>
+                <div class="security-check-card">
+                    <span class="check-name">Network Latency</span>
+                    <span class="check-status status-checking" id="chk-latency">Checking...</span>
+                </div>
+                <div class="security-check-card">
+                    <span class="check-name">Browser OS Compatibility</span>
+                    <span class="check-status status-checking" id="chk-browser">Checking...</span>
+                </div>
+                <div class="security-check-card">
+                    <span class="check-name">Candidate Authorization</span>
+                    <span class="check-status status-checking" id="chk-session">Checking...</span>
+                </div>
+            </div>
+
+            <div class="warning-box" style="margin-bottom: 2rem;">
+                <div class="warning-box-icon">⚠</div>
+                <div>
+                    <div class="warning-title" style="color: var(--accent-red)">ASSESSMENT MONITORED ENVIRONMENT</div>
+                    Webcam captures, microphone feeds, and location coordinates are actively tracked. 
+                    Ensure you are in a quiet, well-lit environment. Do not leave the assessment screen.
+                </div>
+            </div>
+
+            <div class="form-actions" style="justify-content: center;">
+                <button type="button" class="btn-futuristic" id="btn-begin-assess" disabled>
+                    Enter Fullscreen & Begin Challenge
+                </button>
+            </div>
+        </div>
+
+        <!-- 4. CHALLENGE CONTAINER -->
+        <div id="challenge-view" class="view-panel glass-panel challenge-container">
+            <div class="challenge-header">
+                <div class="challenge-level-info">
+                    <span class="level-indicator" id="challenge-level-indicator">LEVEL 1 OF 7</span>
+                    <span class="level-name" id="challenge-level-name">Pattern Recognition</span>
+                </div>
+                <div class="challenge-stats">
+                    <div class="xp-counter" style="color: var(--accent-red); margin-right: 1.5rem;" id="violation-display">Violations: 0/3</div>
+                    <div class="xp-counter">XP: <span id="challenge-xp">0</span></div>
+                    <div class="timer-box" style="margin-left: 1.5rem;">
+                        <span>⏱</span> <span id="challenge-timer">00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="challenge-progress-fill"></div>
+            </div>
+
+            <div class="secret-level-banner" id="secret-level-indicator" style="display: none;">
+                ⚠ SECRET VECTOR: BUDGET ₹1000 // NO GPU LIMIT // MAX 150 WORDS ⚠
+            </div>
+
+            <!-- Dynamic Question Form -->
+            <div class="challenge-body">
+                <div id="question-render-area">
+                    <!-- Javascript dynamic elements -->
+                </div>
+
+                <div class="form-actions">
+                    <span id="word-counter-display" style="display:none; font-family: var(--font-mono); color: var(--text-secondary); align-self: center;">
+                        Words: <span id="word-count-num">0</span>/150
+                    </span>
+                    <button type="button" class="btn-futuristic" id="btn-next-level">
+                        Next Level ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. RESULTS PANEL -->
+        <div id="results-view" class="view-panel glass-panel">
+            <h2 class="form-title" style="color: var(--accent-green);" id="results-title">METRIC LOGGING COMPLETE</h2>
+            <p class="form-subtitle" id="results-subtitle">Your analytical vector profile has been compiled and saved.</p>
+
+            <div class="results-grid">
+                <div class="results-left">
+                    <div class="glass-panel score-summary-card">
+                        <div class="stat-label">Composite Match Index</div>
+                        <div class="score-large" id="res-final-score">82.4</div>
+                        
+                        <div class="iq-meter-container">
+                            <span class="iq-meter-label">COGNITIVE IQ ESTIMATE: <span id="res-iq-val">138</span></span>
+                            <div class="iq-bar-bg">
+                                <div class="iq-bar-fill" id="res-iq-fill"></div>
+                            </div>
+                        </div>
+
+                        <!-- Score breakdown bars -->
+                        <div class="score-breakdown">
+                            <div class="score-row">
+                                <span class="score-row-label">Logic (40%)</span>
+                                <div class="score-row-bar-container">
+                                    <div class="score-row-bar-fill" id="bar-logic" style="width: 80%"></div>
+                                </div>
+                                <span class="score-row-val" id="val-logic">32.0</span>
+                            </div>
+                            <div class="score-row">
+                                <span class="score-row-label">Creativity (20%)</span>
+                                <div class="score-row-bar-container">
+                                    <div class="score-row-bar-fill" id="bar-creativity" style="width: 70%"></div>
+                                </div>
+                                <span class="score-row-val" id="val-creativity">14.0</span>
+                            </div>
+                            <div class="score-row">
+                                <span class="score-row-label">AI Knowledge (20%)</span>
+                                <div class="score-row-bar-container">
+                                    <div class="score-row-bar-fill" id="bar-ai" style="width: 75%"></div>
+                                </div>
+                                <span class="score-row-val" id="val-ai">15.0</span>
+                            </div>
+                            <div class="score-row">
+                                <span class="score-row-label">Problem Solving (10%)</span>
+                                <div class="score-row-bar-container">
+                                    <div class="score-row-bar-fill" id="bar-ps" style="width: 90%"></div>
+                                </div>
+                                <span class="score-row-val" id="val-ps">9.0</span>
+                            </div>
+                            <div class="score-row">
+                                <span class="score-row-label">Time Velocity (10%)</span>
+                                <div class="score-row-bar-container">
+                                    <div class="score-row-bar-fill" id="bar-time" style="width: 85%"></div>
+                                </div>
+                                <span class="score-row-val" id="val-time">8.5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-right glass-panel">
+                    <div class="radar-chart-container">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+
+                    <div class="badges-container">
+                        <h4 class="stat-label" style="text-align: center;">Unlocked Achievements</h4>
+                        <div class="badge-list" id="unlocked-badges">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box" id="res-advisory-box" style="margin-top: 3rem; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); color: #a7f3d0; text-align: center; justify-content: center;">
+                <div>
+                    <div class="warning-title" style="color: var(--accent-green); text-transform: uppercase;">Review Queue Pending</div>
+                    Application has been indexed. The selection panel will verify shortlists against the top 30 threshold.
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="btn-futuristic" id="btn-restart">
+                    Return to Main Portal
+                </button>
+            </div>
+        </div>
+
+        <!-- 6. DISQUALIFICATION PANEL -->
+        <div id="disqualified-view" class="view-panel glass-panel disqualified-container">
+            <h2 class="form-title" style="color: var(--accent-red); margin-bottom: 1.5rem;">CANDIDATE DISQUALIFIED</h2>
+            <div style="font-size: 4rem; margin-bottom: 2rem;">☠</div>
+            <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 2rem;">
+                The assessment was terminated due to exceeding the maximum allowance of security policy violations (Limit: 3). 
+                Actions such as tab switching, exiting fullscreen, copy-paste attempts, or camera blurs are fully logged under your ID.
+            </p>
+            <div class="warning-box" style="margin-bottom: 2rem; border-color: rgba(239,68,68,0.4); text-align: left;">
+                <div>
+                    <div class="warning-title">VIOLATION REPORT LOGGED</div>
+                    Your candidate profile has been flagged and submitted to the MIT Media Lab & AI Next Gen selection committee with a score of 0.
+                </div>
+            </div>
+            <button class="btn-futuristic btn-secondary" id="btn-disq-return">
+                Return to Main Portal
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Anti-cheat Alert container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

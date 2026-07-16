@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - AI Next Gen 2026</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 10vh auto;
+            padding: 3rem;
+            text-align: center;
+        }
+        .login-logo {
+            margin-bottom: 2rem;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <div class="container">
+        <div class="glass-panel login-container">
+            <div class="login-logo">
+                <div class="logo-icon" style="width: 40px; height: 40px;"></div>
+                <span class="logo-text" style="font-size: 1.4rem;">AI NEXT GEN</span>
+            </div>
+            
+            <h2 class="form-title" style="font-size: 1.4rem; margin-bottom: 1.5rem;">LAB CONTROL LOGIN</h2>
+            
+            <form id="login-form">
+                <div class="form-group" style="text-align: left;">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required placeholder="Enter admin username">
+                </div>
+                <div class="form-group" style="text-align: left; margin-bottom: 2rem;">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter password">
+                </div>
+                
+                <button type="submit" class="btn-futuristic" style="width: 100%;">
+                    Authenticate
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    window.location.href = '/admin';
+                } else {
+                    alert(result.error || 'Authentication failed');
+                }
+            } catch (err) {
+                alert('Connection error');
+            }
+        });
+    </script>
+</body>
+</html>
