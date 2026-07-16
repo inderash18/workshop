@@ -6,92 +6,666 @@
     <title>Assessment Arena - AI NEXT GEN 2026</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
+        /* ===== ENHANCED CSS ===== */
+        :root {
+            --primary-bg: #D8D7CE;
+            --dark-bg: #222831;
+            --accent-cyan: #00A6C0;
+            --accent-green: #16A34A;
+            --accent-red: #DC2626;
+            --accent-yellow: #F59E0B;
+            --font-serif: 'Georgia', serif;
+            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+            --font-futuristic: 'Segoe UI', system-ui, sans-serif;
+            --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #D8D7CE !important;
+            background-color: var(--primary-bg) !important;
+            font-family: var(--font-sans);
+            color: var(--dark-bg);
             margin: 0;
             padding: 0;
             min-height: 100vh;
+            position: relative;
         }
 
         body::before, body::after {
             display: none !important;
         }
 
+        /* ===== CONTAINER ===== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(34, 40, 49, 0.08);
+            padding-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-cyan), #7b2ffc);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            font-weight: 700;
+        }
+
+        .logo-text {
+            font-family: var(--font-futuristic);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--dark-bg);
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: rgba(34, 40, 49, 0.6);
+            font-size: 0.85rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-cyan);
+            background: rgba(0, 166, 192, 0.06);
+        }
+
+        .nav-links a.active {
+            color: var(--accent-cyan);
+            background: rgba(0, 166, 192, 0.08);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        #violation-display {
+            background: rgba(220, 38, 38, 0.08);
+            border: 1px solid rgba(220, 38, 38, 0.15);
+            color: var(--accent-red);
+            font-family: var(--font-futuristic);
+            font-size: 0.75rem;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        #violation-display.warning {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: rgba(245, 158, 11, 0.2);
+            color: var(--accent-yellow);
+        }
+
+        #violation-display.danger {
+            background: rgba(220, 38, 38, 0.15);
+            border-color: rgba(220, 38, 38, 0.25);
+            color: var(--accent-red);
+            animation: pulse-warning 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* ===== ARENA GRID ===== */
         .arena-grid {
             display: grid;
             grid-template-columns: 280px 1fr;
             gap: 2rem;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
         }
 
-        /* Sidebar Missions Menu */
+        /* ===== MISSIONS SIDEBAR ===== */
         .missions-sidebar {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.65rem;
         }
 
         .mission-item {
-            padding: 1.1rem;
+            padding: 1rem 1.2rem;
             border-radius: 16px;
-            background: rgba(40, 59, 72, 0.12);
-            border: 1px solid rgba(34, 40, 49, 0.12);
+            background: rgba(255, 255, 255, 0.35);
+            border: 1px solid rgba(34, 40, 49, 0.08);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s var(--transition-smooth);
             font-size: 0.8rem;
-            color: rgba(34, 40, 49, 0.8);
+            color: rgba(34, 40, 49, 0.6);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: var(--accent-cyan);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mission-item:hover:not(.locked) {
+            transform: translateX(4px);
+            border-color: rgba(0, 166, 192, 0.2);
         }
 
         .mission-item.active {
-            border-color: #00A6C0;
+            border-color: var(--accent-cyan);
             background: rgba(0, 166, 192, 0.08);
-            box-shadow: 0 0 20px rgba(0, 166, 192, 0.15);
-            color: #222831;
+            box-shadow: 0 4px 16px rgba(0, 166, 192, 0.1);
+            color: var(--dark-bg);
             font-weight: 600;
         }
 
+        .mission-item.active::before {
+            opacity: 1;
+        }
+
         .mission-item.completed {
-            border-color: rgba(22, 163, 74, 0.3);
-            background: rgba(22, 163, 74, 0.05);
-            color: rgba(34, 40, 49, 0.9);
+            border-color: rgba(22, 163, 74, 0.2);
+            background: rgba(22, 163, 74, 0.06);
+            color: rgba(34, 40, 49, 0.8);
+        }
+
+        .mission-item.completed .mission-status-icon {
+            color: var(--accent-green);
         }
 
         .mission-item.locked {
             opacity: 0.4;
             cursor: not-allowed;
-            background: rgba(34, 40, 49, 0.05);
+            background: rgba(34, 40, 49, 0.03);
+        }
+
+        .mission-item .mission-number {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: rgba(34, 40, 49, 0.3);
+            margin-right: 8px;
+            font-weight: 700;
         }
 
         .mission-item-title {
             font-family: var(--font-futuristic);
-            letter-spacing: 0.5px;
-            font-weight: 700;
+            letter-spacing: 0.3px;
+            font-weight: 600;
+            font-size: 0.8rem;
         }
 
         .mission-status-icon {
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .mission-item .mission-score {
+            font-size: 0.65rem;
+            color: rgba(34, 40, 49, 0.3);
+            font-weight: 600;
+            background: rgba(255,255,255,0.3);
+            padding: 2px 10px;
+            border-radius: 10px;
+        }
+
+        /* ===== CHALLENGE CONTAINER ===== */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(34, 40, 49, 0.08);
+            padding: 32px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
+        }
+
+        .challenge-container {
+            margin: 0;
+            padding: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .challenge-header {
+            border-bottom: 1px solid rgba(34, 40, 49, 0.06);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .challenge-level-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .level-indicator {
+            font-family: var(--font-futuristic);
+            font-size: 0.7rem;
+            color: rgba(34, 40, 49, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .level-name {
+            font-family: var(--font-serif);
+            font-size: 1.3rem;
+            color: var(--dark-bg);
+            font-weight: 500;
+        }
+
+        .challenge-stats {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .xp-counter {
+            font-family: var(--font-futuristic);
+            font-weight: 700;
+            color: var(--accent-cyan);
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+            background: rgba(0, 166, 192, 0.06);
+            padding: 4px 14px;
+            border-radius: 12px;
+        }
+
+        .timer-box {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--dark-bg);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timer-box .icon {
             font-size: 1rem;
         }
 
-        /* Floating Video */
-        #floating-webcam-feed {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 150px;
-            height: 110px;
-            border-radius: 16px;
-            border: 1.5px solid #00A6C0;
-            box-shadow: 0 0 20px rgba(0, 166, 192, 0.25);
-            z-index: 999;
-            object-fit: cover;
-            background: #283B48;
-            pointer-events: none;
+        .timer-box.warning {
+            color: var(--accent-yellow);
+        }
+
+        .timer-box.danger {
+            color: var(--accent-red);
+            animation: pulse-timer 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-timer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-bar-container {
+            height: 6px;
+            background: rgba(34, 40, 49, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), #7b2ffc);
+            border-radius: 4px;
+            transition: width 0.6s var(--transition-smooth);
+            width: 0%;
+            position: relative;
+        }
+
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+            border-radius: 4px;
+        }
+
+        .progress-text {
+            font-size: 0.7rem;
+            color: rgba(34, 40, 49, 0.3);
+            text-align: right;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* ===== SECRET LEVEL BANNER ===== */
+        .secret-level-banner {
+            display: none;
+            background: rgba(220, 38, 38, 0.06);
+            border: 1.5px solid rgba(220, 38, 38, 0.15);
+            border-radius: 12px;
+            padding: 12px 16px;
+            text-align: center;
+            color: var(--accent-red);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            animation: fadeSlideIn 0.5s ease;
+        }
+
+        .secret-level-banner.show {
             display: block;
         }
 
-        /* Watermark */
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== QUESTION AREA ===== */
+        .challenge-body {
+            min-height: 300px;
+        }
+
+        #question-render-area {
+            color: var(--dark-bg);
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        #question-render-area .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 1.2rem;
+            color: var(--dark-bg);
+        }
+
+        #question-render-area .question-text .q-number {
+            color: var(--accent-cyan);
+            font-weight: 700;
+        }
+
+        #question-render-area .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+
+        #question-render-area .option-item {
+            padding: 0.9rem 1.2rem;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(34, 40, 49, 0.06);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        #question-render-area .option-item:hover:not(.disabled) {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 166, 192, 0.04);
+            transform: translateX(4px);
+        }
+
+        #question-render-area .option-item.selected {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 166, 192, 0.08);
+        }
+
+        #question-render-area .option-item.correct {
+            border-color: var(--accent-green);
+            background: rgba(22, 163, 74, 0.08);
+        }
+
+        #question-render-area .option-item.wrong {
+            border-color: var(--accent-red);
+            background: rgba(220, 38, 38, 0.08);
+        }
+
+        #question-render-area .option-item.disabled {
+            cursor: default;
+            opacity: 0.7;
+        }
+
+        #question-render-area .option-item .letter {
+            font-weight: 700;
+            color: var(--accent-cyan);
+            font-size: 0.8rem;
+            min-width: 24px;
+        }
+
+        #question-render-area textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(34, 40, 49, 0.06);
+            border-radius: 14px;
+            color: var(--dark-bg);
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s ease;
+        }
+
+        #question-render-area textarea:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 166, 192, 0.1);
+        }
+
+        #question-render-area textarea::placeholder {
+            color: rgba(34, 40, 49, 0.2);
+        }
+
+        #question-render-area .word-count {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: rgba(34, 40, 49, 0.3);
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        #question-render-area .word-count.limit {
+            color: var(--accent-red);
+        }
+
+        /* ===== FORM ACTIONS ===== */
+        .form-actions {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(34, 40, 49, 0.06);
+        }
+
+        .form-actions .left-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #word-counter-display {
+            font-family: var(--font-mono);
+            color: rgba(34, 40, 49, 0.3);
+            font-size: 0.8rem;
+        }
+
+        #word-counter-display .count {
+            font-weight: 700;
+            color: var(--dark-bg);
+        }
+
+        .btn-futuristic {
+            padding: 10px 28px;
+            background: linear-gradient(135deg, var(--accent-cyan), #7b2ffc);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s var(--transition-smooth);
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-futuristic:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 166, 192, 0.3);
+        }
+
+        .btn-futuristic:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-futuristic:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-futuristic.btn-secondary {
+            background: rgba(34, 40, 49, 0.06);
+            color: var(--dark-bg);
+        }
+
+        .btn-futuristic.btn-secondary:hover {
+            background: rgba(34, 40, 49, 0.1);
+            box-shadow: none;
+        }
+
+        .btn-futuristic .spinner-small {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .btn-futuristic.loading .spinner-small {
+            display: inline-block;
+        }
+
+        .btn-futuristic.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== FLOATING WEBCAM ===== */
+        #floating-webcam-feed {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 160px;
+            height: 120px;
+            border-radius: 16px;
+            border: 2px solid var(--accent-cyan);
+            box-shadow: 0 8px 32px rgba(0, 166, 192, 0.2);
+            z-index: 999;
+            object-fit: cover;
+            background: var(--dark-bg);
+            pointer-events: none;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        #floating-webcam-feed.active {
+            border-color: var(--accent-green);
+        }
+
+        #floating-webcam-feed.inactive {
+            border-color: var(--accent-red);
+            opacity: 0.6;
+        }
+
+        .webcam-label {
+            position: fixed;
+            bottom: 148px;
+            left: 28px;
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.4);
+            background: rgba(0,0,0,0.5);
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            z-index: 1000;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== WATERMARK ===== */
         #dynamic-watermark {
             position: fixed;
             top: 0;
@@ -101,102 +675,136 @@
             pointer-events: none;
             z-index: 9999;
             font-family: var(--font-mono);
-            font-size: 0.85rem;
-            color: rgba(216, 215, 206, 0.012);
+            font-size: 0.8rem;
+            color: rgba(34, 40, 49, 0.03);
             display: block;
             user-select: none;
-            white-space: nowrap;
+            overflow: hidden;
         }
-        
+
         .watermark-text {
             position: absolute;
-            animation: moveWatermark 25s infinite linear;
+            animation: moveWatermark 30s infinite linear;
             transform: rotate(-15deg);
+            white-space: nowrap;
+            font-weight: 700;
+            letter-spacing: 2px;
         }
 
         @keyframes moveWatermark {
             0% { top: -5%; left: -5%; }
-            50% { top: 95%; left: 95%; }
+            50% { top: 95%; left: 85%; }
             100% { top: -5%; left: -5%; }
         }
 
-        /* Screen blur on violation */
-        .blur-overlay {
-            filter: blur(25px) !important;
-            transition: filter 0.3s ease;
-        }
-
-        .shape-match-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-        .shape-card-grid {
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 1.5rem;
-            border-radius: 16px;
-            background: rgba(40, 59, 72, 0.45);
-            cursor: pointer;
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 380px;
+        }
+
+        .toast {
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: var(--dark-bg);
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            animation: slideInRight 0.4s var(--transition-smooth);
+            display: flex;
             align-items: center;
-            transition: all 0.2s ease;
-        }
-        .shape-card-grid:hover {
-            border-color: #00A6C0;
-            background: rgba(0, 166, 192, 0.05);
-        }
-        .shape-card-grid.selected {
-            border-color: #00A6C0;
-            background: rgba(0, 166, 192, 0.12);
-            box-shadow: 0 0 15px rgba(0, 166, 192, 0.15);
+            gap: 12px;
+            border-left: 4px solid var(--accent-cyan);
+            font-size: 0.85rem;
         }
 
-        .progress-bar-container {
-            height: 6px;
-            background: rgba(0, 0, 0, 0.15);
-            border-radius: 3px;
-            overflow: hidden;
+        .toast.success { border-left-color: var(--accent-green); }
+        .toast.error { border-left-color: var(--accent-red); }
+        .toast.warning { border-left-color: var(--accent-yellow); }
+
+        .toast .icon { font-size: 1.2rem; }
+        .toast .message { font-weight: 500; }
+        .toast .close-toast {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.3);
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: auto;
+            padding: 0 4px;
         }
 
-        .progress-bar-fill {
-            height: 100%;
-            background: #00A6C0;
-            box-shadow: 0 0 10px rgba(0, 166, 192, 0.5);
-            border-radius: 3px;
-            transition: width 0.4s ease;
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        .timer-box {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            color: #00A6C0;
+        .toast.removing {
+            animation: slideOutRight 0.3s ease forwards;
         }
 
-        .xp-counter {
-            font-family: var(--font-futuristic);
-            font-weight: 700;
-            color: #00A6C0;
-            letter-spacing: 0.5px;
+        @keyframes slideOutRight {
+            to { transform: translateX(100%); opacity: 0; }
         }
 
-        .level-indicator {
-            font-family: var(--font-futuristic);
-            font-size: 0.75rem;
-            color: rgba(216, 215, 206, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        /* ===== ANTI-CHEAT OVERLAY ===== */
+        .blur-overlay {
+            filter: blur(20px) !important;
+            transition: filter 0.5s ease;
+            pointer-events: none;
         }
 
-        .level-name {
+        .anti-cheat-banner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10000;
+            background: rgba(34, 40, 49, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px 48px;
+            border-radius: 24px;
+            border: 2px solid var(--accent-red);
+            text-align: center;
+            color: white;
+            max-width: 500px;
+            display: none;
+        }
+
+        .anti-cheat-banner.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .anti-cheat-banner .icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .anti-cheat-banner h2 {
             font-family: var(--font-serif);
-            font-size: 1.35rem;
-            color: #D8D7CE;
-            font-weight: 500;
+            font-size: 1.4rem;
+            margin-bottom: 8px;
         }
 
-        @media (max-width: 800px) {
+        .anti-cheat-banner p {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
             .arena-grid {
                 grid-template-columns: 1fr;
             }
@@ -204,119 +812,1137 @@
                 flex-direction: row;
                 overflow-x: auto;
                 padding-bottom: 0.5rem;
+                gap: 0.5rem;
             }
             .mission-item {
                 flex-shrink: 0;
                 min-width: 180px;
             }
         }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .challenge-container {
+                padding: 20px;
+            }
+            #question-render-area .options-grid {
+                grid-template-columns: 1fr;
+            }
+            .challenge-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .challenge-stats {
+                justify-content: space-between;
+            }
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #floating-webcam-feed {
+                width: 100px;
+                height: 75px;
+                bottom: 12px;
+                left: 12px;
+            }
+            .webcam-label {
+                bottom: 90px;
+                left: 14px;
+                font-size: 0.5rem;
+            }
+            header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #question-render-area .option-item {
+                padding: 0.7rem 1rem;
+                font-size: 0.8rem;
+            }
+            .mission-item {
+                min-width: 140px;
+                padding: 0.7rem 1rem;
+                font-size: 0.7rem;
+            }
+            .level-name {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- ===== WATERMARK ===== -->
     <div id="dynamic-watermark">
-        <span class="watermark-text" id="watermark-content">AINEXT2026-0000 // ACTIVE ASSESSMENT</span>
+        <span class="watermark-text" id="watermark-content">AINEXT2026-0000 // ACTIVE ASSESSMENT // SECURE SESSION</span>
     </div>
 
-    <!-- Live Webcam Overlay -->
-    <video id="floating-webcam-feed" autoplay muted playsinline></video>
+    <!-- ===== ANTI-CHEAT BANNER ===== -->
+    <div class="anti-cheat-banner" id="anti-cheat-banner">
+        <div class="icon">🚨</div>
+        <h2>Assessment Paused</h2>
+        <p>A security violation has been detected. The assessment has been paused. Please refrain from switching tabs or using external applications.</p>
+        <button class="btn-futuristic" style="margin-top: 16px;" id="btn-resume-assessment">Resume Assessment</button>
+    </div>
 
+    <!-- ===== WEBCAM ===== -->
+    <video id="floating-webcam-feed" autoplay muted playsinline></video>
+    <div class="webcam-label" id="webcam-label">📷 WEBCAM • ACTIVE</div>
+
+    <!-- ===== MAIN CONTENT ===== -->
     <div class="container" id="main-content-wrapper">
         <!-- HEADER -->
-        <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 1.25rem;">
-            <div style="display: flex; align-items: center; gap: 24px;">
-                <div class="logo" style="margin-right: 8px;">
-                    <div class="logo-icon"></div>
-                    <span class="logo-text">AI NEXT GEN CHALLENGE</span>
+        <header>
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                <div class="logo">
+                    <div class="logo-icon">✦</div>
+                    <span class="logo-text">AI NEXT GEN</span>
                 </div>
-                <a href="/dashboard" style="color: rgba(34, 40, 49, 0.7); font-size: 0.85rem; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#00A6C0'" onmouseout="this.style.color='rgba(34, 40, 49, 0.7)'">Dashboard</a>
-                <a href="/profile" style="color: rgba(34, 40, 49, 0.7); font-size: 0.85rem; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#00A6C0'" onmouseout="this.style.color='rgba(34, 40, 49, 0.7)'">Profile</a>
+                <div class="nav-links">
+                    <a href="/dashboard">Dashboard</a>
+                    <a href="/challenge" class="active">Challenge</a>
+                    <a href="/profile">Profile</a>
+                </div>
             </div>
-            <div class="selection-ratio" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.2); color: var(--accent-red); font-family: var(--font-futuristic); font-size: 0.8rem;" id="violation-display">
-                Violations: 0/3
+            <div class="header-right">
+                <span id="candidate-name-display" style="font-size:0.8rem; font-weight:600; color:rgba(34,40,49,0.6);">👤 Candidate</span>
+                <div id="violation-display">
+                    ⚠️ Violations: <span id="violation-count">0</span>/3
+                </div>
             </div>
         </header>
 
-        <!-- Main Challenge Arena Layout -->
+        <!-- ARENA -->
         <div class="arena-grid">
-            
-            <!-- Side Missions progression board -->
-            <div class="missions-sidebar">
-                <div class="mission-item locked" id="m-item-1">
-                    <span class="mission-item-title">M-01: AI LOGIC DETECTIVE</span>
-                    <span class="mission-status-icon" id="m-status-1">🔒</span>
-                </div>
-                <div class="mission-item locked" id="m-item-2">
-                    <span class="mission-item-title">M-02: FUTURE THINKER</span>
-                    <span class="mission-status-icon" id="m-status-2">🔒</span>
-                </div>
-                <div class="mission-item locked" id="m-item-3">
-                    <span class="mission-item-title">M-03: PROMPT MASTER</span>
-                    <span class="mission-status-icon" id="m-status-3">🔒</span>
-                </div>
-                <div class="mission-item locked" id="m-item-4">
-                    <span class="mission-item-title">M-04: THE INNOVATION LAB</span>
-                    <span class="mission-status-icon" id="m-status-4">🔒</span>
-                </div>
-                <div class="mission-item locked" id="m-item-5">
-                    <span class="mission-item-title">M-05: AI ARCHITECT</span>
-                    <span class="mission-status-icon" id="m-status-5">🔒</span>
-                </div>
-                <div class="mission-item locked" id="m-item-6">
-                    <span class="mission-item-title">M-06: BALANCE MASTER</span>
-                    <span class="mission-status-icon" id="m-status-6">🔒</span>
-                </div>
-                <div class="mission-item locked" id="m-item-7">
-                    <span class="mission-item-title">M-07: FUTURE BUILDER</span>
-                    <span class="mission-status-icon" id="m-status-7">🔒</span>
-                </div>
+            <!-- Missions Sidebar -->
+            <div class="missions-sidebar" id="missions-sidebar">
+                <!-- Rendered by JS -->
             </div>
 
-            <!-- Interactive Questions Pane -->
-            <div class="glass-panel challenge-container" style="margin: 0; padding: 32px;">
-                <div class="challenge-header" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <!-- Challenge Container -->
+            <div class="glass-panel challenge-container" id="challenge-container">
+                <div class="challenge-header">
                     <div class="challenge-level-info">
                         <span class="level-indicator" id="challenge-level-indicator">MISSION 01 OF 07</span>
                         <div class="level-name" id="challenge-level-name">AI Logic Detective</div>
                     </div>
-                    <div style="display: flex; align-items: center;">
-                        <div class="xp-counter">XP: <span id="challenge-xp">0</span></div>
-                        <div class="timer-box" style="margin-left: 1.5rem; display: flex; align-items: center; gap: 6px;">
-                            <span>⏱</span> <span id="challenge-timer">00:00</span>
+                    <div class="challenge-stats">
+                        <div class="xp-counter">🏆 XP: <span id="challenge-xp">0</span></div>
+                        <div class="timer-box" id="timer-box">
+                            <span class="icon">⏱</span>
+                            <span id="challenge-timer">00:00</span>
+                        </div>
+                        <div style="font-size:0.7rem; color:rgba(34,40,49,0.3); font-weight:500;">
+                            Q: <span id="question-counter">1</span>/<span id="total-questions">5</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Progress bar fill -->
-                <div class="progress-bar-container" style="margin-bottom: 2rem;">
+                <!-- Progress -->
+                <div class="progress-bar-container">
                     <div class="progress-bar-fill" id="challenge-progress-fill"></div>
                 </div>
+                <div class="progress-text" id="progress-text">0% Complete</div>
 
-                <div class="secret-level-banner" id="secret-level-indicator" style="display: none; background: rgba(220,38,38,0.1); border: 1.5px solid rgba(220,38,38,0.3); border-radius: 12px; padding: 12px; text-align: center; color: var(--accent-red); font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 20px; font-weight: bold; letter-spacing: 0.5px;">
-                    ⚠ SECRET VECTOR: BUDGET ₹1000 // NO GPU LIMIT // MAX 150 WORDS ⚠
+                <!-- Secret Level Banner -->
+                <div class="secret-level-banner" id="secret-level-indicator">
+                    ⚠ SECRET VECTOR: BUDGET ₹1000 • NO GPU LIMIT • MAX 150 WORDS ⚠
                 </div>
 
+                <!-- Question Body -->
                 <div class="challenge-body">
-                    <div id="question-render-area" style="color: rgba(216, 215, 206, 0.95); font-size: 0.95rem; line-height: 1.6;">
-                        <!-- Javascript insertions -->
+                    <div id="question-render-area">
+                        <!-- Rendered by JS -->
                     </div>
 
-                    <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1.5rem; align-items: center;">
-                        <span id="word-counter-display" style="display:none; font-family: var(--font-mono); color: rgba(216, 215, 206, 0.5); font-size: 0.8rem;">
-                            Words: <span id="word-count-num">0</span>/150
-                        </span>
-                        <button type="button" class="btn-futuristic" id="btn-next-level">
-                            Next Mission ➔
-                        </button>
+                    <div class="form-actions">
+                        <div class="left-actions">
+                            <span id="word-counter-display" style="display:none;">
+                                Words: <span class="count" id="word-count-num">0</span>/150
+                            </span>
+                        </div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button type="button" class="btn-futuristic btn-secondary" id="btn-reset-question" style="display:none;">
+                                🔄 Reset
+                            </button>
+                            <button type="button" class="btn-futuristic" id="btn-next-level">
+                                <span class="btn-text">Next Mission ➔</span>
+                                <span class="spinner-small"></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- Toast Anti-cheat Alert container -->
+    <!-- ===== TOAST ===== -->
     <div class="toast-container" id="toast-container"></div>
 
-    <script src="/static/js/app.js"></script>
+    <script>
+        // ===== ENHANCED JAVASCRIPT =====
+        (function() {
+            'use strict';
+
+            // ===== CONFIGURATION =====
+            const CONFIG = {
+                totalMissions: 7,
+                questionsPerMission: 5,
+                violationLimit: 3,
+                timerDuration: 120, // seconds per question
+                xpPerQuestion: 10,
+                xpBonusComplete: 25,
+                wordLimit: 150,
+                autoSaveInterval: 15000, // 15 seconds
+            };
+
+            // ===== STATE =====
+            const state = {
+                currentMission: 0,
+                currentQuestion: 0,
+                xp: 0,
+                violations: 0,
+                timer: CONFIG.timerDuration,
+                timerInterval: null,
+                isAnswered: false,
+                isCompleted: false,
+                isPaused: false,
+                missions: [],
+                answers: {},
+                startTime: null,
+                questionStartTime: null,
+                tabSwitchCount: 0,
+                lastActivity: Date.now(),
+            };
+
+            // ===== MISSION DATA =====
+            const MISSION_DATA = [
+                {
+                    id: 1,
+                    title: 'AI Logic Detective',
+                    icon: '🔍',
+                    questions: [
+                        {
+                            type: 'mcq',
+                            question: 'What is the primary purpose of a Transformer model in NLP?',
+                            options: ['Image recognition', 'Sequence processing with attention', 'Data clustering', 'Reinforcement learning'],
+                            correct: 1
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which of the following is NOT a type of machine learning?',
+                            options: ['Supervised', 'Unsupervised', 'Reinforcement', 'Active learning'],
+                            correct: 3
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'What does RAG stand for in AI?',
+                            options: ['Recursive Attention Graph', 'Retrieval-Augmented Generation', 'Reinforced Action Gradient', 'Random Access Grammar'],
+                            correct: 1
+                        },
+                        {
+                            type: 'text',
+                            question: 'Explain the concept of "few-shot learning" in the context of large language models. Provide an example.',
+                            wordLimit: 150
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which technique helps prevent overfitting in neural networks?',
+                            options: ['Data augmentation', 'Dropout', 'Early stopping', 'All of the above'],
+                            correct: 3
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: 'Future Thinker',
+                    icon: '🚀',
+                    questions: [
+                        {
+                            type: 'mcq',
+                            question: 'What is the primary goal of AGI (Artificial General Intelligence)?',
+                            options: ['To beat humans at chess', 'To perform any intellectual task a human can', 'To automate factories', 'To improve search engines'],
+                            correct: 1
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which company developed the GPT series of language models?',
+                            options: ['Google', 'Meta', 'OpenAI', 'Microsoft'],
+                            correct: 2
+                        },
+                        {
+                            type: 'text',
+                            question: 'Describe three potential ethical concerns with the widespread deployment of autonomous AI agents.',
+                            wordLimit: 150
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'What is the "alignment problem" in AI safety?',
+                            options: ['Making AI systems profitable', 'Ensuring AI goals align with human values', 'Connecting AI to the internet', 'Building larger models'],
+                            correct: 1
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which architecture is most commonly used for image generation today?',
+                            options: ['RNN', 'CNN', 'Diffusion models', 'SVM'],
+                            correct: 2
+                        }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: 'Prompt Master',
+                    icon: '✍️',
+                    questions: [
+                        {
+                            type: 'mcq',
+                            question: 'What is "chain-of-thought" prompting?',
+                            options: ['A long prompt', 'Breaking problems into steps', 'Using emojis in prompts', 'Random word generation'],
+                            correct: 1
+                        },
+                        {
+                            type: 'text',
+                            question: 'Design a prompt that would help an AI model generate a well-structured research proposal on "AI for Climate Change". Include key components.',
+                            wordLimit: 150
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'What is the "temperature" parameter in LLM generation?',
+                            options: ['Physical temperature', 'Controls randomness in output', 'Speed of generation', 'Size of vocabulary'],
+                            correct: 1
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which prompting technique helps reduce hallucinations?',
+                            options: ['Few-shot prompting', 'Chain-of-thought', 'RAG (Retrieval Augmented Generation)', 'All of the above'],
+                            correct: 3
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'What is "role prompting"?',
+                            options: ['Asking the AI to adopt a persona', 'A game mechanic', 'A type of UI design', 'A database query'],
+                            correct: 0
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: 'The Innovation Lab',
+                    icon: '🧪',
+                    questions: [
+                        {
+                            type: 'text',
+                            question: 'Propose a novel application of AI in healthcare that addresses a real-world challenge. Describe the problem and your solution.',
+                            wordLimit: 150
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which of these is a key enabler for personalized medicine?',
+                            options: ['Blockchain', 'AI and genomics', 'Quantum computing', 'Virtual reality'],
+                            correct: 1
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'What is "digital twin" technology?',
+                            options: ['A copy of a website', 'A virtual replica of a physical system', 'A type of AI model', 'A database backup'],
+                            correct: 1
+                        },
+                        {
+                            type: 'text',
+                            question: 'Describe how AI could be used to optimize supply chains while considering environmental sustainability.',
+                            wordLimit: 150
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which sector is most likely to see transformative change from AI in the next 5 years?',
+                            options: ['Agriculture', 'Healthcare', 'Transportation', 'All of the above'],
+                            correct: 3
+                        }
+                    ]
+                },
+                {
+                    id: 5,
+                    title: 'AI Architect',
+                    icon: '🏗️',
+                    questions: [
+                        {
+                            type: 'mcq',
+                            question: 'What is the main advantage of using vector databases with LLMs?',
+                            options: ['Faster training', 'Efficient similarity search', 'Better UI', 'Lower cost'],
+                            correct: 1
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which of these is NOT a popular LLM architecture?',
+                            options: ['Transformer', 'GPT', 'BERT', 'ResNet'],
+                            correct: 3
+                        },
+                        {
+                            type: 'text',
+                            question: 'Explain the trade-offs between model size, inference speed, and accuracy in production AI systems.',
+                            wordLimit: 150
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'What is "edge AI"?',
+                            options: ['AI on the internet', 'AI at the network edge', 'AI on the cloud', 'AI in data centers'],
+                            correct: 1
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which technology enables efficient deployment of AI on mobile devices?',
+                            options: ['Model quantization', 'TensorFlow Lite', 'ONNX', 'All of the above'],
+                            correct: 3
+                        }
+                    ]
+                },
+                {
+                    id: 6,
+                    title: 'Balance Master',
+                    icon: '⚖️',
+                    questions: [
+                        {
+                            type: 'mcq',
+                            question: 'What is the "bias-variance tradeoff" in machine learning?',
+                            options: ['A cost-benefit analysis', 'The balance between underfitting and overfitting', 'A type of data bias', 'A model optimization technique'],
+                            correct: 1
+                        },
+                        {
+                            type: 'text',
+                            question: 'Propose a framework for ensuring fairness and reducing bias in AI-powered hiring systems.',
+                            wordLimit: 150
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which metric is best for evaluating a classification model with imbalanced classes?',
+                            options: ['Accuracy', 'F1-Score', 'Precision', 'Recall'],
+                            correct: 1
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'What is "explainable AI" (XAI)?',
+                            options: ['AI that is simple', 'AI with interpretable decisions', 'AI that explains itself', 'Both B and C'],
+                            correct: 3
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which approach helps make AI systems more robust to adversarial attacks?',
+                            options: ['Adversarial training', 'Data augmentation', 'Model ensembling', 'All of the above'],
+                            correct: 3
+                        }
+                    ]
+                },
+                {
+                    id: 7,
+                    title: 'Future Builder',
+                    icon: '🌍',
+                    questions: [
+                        {
+                            type: 'text',
+                            question: 'Imagine you have a budget of ₹1000 to build a prototype AI application. Describe your concept, technology stack, and expected impact.',
+                            wordLimit: 150,
+                            isSecret: true
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'Which trend is most likely to define the next decade of AI?',
+                            options: ['Quantum AI', 'Generative AI and creativity', 'Embodied AI and robotics', 'All of the above'],
+                            correct: 3
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'What is the significance of "scaling laws" in AI?',
+                            options: ['They determine model pricing', 'They show performance improves with model size', 'They regulate AI development', 'They predict hardware costs'],
+                            correct: 1
+                        },
+                        {
+                            type: 'text',
+                            question: 'Reflect on your journey through this assessment. What is the one AI skill you want to develop most after this experience, and why?',
+                            wordLimit: 150
+                        },
+                        {
+                            type: 'mcq',
+                            question: 'What is the most important quality for AI systems of the future?',
+                            options: ['Speed', 'Accuracy', 'Safety and alignment', 'Cost efficiency'],
+                            correct: 2
+                        }
+                    ]
+                }
+            ];
+
+            // ===== DOM REFS =====
+            const $ = (s) => document.querySelector(s);
+            const $$ = (s) => document.querySelectorAll(s);
+
+            const missionsSidebar = $('#missions-sidebar');
+            const questionArea = $('#question-render-area');
+            const nextBtn = $('#btn-next-level');
+            const resetBtn = $('#btn-reset-question');
+            const progressFill = $('#challenge-progress-fill');
+            const progressText = $('#progress-text');
+            const timerDisplay = $('#challenge-timer');
+            const timerBox = $('#timer-box');
+            const xpDisplay = $('#challenge-xp');
+            const levelName = $('#challenge-level-name');
+            const levelIndicator = $('#challenge-level-indicator');
+            const violationCount = $('#violation-count');
+            const violationDisplay = $('#violation-display');
+            const secretBanner = $('#secret-level-indicator');
+            const wordCounter = $('#word-counter-display');
+            const wordCountNum = $('#word-count-num');
+            const questionCounter = $('#question-counter');
+            const totalQuestions = $('#total-questions');
+            const antiCheatBanner = $('#anti-cheat-banner');
+            const resumeBtn = $('#btn-resume-assessment');
+            const webcamFeed = $('#floating-webcam-feed');
+            const webcamLabel = $('#webcam-label');
+
+            // ===== TOAST SYSTEM =====
+            function showToast(message, type = 'info', duration = 4000) {
+                const container = $('#toast-container');
+                const icons = {
+                    success: '✅',
+                    error: '❌',
+                    warning: '⚠️',
+                    info: 'ℹ️'
+                };
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <span class="icon">${icons[type] || 'ℹ️'}</span>
+                    <span class="message">${message}</span>
+                    <button class="close-toast">✕</button>
+                `;
+                container.appendChild(toast);
+
+                toast.querySelector('.close-toast').addEventListener('click', () => {
+                    removeToast(toast);
+                });
+
+                setTimeout(() => removeToast(toast), duration);
+            }
+
+            function removeToast(toast) {
+                toast.classList.add('removing');
+                setTimeout(() => toast.remove(), 300);
+            }
+
+            // ===== INIT =====
+            function init() {
+                state.missions = MISSION_DATA;
+                state.currentMission = 0;
+                state.currentQuestion = 0;
+                state.xp = 0;
+                state.violations = 0;
+                state.isAnswered = false;
+                state.isCompleted = false;
+                state.answers = {};
+                state.startTime = Date.now();
+                state.questionStartTime = Date.now();
+
+                // Candidate name (mock)
+                const candidateName = localStorage.getItem('candidateName') || 'Candidate';
+                $('#candidate-name-display').textContent = `👤 ${candidateName}`;
+
+                renderMissions();
+                renderQuestion();
+                startTimer();
+                initWebcam();
+                initAntiCheat();
+                updateStats();
+
+                // Auto-save
+                setInterval(autoSave, CONFIG.autoSaveInterval);
+
+                console.log('🚀 Assessment Arena Initialized');
+                console.log(`📋 ${state.missions.length} Missions loaded`);
+            }
+
+            // ===== RENDER MISSIONS =====
+            function renderMissions() {
+                let html = '';
+                state.missions.forEach((mission, index) => {
+                    const isActive = index === state.currentMission;
+                    const isCompleted = state.answers[mission.id] && 
+                        Object.keys(state.answers[mission.id] || {}).length === mission.questions.length;
+                    const isLocked = index > state.currentMission && !isCompleted;
+
+                    let statusIcon = '🔒';
+                    let className = 'mission-item';
+                    if (isActive) className += ' active';
+                    if (isCompleted) { 
+                        className += ' completed'; 
+                        statusIcon = '✅';
+                    }
+                    if (isLocked) className += ' locked';
+
+                    const score = isCompleted ? state.answers[mission.id]?._score || 0 : 0;
+
+                    html += `
+                        <div class="${className}" data-mission="${index}" onclick="window._switchMission(${index})">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span class="mission-number">${String(index + 1).padStart(2, '0')}</span>
+                                <span class="mission-item-title">${mission.icon} ${mission.title}</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                ${isCompleted ? `<span class="mission-score">+${score} XP</span>` : ''}
+                                <span class="mission-status-icon">${statusIcon}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                missionsSidebar.innerHTML = html;
+            }
+
+            // Mission switch (exposed to global for onclick)
+            window._switchMission = function(index) {
+                if (index === state.currentMission) return;
+                if (index > state.currentMission) {
+                    // Check if previous mission is completed
+                    const prevMission = state.missions[state.currentMission];
+                    const prevAnswers = state.answers[prevMission.id] || {};
+                    if (Object.keys(prevAnswers).length < prevMission.questions.length) {
+                        showToast('Complete the current mission first!', 'warning');
+                        return;
+                    }
+                }
+                state.currentMission = index;
+                state.currentQuestion = 0;
+                state.isAnswered = false;
+                state.questionStartTime = Date.now();
+                renderMissions();
+                renderQuestion();
+                resetTimer();
+                updateStats();
+                showToast(`📖 Loaded: ${state.missions[index].title}`, 'info');
+            };
+
+            // ===== RENDER QUESTION =====
+            function renderQuestion() {
+                const mission = state.missions[state.currentMission];
+                const questions = mission.questions;
+                const qIndex = state.currentQuestion;
+                const totalQ = questions.length;
+
+                if (qIndex >= totalQ) {
+                    // Mission complete
+                    completeMission();
+                    return;
+                }
+
+                const question = questions[qIndex];
+                const isAnswered = state.answers[mission.id]?.[qIndex] !== undefined;
+
+                // Update headers
+                levelName.textContent = `${mission.icon} ${mission.title}`;
+                levelIndicator.textContent = `MISSION ${String(state.currentMission + 1).padStart(2, '0')} OF ${String(state.missions.length).padStart(2, '0')}`;
+                questionCounter.textContent = qIndex + 1;
+                totalQuestions.textContent = totalQ;
+
+                // Secret banner
+                if (question.isSecret) {
+                    secretBanner.classList.add('show');
+                } else {
+                    secretBanner.classList.remove('show');
+                }
+
+                // Render question
+                let html = '';
+                html += `<div class="question-text"><span class="q-number">Q${qIndex + 1}.</span> ${question.question}</div>`;
+
+                if (question.type === 'mcq') {
+                    html += `<div class="options-grid">`;
+                    question.options.forEach((opt, i) => {
+                        const letters = ['A', 'B', 'C', 'D'];
+                        const selected = isAnswered && state.answers[mission.id][qIndex] === i;
+                        const correct = isAnswered && i === question.correct;
+                        const wrong = isAnswered && selected && i !== question.correct;
+                        let classes = 'option-item';
+                        if (isAnswered) classes += ' disabled';
+                        if (selected) classes += ' selected';
+                        if (correct && isAnswered) classes += ' correct';
+                        if (wrong) classes += ' wrong';
+
+                        html += `
+                            <div class="${classes}" data-option="${i}" onclick="window._selectOption(${i})">
+                                <span class="letter">${letters[i]}.</span>
+                                <span>${opt}</span>
+                                ${isAnswered && i === question.correct ? ' ✅' : ''}
+                                ${isAnswered && selected && i !== question.correct ? ' ❌' : ''}
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                    if (isAnswered) {
+                        html += `<div style="margin-top:0.5rem; font-size:0.8rem; color:rgba(34,40,49,0.4);">
+                            ${state.answers[mission.id][qIndex] === question.correct ? '✅ Correct!' : '❌ Incorrect'}
+                        </div>`;
+                    }
+                } else if (question.type === 'text') {
+                    const wordLimit = question.wordLimit || CONFIG.wordLimit;
+                    const savedAnswer = isAnswered ? state.answers[mission.id][qIndex] : '';
+                    html += `
+                        <textarea id="text-answer" placeholder="Type your answer here..." ${isAnswered ? 'disabled' : ''}>${savedAnswer}</textarea>
+                        <div class="word-count" id="text-word-count">${savedAnswer.split(/\s+/).filter(w => w.length > 0).length} / ${wordLimit} words</div>
+                    `;
+                    if (isAnswered) {
+                        html += `<div style="margin-top:0.5rem; font-size:0.8rem; color:rgba(34,40,49,0.4);">✅ Answer submitted</div>`;
+                    }
+                }
+
+                questionArea.innerHTML = html;
+
+                // Bind text area events
+                const textArea = document.getElementById('text-answer');
+                if (textArea && !isAnswered) {
+                    textArea.addEventListener('input', function() {
+                        const words = this.value.split(/\s+/).filter(w => w.length > 0);
+                        const count = words.length;
+                        const wordLimit = question.wordLimit || CONFIG.wordLimit;
+                        const wordCountEl = document.getElementById('text-word-count');
+                        if (wordCountEl) {
+                            wordCountEl.textContent = `${count} / ${wordLimit} words`;
+                            wordCountEl.className = count > wordLimit ? 'word-count limit' : 'word-count';
+                        }
+                        // Save draft
+                        state.answers[mission.id] = state.answers[mission.id] || {};
+                        state.answers[mission.id][qIndex] = this.value;
+                        if (count >= wordLimit * 0.5) {
+                            showToast(`📝 ${count} words typed`, 'info', 1000);
+                        }
+                    });
+
+                    // Show word counter
+                    wordCounter.style.display = 'block';
+                    wordCountNum.textContent = '0';
+                } else {
+                    wordCounter.style.display = 'none';
+                }
+
+                // Update button
+                if (isAnswered) {
+                    nextBtn.innerHTML = `<span class="btn-text">${qIndex === totalQ - 1 ? '🏁 Complete Mission' : 'Next Question ➔'}</span><span class="spinner-small"></span>`;
+                    nextBtn.disabled = false;
+                    resetBtn.style.display = 'none';
+                } else {
+                    nextBtn.innerHTML = `<span class="btn-text">${qIndex === totalQ - 1 ? '🏁 Submit Mission' : 'Next Question ➔'}</span><span class="spinner-small"></span>`;
+                    nextBtn.disabled = true;
+                    resetBtn.style.display = 'block';
+                }
+
+                // Update progress
+                const progress = (qIndex / totalQ) * 100;
+                progressFill.style.width = `${progress}%`;
+                progressText.textContent = `${Math.round(progress)}% Complete`;
+
+                // Update state
+                state.isAnswered = isAnswered;
+                state.questionStartTime = Date.now();
+
+                // If already answered, show feedback and auto-advance after delay?
+                // We'll let user click next
+
+                // Expose select option globally
+                window._selectOption = function(optionIndex) {
+                    if (state.isAnswered) return;
+                    const mission = state.missions[state.currentMission];
+                    const question = mission.questions[state.currentQuestion];
+                    
+                    state.answers[mission.id] = state.answers[mission.id] || {};
+                    state.answers[mission.id][state.currentQuestion] = optionIndex;
+                    
+                    const isCorrect = optionIndex === question.correct;
+                    if (isCorrect) {
+                        state.xp += CONFIG.xpPerQuestion;
+                        showToast(`✅ +${CONFIG.xpPerQuestion} XP!`, 'success');
+                    } else {
+                        showToast(`❌ Incorrect. The correct answer was ${['A','B','C','D'][question.correct]}.`, 'warning', 3000);
+                    }
+                    
+                    state.isAnswered = true;
+                    renderQuestion();
+                    updateStats();
+                    checkMissionComplete();
+                };
+            }
+
+            // ===== COMPLETE MISSION =====
+            function completeMission() {
+                const mission = state.missions[state.currentMission];
+                const answers = state.answers[mission.id] || {};
+                const totalQ = mission.questions.length;
+                const answered = Object.keys(answers).filter(k => !isNaN(k)).length;
+
+                // Calculate score
+                let correct = 0;
+                mission.questions.forEach((q, i) => {
+                    if (q.type === 'mcq' && answers[i] === q.correct) correct++;
+                });
+                const score = Math.round((correct / totalQ) * 100);
+                state.answers[mission.id]._score = score;
+
+                // Bonus XP
+                if (score >= 70) {
+                    state.xp += CONFIG.xpBonusComplete;
+                    showToast(`🎉 Mission Complete! +${CONFIG.xpBonusComplete} Bonus XP!`, 'success');
+                }
+
+                showToast(`📊 Mission ${mission.id} Complete! Score: ${score}%`, 'success');
+
+                // Move to next mission if available
+                if (state.currentMission < state.missions.length - 1) {
+                    setTimeout(() => {
+                        state.currentMission++;
+                        state.currentQuestion = 0;
+                        state.isAnswered = false;
+                        renderMissions();
+                        renderQuestion();
+                        resetTimer();
+                        updateStats();
+                    }, 1500);
+                } else {
+                    // All missions complete!
+                    state.isCompleted = true;
+                    nextBtn.disabled = true;
+                    nextBtn.textContent = '🏆 Assessment Complete!';
+                    showToast('🏆 Congratulations! You\'ve completed all missions!', 'success', 8000);
+                    // Redirect or show completion screen
+                }
+
+                renderMissions();
+                updateStats();
+            }
+
+            // ===== CHECK MISSION COMPLETE =====
+            function checkMissionComplete() {
+                const mission = state.missions[state.currentMission];
+                const answers = state.answers[mission.id] || {};
+                const totalQ = mission.questions.length;
+                const answered = Object.keys(answers).filter(k => !isNaN(k) && answers[k] !== undefined && answers[k] !== '').length;
+                if (answered === totalQ) {
+                    // All questions answered
+                    completeMission();
+                }
+            }
+
+            // ===== TIMER =====
+            function startTimer() {
+                if (state.timerInterval) clearInterval(state.timerInterval);
+                state.timer = CONFIG.timerDuration;
+                state.timerInterval = setInterval(() => {
+                    if (state.isPaused) return;
+                    state.timer--;
+                    updateTimerDisplay();
+                    if (state.timer <= 0) {
+                        // Time's up - auto-advance or mark as wrong
+                        clearInterval(state.timerInterval);
+                        const mission = state.missions[state.currentMission];
+                        const question = mission.questions[state.currentQuestion];
+                        if (!state.isAnswered) {
+                            // Auto-submit with wrong answer
+                            state.answers[mission.id] = state.answers[mission.id] || {};
+                            state.answers[mission.id][state.currentQuestion] = -1; // Timeout
+                            state.isAnswered = true;
+                            showToast('⏰ Time\'s up! Moving to next question.', 'warning');
+                            renderQuestion();
+                            updateStats();
+                            checkMissionComplete();
+                        }
+                    }
+                }, 1000);
+            }
+
+            function resetTimer() {
+                if (state.timerInterval) clearInterval(state.timerInterval);
+                state.timer = CONFIG.timerDuration;
+                updateTimerDisplay();
+                startTimer();
+            }
+
+            function updateTimerDisplay() {
+                const mins = Math.floor(state.timer / 60);
+                const secs = state.timer % 60;
+                timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                timerBox.className = 'timer-box';
+                if (state.timer < 10) timerBox.classList.add('danger');
+                else if (state.timer < 30) timerBox.classList.add('warning');
+            }
+
+            // ===== UPDATE STATS =====
+            function updateStats() {
+                xpDisplay.textContent = state.xp;
+                violationCount.textContent = state.violations;
+                
+                if (state.violations >= CONFIG.violationLimit) {
+                    violationDisplay.className = 'danger';
+                    triggerViolationLock();
+                } else if (state.violations >= CONFIG.violationLimit - 1) {
+                    violationDisplay.className = 'warning';
+                } else {
+                    violationDisplay.className = '';
+                }
+
+                // Update sidebar scores
+                renderMissions();
+            }
+
+            // ===== VIOLATION SYSTEM =====
+            function triggerViolation(message) {
+                state.violations++;
+                updateStats();
+                showToast(`🚨 ${message} (${state.violations}/${CONFIG.violationLimit})`, 'error', 4000);
+
+                // Blur screen momentarily
+                const wrapper = $('#main-content-wrapper');
+                wrapper.classList.add('blur-overlay');
+                setTimeout(() => {
+                    wrapper.classList.remove('blur-overlay');
+                }, 2000);
+
+                if (state.violations >= CONFIG.violationLimit) {
+                    triggerViolationLock();
+                }
+            }
+
+            function triggerViolationLock() {
+                state.isPaused = true;
+                antiCheatBanner.classList.add('show');
+                const wrapper = $('#main-content-wrapper');
+                wrapper.classList.add('blur-overlay');
+                showToast('🚫 Assessment locked due to excessive violations.', 'error', 5000);
+            }
+
+            resumeBtn.addEventListener('click', function() {
+                state.isPaused = false;
+                antiCheatBanner.classList.remove('show');
+                const wrapper = $('#main-content-wrapper');
+                wrapper.classList.remove('blur-overlay');
+                showToast('✅ Assessment resumed.', 'success');
+            });
+
+            // ===== ANTI-CHEAT =====
+            function initAntiCheat() {
+                // Tab visibility change
+                document.addEventListener('visibilitychange', function() {
+                    if (document.hidden) {
+                        state.tabSwitchCount++;
+                        triggerViolation('Tab switch detected! Please stay on the assessment page.');
+                    }
+                });
+
+                // Right-click prevention
+                document.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    triggerViolation('Right-click detected!');
+                });
+
+                // Copy prevention
+                document.addEventListener('copy', function(e) {
+                    e.preventDefault();
+                    triggerViolation('Copy attempt detected!');
+                });
+
+                // Paste prevention
+                document.addEventListener('paste', function(e) {
+                    e.preventDefault();
+                    triggerViolation('Paste attempt detected!');
+                });
+
+                // Fullscreen detection
+                document.addEventListener('fullscreenchange', function() {
+                    if (!document.fullscreenElement) {
+                        triggerViolation('Exited fullscreen mode!');
+                    }
+                });
+
+                // Force fullscreen on load
+                // Uncomment for production:
+                // if (document.documentElement.requestFullscreen) {
+                //     document.documentElement.requestFullscreen().catch(() => {});
+                // }
+
+                console.log('🛡️ Anti-cheat system initialized');
+            }
+
+            // ===== WEBCAM =====
+            function initWebcam() {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 160 },
+                            height: { ideal: 120 },
+                            facingMode: 'user'
+                        },
+                        audio: false
+                    })
+                    .then(stream => {
+                        webcamFeed.srcObject = stream;
+                        webcamFeed.classList.add('active');
+                        webcamLabel.textContent = '📷 WEBCAM • ACTIVE';
+                    })
+                    .catch(err => {
+                        console.warn('Webcam not available:', err);
+                        webcamFeed.classList.add('inactive');
+                        webcamLabel.textContent = '📷 WEBCAM • UNAVAILABLE';
+                        showToast('📷 Webcam access denied. Please enable camera for proctoring.', 'warning', 5000);
+                    });
+                } else {
+                    webcamFeed.classList.add('inactive');
+                    webcamLabel.textContent = '📷 WEBCAM • NOT SUPPORTED';
+                }
+            }
+
+            // ===== AUTO-SAVE =====
+            function autoSave() {
+                try {
+                    const data = {
+                        answers: state.answers,
+                        xp: state.xp,
+                        currentMission: state.currentMission,
+                        currentQuestion: state.currentQuestion,
+                        timestamp: Date.now()
+                    };
+                    localStorage.setItem('assessmentProgress', JSON.stringify(data));
+                    // console.log('💾 Auto-saved progress');
+                } catch (e) {
+                    // Ignore
+                }
+            }
+
+            // ===== LOAD SAVED PROGRESS =====
+            function loadProgress() {
+                try {
+                    const saved = localStorage.getItem('assessmentProgress');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        state.answers = data.answers || {};
+                        state.xp = data.xp || 0;
+                        state.currentMission = data.currentMission || 0;
+                        state.currentQuestion = data.currentQuestion || 0;
+                        showToast('📂 Progress restored from previous session.', 'info', 3000);
+                        return true;
+                    }
+                } catch (e) {
+                    // Ignore
+                }
+                return false;
+            }
+
+            // ===== NEXT BUTTON =====
+            nextBtn.addEventListener('click', function() {
+                if (state.isPaused) {
+                    showToast('⏸️ Assessment is paused. Resume to continue.', 'warning');
+                    return;
+                }
+
+                const mission = state.missions[state.currentMission];
+                const questions = mission.questions;
+                const qIndex = state.currentQuestion;
+
+                // For text questions, check if answered
+                const question = questions[qIndex];
+                if (question.type === 'text') {
+                    const textArea = document.getElementById('text-answer');
+                    if (textArea && !state.isAnswered) {
+                        const answer = textArea.value.trim();
+                        if (answer.length < 10) {
+                            showToast('Please write a more detailed response (minimum 10 characters).', 'warning');
+                            return;
+                        }
+                        state.answers[mission.id] = state.answers[mission.id] || {};
+                        state.answers[mission.id][qIndex] = answer;
+                        state.isAnswered = true;
+                        renderQuestion();
+                        updateStats();
+                        checkMissionComplete();
+                        return;
+                    }
+                }
+
+                // For MCQ, check if answered
+                if (!state.isAnswered) {
+                    showToast('Please answer the question first.', 'warning');
+                    return;
+                }
+
+                // Move to next question or complete mission
+                if (qIndex < questions.length - 1) {
+                    state.currentQuestion++;
+                    state.isAnswered = false;
+                    renderQuestion();
+                    resetTimer();
+                    showToast(`📖 Question ${state.currentQuestion + 1} of ${questions.length}`, 'info', 1000);
+                } else {
+                    // All questions answered, complete mission
+                    if (!state.answers[mission.id]?._score) {
+                        completeMission();
+                    }
+                }
+            });
+
+            // ===== RESET BUTTON =====
+            resetBtn.addEventListener('click', function() {
+                const mission = state.missions[state.currentMission];
+                const qIndex = state.currentQuestion;
+                if (state.answers[mission.id]?.[qIndex] !== undefined) {
+                    if (confirm('Reset this question? Your answer will be cleared.')) {
+                        delete state.answers[mission.id][qIndex];
+                        state.isAnswered = false;
+                        renderQuestion();
+                        resetTimer();
+                        showToast('🔄 Question reset.', 'info');
+                    }
+                }
+            });
+
+            // ===== KEYBOARD SHORTCUTS =====
+            document.addEventListener('keydown', function(e) {
+                // Alt+N for next
+                if (e.altKey && e.key === 'n') {
+                    e.preventDefault();
+                    nextBtn.click();
+                }
+                // Alt+R for reset
+                if (e.altKey && e.key === 'r') {
+                    e.preventDefault();
+                    resetBtn.click();
+                }
+                // Number keys for MCQ
+                if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+                    const num = parseInt(e.key);
+                    if (num >= 1 && num <= 4) {
+                        const options = document.querySelectorAll('.option-item:not(.disabled)');
+                        if (options[num - 1]) {
+                            options[num - 1].click();
+                        }
+                    }
+                }
+            });
+
+            // ===== INIT =====
+            // Load saved progress or start fresh
+            const hasProgress = loadProgress();
+            init();
+
+            if (hasProgress) {
+                setTimeout(() => {
+                    renderMissions();
+                    renderQuestion();
+                    resetTimer();
+                    updateStats();
+                }, 100);
+            }
+
+            console.log('📌 Shortcuts: Alt+N (Next), Alt+R (Reset), 1-4 (MCQ options)');
+
+        })();
+    </script>
 </body>
 </html>

@@ -6,8 +6,31 @@
     <title>Edit Profile - AI NEXT GEN 2026</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
+        /* ===== ENHANCED CSS ===== */
+        :root {
+            --primary-bg: #D8D7CE;
+            --dark-bg: #222831;
+            --accent-cyan: #00A6C0;
+            --accent-green: #16A34A;
+            --accent-red: #DC2626;
+            --accent-yellow: #F59E0B;
+            --accent-purple: #7b2ffc;
+            --font-serif: 'Georgia', serif;
+            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+            --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #D8D7CE !important;
+            background-color: var(--primary-bg) !important;
+            font-family: var(--font-sans);
+            color: var(--dark-bg);
             margin: 0;
             padding: 0;
             min-height: 100vh;
@@ -17,21 +40,21 @@
             display: none !important;
         }
 
-        /* Tablet Layout Wrapper */
+        /* ===== LAYOUT ===== */
         .tablet-wrapper {
             display: grid;
             grid-template-columns: 80px 1fr 340px;
             min-height: 100vh;
-            background: #D8D7CE;
-            box-sizing: border-box;
+            background: var(--primary-bg);
+            transition: grid-template-columns 0.3s ease;
         }
 
-        /* Left Navigation Sidebar */
+        /* ===== LEFT SIDEBAR ===== */
         .left-sidebar {
-            background: rgba(216, 215, 206, 0.85);
+            background: rgba(216, 215, 206, 0.92);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(34, 40, 49, 0.12);
+            border-right: 1px solid rgba(34, 40, 49, 0.1);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -40,108 +63,293 @@
             position: sticky;
             top: 0;
             height: 100vh;
-            box-sizing: border-box;
-            z-index: 20;
+            z-index: 100;
+            transition: all 0.3s ease;
         }
 
         .sidebar-logo {
             text-align: center;
+            position: relative;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto;
+            box-shadow: 0 4px 16px rgba(0, 166, 192, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: scale(1.05) rotate(-5deg);
         }
 
         .sidebar-menu {
             display: flex;
             flex-direction: column;
-            gap: 28px;
+            gap: 20px;
+            align-items: center;
         }
 
         .menu-item {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             text-decoration: none;
-            color: rgba(34, 40, 49, 0.7);
-            padding: 10px;
+            color: rgba(34, 40, 49, 0.5);
+            padding: 12px;
             border-radius: 14px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s var(--transition-smooth);
+            position: relative;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            background: var(--accent-cyan);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s var(--transition-smooth);
+        }
+
         .menu-item:hover {
-            color: #00A6C0;
-            background: rgba(34, 40, 49, 0.04);
+            color: var(--dark-bg);
+            transform: translateX(2px);
+        }
+
+        .menu-item:hover::before {
+            opacity: 0.08;
+            transform: scale(1);
         }
 
         .menu-item.active {
-            color: #D8D7CE;
-            background: #222831;
-            box-shadow: 0 0 20px rgba(34, 40, 49, 0.15);
+            color: white;
+            background: var(--dark-bg);
+            box-shadow: 0 8px 24px rgba(34, 40, 49, 0.2);
         }
 
-        /* Main Page Content area */
+        .menu-item .tooltip {
+            position: absolute;
+            left: 70px;
+            background: var(--dark-bg);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .menu-item:hover .tooltip {
+            opacity: 1;
+            transform: translateX(4px);
+        }
+
+        .sidebar-footer button {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: rgba(34, 40, 49, 0.4);
+            transition: all 0.3s ease;
+            padding: 12px;
+            border-radius: 12px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .sidebar-footer button:hover {
+            color: var(--accent-red);
+            background: rgba(220, 38, 38, 0.08);
+            transform: scale(1.05);
+        }
+
+        /* ===== MAIN CONTENT ===== */
         .main-dashboard-content {
-            padding: 40px;
+            padding: 32px 40px 40px;
             overflow-y: auto;
-            box-sizing: border-box;
+            max-height: 100vh;
         }
 
+        .main-dashboard-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .main-dashboard-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .main-dashboard-content::-webkit-scrollbar-thumb {
+            background: rgba(34, 40, 49, 0.2);
+            border-radius: 10px;
+        }
+
+        /* ===== HEADER ===== */
         .main-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 36px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
         .search-bar {
-            background: rgba(255, 255, 255, 0.45);
-            border: 1px solid rgba(34, 40, 49, 0.12);
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(34, 40, 49, 0.1);
             border-radius: 9999px;
             padding: 10px 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 0.85rem;
+            width: 180px;
+            color: var(--dark-bg);
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(34, 40, 49, 0.35);
         }
 
         .header-right {
             display: flex;
             align-items: center;
+            gap: 12px;
         }
 
         .support-tag {
             background: rgba(34, 40, 49, 0.08);
-            color: #222831;
-            font-size: 0.75rem;
+            color: rgba(34, 40, 49, 0.7);
+            font-size: 0.7rem;
             font-weight: 600;
             padding: 6px 14px;
             border-radius: 9999px;
-            margin-right: 16px;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .support-tag .online-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
         }
 
         .header-candidate-id {
             font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: rgba(34, 40, 49, 0.5);
+            font-weight: 600;
+            background: rgba(255,255,255,0.3);
+            padding: 4px 14px;
+            border-radius: 12px;
+        }
+
+        /* ===== TITLE ===== */
+        .serif-title {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--dark-bg);
+            margin: 0 0 24px 0;
+        }
+
+        .serif-title .highlight {
+            color: var(--accent-cyan);
+        }
+
+        .serif-title .sub {
             font-size: 0.8rem;
-            color: rgba(34, 40, 49, 0.7);
+            font-weight: 400;
+            color: rgba(34, 40, 49, 0.3);
+            font-family: var(--font-sans);
+        }
+
+        /* ===== PROFILE CARD ===== */
+        .profile-card {
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 28px;
+            border: 1px solid rgba(34, 40, 49, 0.08);
+            padding: 36px;
+            max-width: 700px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        .profile-card:hover {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        }
+
+        .profile-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .profile-card .card-header h3 {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--dark-bg);
+            margin: 0;
+        }
+
+        .profile-card .card-header .badge {
+            font-size: 0.7rem;
+            padding: 4px 14px;
+            border-radius: 20px;
             font-weight: 600;
         }
 
-        .serif-title {
-            font-family: var(--font-serif);
-            font-size: 2.2rem;
-            font-weight: 500;
-            color: #222831;
-            margin: 0 0 28px 0;
+        .badge-verified {
+            background: rgba(22, 163, 74, 0.1);
+            color: var(--accent-green);
+            border: 1px solid rgba(22, 163, 74, 0.15);
         }
 
-        /* Profile Card Form Styling */
-        .profile-card {
-            background: rgba(40, 59, 72, 0.12);
-            border-radius: 28px;
-            border: 1px solid rgba(34, 40, 49, 0.12);
-            padding: 36px;
-            max-width: 600px;
-            box-shadow: 0 4px 20px rgba(34, 40, 49, 0.03);
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-yellow);
+            border: 1px solid rgba(245, 158, 11, 0.15);
         }
 
+        /* ===== FORM ===== */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -149,139 +357,447 @@
             margin-bottom: 28px;
         }
 
+        .form-grid .full-width {
+            grid-column: 1 / -1;
+        }
+
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
         }
 
         .input-group label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            color: rgba(34, 40, 49, 0.6);
+            color: rgba(34, 40, 49, 0.5);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding-left: 12px;
+            letter-spacing: 0.3px;
+            padding-left: 4px;
         }
 
-        .input-group input, .input-group select {
+        .input-group label .required {
+            color: var(--accent-red);
+        }
+
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
             width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1.5px solid rgba(34, 40, 49, 0.08);
+            border-radius: 14px;
+            color: var(--dark-bg);
+            font-size: 0.9rem;
+            font-family: var(--font-sans);
+            transition: all 0.3s var(--transition-smooth);
+            outline: none;
             box-sizing: border-box;
         }
 
+        .input-group input::placeholder,
+        .input-group textarea::placeholder {
+            color: rgba(34, 40, 49, 0.25);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            border-color: var(--accent-cyan);
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 0 3px rgba(0, 166, 192, 0.08);
+        }
+
         .input-group input:disabled {
-            background: rgba(255, 255, 255, 0.25);
-            color: rgba(34, 40, 49, 0.5);
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(34, 40, 49, 0.4);
             cursor: not-allowed;
-            border-color: rgba(34, 40, 49, 0.08);
+            border-color: rgba(34, 40, 49, 0.04);
+        }
+
+        .input-group input.error {
+            border-color: var(--accent-red);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+        }
+
+        .input-group .error-message {
+            font-size: 0.7rem;
+            color: var(--accent-red);
+            margin-top: 2px;
+            display: none;
+        }
+
+        .input-group .error-message.show {
+            display: block;
         }
 
         .input-group select {
-            padding-right: 28px;
-            cursor: pointer;
             appearance: none;
             -webkit-appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23222831' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 18px center;
+            background-position: right 16px center;
             background-size: 14px;
+            cursor: pointer;
         }
 
         .input-group select option {
-            background: #ffffff;
-            color: #222831;
+            background: var(--primary-bg);
+            color: var(--dark-bg);
         }
 
-        /* Right Sidebar Panel */
+        .input-group textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-family: var(--font-sans);
+        }
+
+        .input-group .helper-text {
+            font-size: 0.65rem;
+            color: rgba(34, 40, 49, 0.3);
+            padding-left: 4px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn-futuristic {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s var(--transition-smooth);
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn-futuristic:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 166, 192, 0.3);
+        }
+
+        .btn-futuristic:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-futuristic:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-futuristic .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .btn-futuristic.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-futuristic.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-futuristic.btn-secondary {
+            background: rgba(34, 40, 49, 0.06);
+            color: var(--dark-bg);
+            width: auto;
+        }
+
+        .btn-futuristic.btn-secondary:hover {
+            background: rgba(34, 40, 49, 0.1);
+            box-shadow: none;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .form-actions .btn-futuristic {
+            flex: 1;
+        }
+
+        /* ===== RIGHT SIDEBAR ===== */
         .right-sidebar {
-            background: rgba(216, 215, 206, 0.85);
+            background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-left: 1px solid rgba(34, 40, 49, 0.12);
-            padding: 40px 24px;
+            border-left: 1px solid rgba(34, 40, 49, 0.06);
+            padding: 32px 20px;
             display: flex;
             flex-direction: column;
-            gap: 36px;
+            gap: 28px;
             position: sticky;
             top: 0;
             height: 100vh;
-            box-sizing: border-box;
-            z-index: 20;
+            overflow-y: auto;
+        }
+
+        .right-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .right-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(34, 40, 49, 0.1);
+            border-radius: 10px;
+        }
+
+        /* ===== WEBCAM PANEL ===== */
+        .webcam-monitor-panel {
+            text-align: center;
         }
 
         .webcam-camera-frame {
-            width: 150px;
-            height: 150px;
-            border: 2px dashed rgba(34, 40, 49, 0.25);
+            width: 140px;
+            height: 140px;
+            border: 2px dashed rgba(34, 40, 49, 0.15);
             border-radius: 50%;
-            margin: 0 auto 16px auto;
+            margin: 0 auto 12px auto;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .webcam-camera-frame:hover {
+            border-color: var(--accent-cyan);
         }
 
         .camera-circle {
-            width: 130px;
-            height: 130px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.35);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.8rem;
-            color: rgba(34, 40, 49, 0.6);
+            font-size: 2.2rem;
+            color: rgba(34, 40, 49, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .camera-circle.active {
+            border: 3px solid var(--accent-green);
+            box-shadow: 0 0 30px rgba(22, 163, 74, 0.15);
         }
 
         .webcam-indicator-dot {
             position: absolute;
-            bottom: 6px;
+            bottom: 8px;
             right: 12px;
-            background: var(--accent-green);
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            border: 2.5px solid #D8D7CE;
-            box-shadow: 0 0 8px var(--accent-green);
+            border: 2.5px solid var(--primary-bg);
+            transition: all 0.3s ease;
+        }
+
+        .webcam-indicator-dot.active {
+            background: var(--accent-green);
+            box-shadow: 0 0 12px rgba(22, 163, 74, 0.4);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .webcam-indicator-dot.inactive {
+            background: var(--accent-red);
+            box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+        }
+
+        .webcam-monitor-panel h4 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--dark-bg);
+            margin: 0;
+        }
+
+        .webcam-monitor-panel .sub {
+            font-size: 0.65rem;
+            color: rgba(34, 40, 49, 0.3);
+            margin: 2px 0 0;
+        }
+
+        /* ===== STATUS PANEL ===== */
+        .status-panel {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            border: 1px solid rgba(34, 40, 49, 0.06);
         }
 
         .status-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             font-size: 0.8rem;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
+            animation: pulse-dot 2s ease-in-out infinite;
         }
 
-        .status-color-pending { background-color: var(--accent-yellow); box-shadow: 0 0 8px var(--accent-yellow); }
-        .status-color-selected { background-color: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
-        .status-color-rejected { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
-        .status-color-disqualified { background-color: #dc2626; box-shadow: 0 0 10px #dc2626; }
+        .status-color-pending { 
+            background: var(--accent-yellow); 
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+        }
+        .status-color-selected { 
+            background: var(--accent-green); 
+            box-shadow: 0 0 12px rgba(22, 163, 74, 0.3);
+        }
+        .status-color-rejected { 
+            background: var(--accent-red); 
+            box-shadow: 0 0 12px rgba(220, 38, 38, 0.3);
+        }
+        .status-color-disqualified { 
+            background: #6B7280; 
+            box-shadow: 0 0 12px rgba(107, 114, 128, 0.3);
+        }
 
+        .status-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--dark-bg);
+        }
+
+        .status-text .highlight {
+            font-weight: 700;
+        }
+
+        /* ===== SCORE DIAL ===== */
         .final-score-dial-card {
-            background: #222831 !important;
-            color: #D8D7CE !important;
+            background: var(--dark-bg) !important;
+            color: var(--primary-bg) !important;
             border-radius: 24px;
-            padding: 24px 20px;
+            padding: 28px 20px;
             text-align: center;
             margin-top: auto;
-            box-shadow: 0 10px 30px rgba(34, 40, 49, 0.15);
+            box-shadow: 0 8px 32px rgba(34, 40, 49, 0.2);
+            border: none !important;
+            transition: all 0.3s ease;
+        }
+
+        .final-score-dial-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(34, 40, 49, 0.25);
         }
 
         .final-score-dial-card .dial-value {
-            color: #D8D7CE !important;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary-bg) !important;
+            font-family: var(--font-mono);
+            line-height: 1;
         }
 
-        .final-score-dial-card div {
-            color: rgba(216, 215, 206, 0.75) !important;
+        .final-score-dial-card .dial-label {
+            font-size: 0.7rem;
+            color: rgba(216, 215, 206, 0.5) !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+            font-weight: 600;
         }
 
+        .final-score-dial-card .dial-sub {
+            margin-top: 14px;
+            font-size: 0.65rem;
+            color: rgba(216, 215, 206, 0.3) !important;
+            border-top: 1px solid rgba(216, 215, 206, 0.06);
+            padding-top: 10px;
+            font-weight: 500;
+        }
+
+        .final-score-dial-card .rank-badge {
+            display: inline-block;
+            background: rgba(0, 166, 192, 0.15);
+            color: var(--accent-cyan);
+            padding: 4px 16px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 380px;
+        }
+
+        .toast {
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: var(--dark-bg);
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            animation: slideInRight 0.4s var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid var(--accent-cyan);
+            font-size: 0.85rem;
+        }
+
+        .toast.success { border-left-color: var(--accent-green); }
+        .toast.error { border-left-color: var(--accent-red); }
+        .toast.warning { border-left-color: var(--accent-yellow); }
+
+        .toast .icon { font-size: 1.2rem; }
+        .toast .message { font-weight: 500; }
+        .toast .close-toast {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.3);
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: auto;
+            padding: 0 4px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.removing {
+            animation: slideOutRight 0.3s ease forwards;
+        }
+
+        @keyframes slideOutRight {
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 1100px) {
             .tablet-wrapper {
                 grid-template-columns: 80px 1fr;
@@ -298,277 +814,611 @@
             .left-sidebar {
                 display: none;
             }
+            .main-dashboard-content {
+                padding: 16px;
+            }
+            .profile-card {
+                padding: 24px;
+            }
             .form-grid {
                 grid-template-columns: 1fr;
+            }
+            .form-grid .full-width {
+                grid-column: 1;
+            }
+            .serif-title {
+                font-size: 1.6rem;
+            }
+            .form-actions {
+                flex-direction: column;
+            }
+            .form-actions .btn-futuristic {
+                width: 100%;
+            }
+            .main-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-bar {
+                width: 100%;
+            }
+            .search-bar input {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-card {
+                padding: 16px;
+            }
+            .input-group input,
+            .input-group select,
+            .input-group textarea {
+                padding: 10px 14px;
+                font-size: 0.85rem;
+            }
+            .profile-card .card-header {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
 </head>
 <body>
     <div class="tablet-wrapper">
-        <!-- Sidebar Navigation menu -->
+        <!-- ===== LEFT SIDEBAR ===== -->
         <div class="left-sidebar">
             <div class="sidebar-logo">
-                <div class="logo-icon"></div>
+                <div class="logo-icon" aria-hidden="true">✦</div>
             </div>
             <div class="sidebar-menu">
-                <a href="/" class="menu-item" title="Home">🏠</a>
-                <a href="/dashboard" class="menu-item" title="Dashboard">📊</a>
-                <a href="/profile" class="menu-item active" title="My Profile">👤</a>
-                <a href="/challenge" class="menu-item" title="Assessment Arena">⚔️</a>
-                <a href="/admin" class="menu-item" title="Admin Control">⚙️</a>
+                <a href="/" class="menu-item" title="Home">
+                    🏠
+                    <span class="tooltip">Home</span>
+                </a>
+                <a href="/dashboard" class="menu-item" title="Dashboard">
+                    📊
+                    <span class="tooltip">Dashboard</span>
+                </a>
+                <a href="/profile" class="menu-item active" title="Profile">
+                    👤
+                    <span class="tooltip">Profile</span>
+                </a>
+                <a href="/challenge" class="menu-item" title="Challenge">
+                    ⚔️
+                    <span class="tooltip">Challenge</span>
+                </a>
+                <a href="/admin" class="menu-item" title="Admin">
+                    ⚙️
+                    <span class="tooltip">Admin</span>
+                </a>
             </div>
             <div class="sidebar-footer">
-                <button id="btn-user-logout" title="Log Out" style="background: none; border: none; font-size: 1.35rem; cursor: pointer; opacity: 0.7; color: rgba(216, 215, 206, 0.6);">🚪</button>
+                <button id="btn-user-logout" title="Log Out" aria-label="Logout">🚪</button>
             </div>
         </div>
 
-        <!-- Main Body details editing -->
+        <!-- ===== MAIN CONTENT ===== -->
         <div class="main-dashboard-content">
+            <!-- Header -->
             <div class="main-header">
                 <div class="search-bar">
-                    <span style="color: rgba(216, 215, 206, 0.5); font-size: 0.9rem;">🔍</span>
-                    <input type="text" placeholder="Search profiles..." style="border: none; background: transparent; outline: none; font-size: 0.85rem; width: 180px; color: #D8D7CE;" disabled>
+                    <span style="color: rgba(34, 40, 49, 0.3);">🔍</span>
+                    <input type="text" placeholder="Search profiles..." disabled>
                 </div>
                 <div class="header-right">
-                    <span class="support-tag">Online support</span>
-                    <span class="header-candidate-id" id="top-candidate-id">CANDIDATE ID: AINEXT2026-0000</span>
+                    <span class="support-tag">
+                        <span class="online-dot"></span>
+                        Online support
+                    </span>
+                    <span class="header-candidate-id" id="top-candidate-id">
+                        🆔 AINEXT2026-0000
+                    </span>
                 </div>
             </div>
 
-            <h1 class="serif-title">Account Profile</h1>
+            <!-- Title -->
+            <h1 class="serif-title">
+                👤 Account Profile
+                <span class="sub">Manage your personal information</span>
+            </h1>
 
+            <!-- Profile Card -->
             <div class="glass-panel profile-card">
-                <form id="profile-edit-form">
+                <div class="card-header">
+                    <h3>📋 Personal Information</h3>
+                    <span class="badge badge-pending" id="profile-badge">⏳ Pending Verification</span>
+                </div>
+
+                <form id="profile-edit-form" novalidate>
                     <div class="form-grid">
+                        <!-- Full Name -->
                         <div class="input-group">
-                            <label for="name">Full Name</label>
-                            <input type="text" id="name" required placeholder="Full Name">
+                            <label for="name">Full Name <span class="required">*</span></label>
+                            <input type="text" id="name" required placeholder="Enter your full name">
+                            <div class="error-message" id="name-error">Please enter your full name</div>
                         </div>
+
+                        <!-- Email (Disabled) -->
                         <div class="input-group">
                             <label for="email">Academic Email</label>
-                            <input type="email" id="email" disabled placeholder="Academic Email">
+                            <input type="email" id="email" disabled placeholder="Academic email">
+                            <div class="helper-text">🔒 Email cannot be changed</div>
                         </div>
+
+                        <!-- Phone -->
                         <div class="input-group">
-                            <label for="phone">Phone Number</label>
-                            <input type="tel" id="phone" required placeholder="Phone Number">
+                            <label for="phone">Phone Number <span class="required">*</span></label>
+                            <input type="tel" id="phone" required placeholder="+91 98765 43210">
+                            <div class="error-message" id="phone-error">Please enter a valid phone number</div>
                         </div>
+
+                        <!-- College -->
                         <div class="input-group">
-                            <label for="college">College / University</label>
-                            <input type="text" id="college" required placeholder="College / University">
+                            <label for="college">College / University <span class="required">*</span></label>
+                            <input type="text" id="college" required placeholder="Enter your college name">
+                            <div class="error-message" id="college-error">Please enter your college name</div>
                         </div>
+
+                        <!-- Department -->
                         <div class="input-group">
-                            <label for="department">Department</label>
-                            <input type="text" id="department" required placeholder="Department">
+                            <label for="department">Department <span class="required">*</span></label>
+                            <input type="text" id="department" required placeholder="e.g., Computer Science">
+                            <div class="error-message" id="department-error">Please enter your department</div>
                         </div>
+
+                        <!-- Year -->
                         <div class="input-group">
-                            <label for="year">Year of Study</label>
+                            <label for="year">Year of Study <span class="required">*</span></label>
                             <select id="year" required>
-                                <option value="" disabled>Select Year</option>
+                                <option value="">Select Year</option>
                                 <option value="1">1st Year</option>
                                 <option value="2">2nd Year</option>
                                 <option value="3">3rd Year</option>
                                 <option value="4">4th Year</option>
+                                <option value="5">5th Year</option>
+                                <option value="grad">Graduate</option>
                             </select>
+                            <div class="error-message" id="year-error">Please select your year of study</div>
                         </div>
-                        <div class="input-group">
+
+                        <!-- LinkedIn (Full Width) -->
+                        <div class="input-group full-width">
                             <label for="linkedin">LinkedIn Profile URL</label>
-                            <input type="url" id="linkedin" placeholder="LinkedIn Profile (Optional)">
+                            <input type="url" id="linkedin" placeholder="https://linkedin.com/in/yourprofile">
+                            <div class="helper-text">🔗 Optional but recommended</div>
                         </div>
-                        <div class="input-group">
+
+                        <!-- GitHub (Full Width) -->
+                        <div class="input-group full-width">
                             <label for="github">GitHub Profile URL</label>
-                            <input type="url" id="github" placeholder="GitHub Profile (Optional)">
+                            <input type="url" id="github" placeholder="https://github.com/yourusername">
+                            <div class="helper-text">🔗 Optional but recommended</div>
+                        </div>
+
+                        <!-- Bio (Full Width) -->
+                        <div class="input-group full-width">
+                            <label for="bio">Short Bio</label>
+                            <textarea id="bio" placeholder="Tell us a bit about yourself, your interests in AI, and what you hope to achieve..." rows="3"></textarea>
+                            <div class="helper-text" id="bio-counter">0 / 500 characters</div>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-futuristic" style="width: 100%;">Save Changes</button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-futuristic" id="save-btn">
+                            <span class="btn-text">💾 Save Changes</span>
+                            <span class="spinner"></span>
+                        </button>
+                        <button type="button" class="btn-futuristic btn-secondary" id="reset-btn">↺ Reset</button>
+                    </div>
                 </form>
             </div>
         </div>
 
-        <!-- Right Side info sidebar -->
+        <!-- ===== RIGHT SIDEBAR ===== -->
         <div class="right-sidebar">
-            <div class="webcam-monitor-panel" style="text-align: center;">
+            <!-- Webcam -->
+            <div class="webcam-monitor-panel">
                 <div class="webcam-camera-frame">
-                    <div class="camera-circle">👤</div>
-                    <span class="webcam-indicator-dot" id="right-camera-dot"></span>
+                    <div class="camera-circle" id="camera-circle">👤</div>
+                    <span class="webcam-indicator-dot active" id="right-camera-dot"></span>
                 </div>
-                <h4 style="font-size: 0.85rem; font-weight: 600; color: #D8D7CE; margin: 0;">Identity feed</h4>
-                <p style="font-size: 0.7rem; color: rgba(216, 215, 206, 0.5); margin: 4px 0 0 0;">Viewport tracking active</p>
+                <h4>📷 Identity Feed</h4>
+                <div class="sub" id="webcam-status-text">Viewport tracking active</div>
             </div>
 
-            <div class="glass-panel" style="padding: 20px;">
-                <div class="status-container" style="margin: 0;">
+            <!-- Status -->
+            <div class="status-panel">
+                <div class="status-container">
                     <span class="status-dot status-color-pending" id="status-light"></span>
-                    <span style="font-size: 0.8rem; font-weight: 600; color: #D8D7CE;">SELECTION: <span id="status-text" style="color: var(--accent-yellow);">PENDING</span></span>
+                    <span class="status-text">
+                        Selection: <span class="highlight" id="status-text">PENDING</span>
+                    </span>
                 </div>
             </div>
 
-            <!-- Score dial panel -->
-            <div class="glass-panel final-score-dial-card">
+            <!-- Score Dial -->
+            <div class="final-score-dial-card">
                 <div class="dial-value" id="score-final-dial">0.0</div>
-                <div style="font-size: 0.75rem; color: rgba(34, 40, 49, 0.7); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600;">Final Score %</div>
-                <div style="margin-top: 14px; font-size: 0.7rem; color: rgba(34, 40, 49, 0.6); border-top: 1px solid rgba(34,40,49,0.1); padding-top: 10px; font-weight: 600;">
-                    Expand your possibilities
-                </div>
+                <div class="dial-label">Final Score</div>
+                <div class="rank-badge" id="rank-badge">🏅 Not Ranked</div>
+                <div class="dial-sub">Complete your profile to unlock 🚀</div>
             </div>
         </div>
     </div>
 
+    <!-- ===== TOAST ===== -->
+    <div class="toast-container" id="toast-container"></div>
+
     <script>
-        let activeCandidate = null;
+        // ===== ENHANCED JAVASCRIPT =====
+        (function() {
+            'use strict';
 
-        // Load Session Profile details
-        async function initProfile() {
-            try {
-                const response = await fetch('/api/session');
-                const data = await response.json();
-                
-                if (response.ok && data.logged_in) {
-                    activeCandidate = data.candidate;
-                    populateProfileFields();
-                } else {
-                    window.location.href = '/login';
-                }
-            } catch (e) {
-                loadLocalSession();
-            }
-        }
-        initProfile();
+            // ===== DOM REFS =====
+            const $ = (s) => document.querySelector(s);
+            const form = document.getElementById('profile-edit-form');
+            const saveBtn = document.getElementById('save-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const bioTextarea = document.getElementById('bio');
+            const bioCounter = document.getElementById('bio-counter');
 
-        function loadLocalSession() {
-            const email = localStorage.getItem('active_session_email');
-            if (!email) {
-                window.location.href = '/login';
-                return;
-            }
+            // ===== STATE =====
+            let activeCandidate = null;
+            let originalData = {};
 
-            const raw = localStorage.getItem('candidates');
-            const list = raw ? JSON.parse(raw) : [];
-            activeCandidate = list.find(c => c.email.toLowerCase() === email.toLowerCase());
+            // ===== TOAST SYSTEM =====
+            function showToast(message, type = 'info', duration = 4000) {
+                const container = document.getElementById('toast-container');
+                const icons = {
+                    success: '✅',
+                    error: '❌',
+                    warning: '⚠️',
+                    info: 'ℹ️'
+                };
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <span class="icon">${icons[type] || 'ℹ️'}</span>
+                    <span class="message">${message}</span>
+                    <button class="close-toast">✕</button>
+                `;
+                container.appendChild(toast);
 
-            if (!activeCandidate) {
-                window.location.href = '/login';
-                return;
-            }
+                toast.querySelector('.close-toast').addEventListener('click', () => {
+                    removeToast(toast);
+                });
 
-            populateProfileFields();
-        }
-
-        function populateProfileFields() {
-            document.getElementById('top-candidate-id').textContent = `CANDIDATE ID: ${activeCandidate.candidate_id}`;
-            document.getElementById('name').value = activeCandidate.name || '';
-            document.getElementById('email').value = activeCandidate.email || '';
-            document.getElementById('phone').value = activeCandidate.phone || '';
-            document.getElementById('college').value = activeCandidate.college || '';
-            document.getElementById('department').value = activeCandidate.department || '';
-            document.getElementById('year').value = activeCandidate.year || '';
-            document.getElementById('linkedin').value = activeCandidate.linkedin || '';
-            document.getElementById('github').value = activeCandidate.github || '';
-
-            // Set final score circular dial
-            const dialScore = document.getElementById('score-final-dial');
-            if (dialScore) {
-                dialScore.textContent = (activeCandidate.score_final || 0.0).toFixed(1);
+                setTimeout(() => removeToast(toast), duration);
             }
 
-            // Selection statuses color
-            const statusLight = document.getElementById('status-light');
-            const statusText = document.getElementById('status-text');
-            
-            let statusClass = 'status-color-pending';
-            let statusString = 'PENDING';
-            
-            if (activeCandidate.selected === 1) {
-                statusClass = 'status-color-selected';
-                statusString = 'SELECTED';
-            } else if (activeCandidate.selected === 2) {
-                statusClass = 'status-color-rejected';
-                statusString = 'ARCHIVED';
-            } else if (activeCandidate.selected === 3) {
-                statusClass = 'status-color-disqualified';
-                statusString = 'DISQUALIFIED';
+            function removeToast(toast) {
+                toast.classList.add('removing');
+                setTimeout(() => toast.remove(), 300);
             }
 
-            if (statusLight) statusLight.className = `status-dot ${statusClass}`;
-            if (statusText) {
-                statusText.textContent = statusString;
-                statusText.style.color = activeCandidate.selected === 1 ? 'var(--accent-green)' : (activeCandidate.selected === 3 || activeCandidate.selected === 2 ? 'var(--accent-red)' : 'var(--accent-yellow)');
-            }
-
-            // Webcam active dots color
-            const cameraDot = document.getElementById('right-camera-dot');
-            if (cameraDot) {
-                if (activeCandidate.webcam_status === 'Active') {
-                    cameraDot.style.backgroundColor = 'var(--accent-green)';
-                    cameraDot.style.boxShadow = '0 0 8px var(--accent-green)';
-                } else {
-                    cameraDot.style.backgroundColor = 'var(--accent-red)';
-                    cameraDot.style.boxShadow = '0 0 8px var(--accent-red)';
-                }
-            }
-        }
-
-        // Handle Logout
-        document.getElementById('btn-user-logout').addEventListener('click', async () => {
-            try {
-                const response = await fetch('/api/logout', { method: 'POST' });
-                if (response.ok) {
-                    window.location.href = '/login';
-                }
-            } catch(err) {
-                localStorage.removeItem('active_session_email');
-                localStorage.removeItem('active_session_candidate_id');
-                window.location.href = '/login';
-            }
-        });
-
-        // Save Profile Updates Form Submission
-        document.getElementById('profile-edit-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const updateData = {
-                name: document.getElementById('name').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                college: document.getElementById('college').value.trim(),
-                department: document.getElementById('department').value.trim(),
-                year: parseInt(document.getElementById('year').value),
-                linkedin: document.getElementById('linkedin').value.trim(),
-                github: document.getElementById('github').value.trim()
+            // ===== VALIDATION =====
+            const validators = {
+                name: (val) => val.trim().length >= 2,
+                phone: (val) => /^[\+\d\s\-\(\)]{10,15}$/.test(val.trim()),
+                college: (val) => val.trim().length >= 2,
+                department: (val) => val.trim().length >= 2,
+                year: (val) => val && val !== '',
+                linkedin: (val) => !val || val.startsWith('https://') || val.startsWith('http://'),
+                github: (val) => !val || val.startsWith('https://') || val.startsWith('http://')
             };
 
-            try {
-                const response = await fetch('/api/profile/update', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updateData)
-                });
-                
-                const result = await response.json();
-                if (response.ok) {
-                    alert("Profile details updated successfully!");
-                    if (activeCandidate) {
-                        Object.assign(activeCandidate, updateData);
-                    }
+            function validateField(id) {
+                const input = document.getElementById(id);
+                const errorEl = document.getElementById(id + '-error');
+                const isValid = validators[id] ? validators[id](input.value) : true;
+
+                if (!isValid && input.required !== false) {
+                    input.classList.add('error');
+                    if (errorEl) errorEl.classList.add('show');
+                    return false;
                 } else {
-                    alert(result.error || "Failed to update profile details");
-                }
-            } catch (err) {
-                // Local Storage Sandbox Fallback Update
-                const raw = localStorage.getItem('candidates');
-                let list = raw ? JSON.parse(raw) : [];
-                let idx = list.findIndex(c => c.email.toLowerCase() === activeCandidate.email.toLowerCase());
-                
-                if (idx !== -1) {
-                    Object.assign(list[idx], updateData);
-                    localStorage.setItem('candidates', JSON.stringify(list));
-                    alert("Server offline. Profile updated locally in sandbox database.");
-                    Object.assign(activeCandidate, updateData);
-                } else {
-                    alert("Failed to locate candidate credentials locally.");
+                    input.classList.remove('error');
+                    if (errorEl) errorEl.classList.remove('show');
+                    return true;
                 }
             }
-        });
+
+            function validateForm() {
+                const fields = ['name', 'phone', 'college', 'department', 'year'];
+                let isValid = true;
+                fields.forEach(f => {
+                    if (!validateField(f)) isValid = false;
+                });
+                return isValid;
+            }
+
+            // ===== BIND VALIDATION =====
+            ['name', 'phone', 'college', 'department', 'year'].forEach(id => {
+                const input = document.getElementById(id);
+                input.addEventListener('blur', () => validateField(id));
+                input.addEventListener('input', () => {
+                    if (input.classList.contains('error')) validateField(id);
+                });
+            });
+
+            // ===== BIO COUNTER =====
+            bioTextarea.addEventListener('input', function() {
+                const count = this.value.length;
+                const max = 500;
+                bioCounter.textContent = `${count} / ${max} characters`;
+                if (count > max) {
+                    bioCounter.style.color = 'var(--accent-red)';
+                    this.value = this.value.substring(0, max);
+                } else {
+                    bioCounter.style.color = 'rgba(34, 40, 49, 0.3)';
+                }
+            });
+
+            // ===== LOAD PROFILE =====
+            async function loadProfile() {
+                try {
+                    const response = await fetch('/api/session');
+                    const data = await response.json();
+
+                    if (response.ok && data.logged_in) {
+                        activeCandidate = data.candidate;
+                        populateProfile(activeCandidate);
+                    } else {
+                        loadLocalSession();
+                    }
+                } catch (e) {
+                    loadLocalSession();
+                }
+            }
+
+            function loadLocalSession() {
+                const email = localStorage.getItem('active_session_email');
+                if (!email) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const raw = localStorage.getItem('candidates');
+                const list = raw ? JSON.parse(raw) : [];
+                activeCandidate = list.find(c => c.email.toLowerCase() === email.toLowerCase());
+
+                if (!activeCandidate) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                populateProfile(activeCandidate);
+            }
+
+            function populateProfile(candidate) {
+                // Store original data for reset
+                originalData = { ...candidate };
+
+                // Header
+                document.getElementById('top-candidate-id').textContent = `🆔 ${candidate.candidate_id || 'AINEXT2026-0000'}`;
+
+                // Form fields
+                document.getElementById('name').value = candidate.name || '';
+                document.getElementById('email').value = candidate.email || '';
+                document.getElementById('phone').value = candidate.phone || '';
+                document.getElementById('college').value = candidate.college || '';
+                document.getElementById('department').value = candidate.department || '';
+                document.getElementById('year').value = candidate.year || '';
+                document.getElementById('linkedin').value = candidate.linkedin || '';
+                document.getElementById('github').value = candidate.github || '';
+                document.getElementById('bio').value = candidate.bio || '';
+
+                // Bio counter
+                if (candidate.bio) {
+                    const count = candidate.bio.length;
+                    bioCounter.textContent = `${count} / 500 characters`;
+                }
+
+                // Score dial
+                const dialScore = document.getElementById('score-final-dial');
+                if (dialScore) {
+                    dialScore.textContent = (candidate.score_final || 0).toFixed(1);
+                }
+
+                // Status
+                const statusLight = document.getElementById('status-light');
+                const statusText = document.getElementById('status-text');
+                const statusMap = {
+                    0: { class: 'status-color-pending', text: 'PENDING', color: 'var(--accent-yellow)' },
+                    1: { class: 'status-color-selected', text: 'SELECTED ✅', color: 'var(--accent-green)' },
+                    2: { class: 'status-color-rejected', text: 'ARCHIVED', color: 'var(--accent-red)' },
+                    3: { class: 'status-color-disqualified', text: 'DISQUALIFIED', color: '#6B7280' }
+                };
+                const status = statusMap[candidate.selected] || statusMap[0];
+                statusLight.className = `status-dot ${status.class}`;
+                statusText.textContent = status.text;
+                statusText.style.color = status.color;
+
+                // Profile badge
+                const badge = document.getElementById('profile-badge');
+                if (candidate.verified) {
+                    badge.className = 'badge badge-verified';
+                    badge.textContent = '✅ Verified';
+                } else {
+                    badge.className = 'badge badge-pending';
+                    badge.textContent = '⏳ Pending Verification';
+                }
+
+                // Webcam
+                const cameraCircle = document.getElementById('camera-circle');
+                const cameraDot = document.getElementById('right-camera-dot');
+                const webcamStatus = document.getElementById('webcam-status-text');
+                if (candidate.webcam_status === 'Active') {
+                    cameraCircle.className = 'camera-circle active';
+                    cameraDot.className = 'webcam-indicator-dot active';
+                    webcamStatus.textContent = '✅ Viewport tracking active';
+                } else {
+                    cameraCircle.className = 'camera-circle';
+                    cameraDot.className = 'webcam-indicator-dot inactive';
+                    webcamStatus.textContent = '❌ Camera offline';
+                }
+
+                // Rank badge
+                const rankBadge = document.getElementById('rank-badge');
+                const score = candidate.score_final || 0;
+                if (score >= 85) {
+                    rankBadge.textContent = '🏅 Platinum Rank';
+                    rankBadge.style.background = 'rgba(16,185,129,0.2)';
+                    rankBadge.style.color = '#16A34A';
+                } else if (score >= 70) {
+                    rankBadge.textContent = '🥇 Gold Rank';
+                    rankBadge.style.background = 'rgba(245,158,11,0.2)';
+                    rankBadge.style.color = '#F59E0B';
+                } else if (score >= 55) {
+                    rankBadge.textContent = '🥈 Silver Rank';
+                    rankBadge.style.background = 'rgba(156,163,175,0.2)';
+                    rankBadge.style.color = '#9CA3AF';
+                } else if (score >= 40) {
+                    rankBadge.textContent = '🥉 Bronze Rank';
+                    rankBadge.style.background = 'rgba(180,83,9,0.2)';
+                    rankBadge.style.color = '#B45309';
+                } else {
+                    rankBadge.textContent = '🏅 Not Ranked';
+                    rankBadge.style.background = 'rgba(107,114,128,0.1)';
+                    rankBadge.style.color = '#6B7280';
+                }
+            }
+
+            // ===== RESET =====
+            resetBtn.addEventListener('click', function() {
+                if (confirm('Reset all fields to their original values?')) {
+                    populateProfile(activeCandidate);
+                    showToast('↺ Fields reset to original values', 'info');
+                }
+            });
+
+            // ===== FORM SUBMIT =====
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (!validateForm()) {
+                    showToast('⚠️ Please fix the errors before saving', 'warning');
+                    return;
+                }
+
+                const updateData = {
+                    name: document.getElementById('name').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    college: document.getElementById('college').value.trim(),
+                    department: document.getElementById('department').value.trim(),
+                    year: document.getElementById('year').value,
+                    linkedin: document.getElementById('linkedin').value.trim(),
+                    github: document.getElementById('github').value.trim(),
+                    bio: document.getElementById('bio').value.trim()
+                };
+
+                // Check if anything changed
+                const hasChanges = Object.keys(updateData).some(key => 
+                    updateData[key] !== (activeCandidate[key] || '')
+                );
+
+                if (!hasChanges) {
+                    showToast('ℹ️ No changes to save', 'info');
+                    return;
+                }
+
+                saveBtn.classList.add('loading');
+                saveBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/api/profile/update', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(updateData)
+                    });
+
+                    let result;
+                    try {
+                        result = await response.json();
+                    } catch {
+                        throw new Error('Invalid server response');
+                    }
+
+                    if (response.ok && result.success) {
+                        // Update local state
+                        Object.assign(activeCandidate, updateData);
+                        originalData = { ...activeCandidate };
+                        showToast('✅ Profile updated successfully!', 'success');
+                        
+                        // Update badge if needed
+                        if (result.verified !== undefined) {
+                            activeCandidate.verified = result.verified;
+                            populateProfile(activeCandidate);
+                        }
+                    } else {
+                        showToast(result.error || 'Failed to update profile', 'error');
+                    }
+                } catch (err) {
+                    // Local Storage Fallback
+                    try {
+                        const raw = localStorage.getItem('candidates');
+                        let list = raw ? JSON.parse(raw) : [];
+                        const idx = list.findIndex(c => c.email.toLowerCase() === activeCandidate.email.toLowerCase());
+
+                        if (idx !== -1) {
+                            Object.assign(list[idx], updateData);
+                            localStorage.setItem('candidates', JSON.stringify(list));
+                            Object.assign(activeCandidate, updateData);
+                            originalData = { ...activeCandidate };
+                            showToast('✅ Profile updated locally (offline mode)', 'success');
+                        } else {
+                            showToast('Failed to locate candidate credentials locally', 'error');
+                        }
+                    } catch (localErr) {
+                        showToast('Error saving profile. Please try again.', 'error');
+                        console.error('Profile save error:', localErr);
+                    }
+                } finally {
+                    saveBtn.classList.remove('loading');
+                    saveBtn.disabled = false;
+                }
+            });
+
+            // ===== LOGOUT =====
+            document.getElementById('btn-user-logout').addEventListener('click', async () => {
+                if (!confirm('Are you sure you want to logout?')) return;
+
+                try {
+                    await fetch('/api/logout', { method: 'POST' });
+                    localStorage.removeItem('active_session_email');
+                    localStorage.removeItem('active_session_candidate_id');
+                    window.location.href = '/login';
+                } catch(err) {
+                    localStorage.removeItem('active_session_email');
+                    localStorage.removeItem('active_session_candidate_id');
+                    window.location.href = '/login';
+                }
+            });
+
+            // ===== KEYBOARD SHORTCUTS =====
+            document.addEventListener('keydown', (e) => {
+                // Ctrl+S to save
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    form.dispatchEvent(new Event('submit'));
+                }
+                // Escape to reset
+                if (e.key === 'Escape') {
+                    resetBtn.click();
+                }
+            });
+
+            // ===== INIT =====
+            loadProfile();
+
+            console.log('🚀 Profile Page Enhanced - AI Next Gen 2026');
+            console.log('📌 Shortcuts: Ctrl+S (Save), Escape (Reset)');
+
+        })();
     </script>
 </body>
 </html>

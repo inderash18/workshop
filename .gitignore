@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment configurations containing secrets
+.env
+
+# Local state/temporary database files
+database.json
+database.json.tmp
+*.tmp
+
+# IDE / System files
+.gemini/
+.agents/
+.system_generated/
+.vscode/
+.idea/
+*.log

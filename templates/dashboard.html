@@ -7,8 +7,32 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* ===== ENHANCED CSS ===== */
+        :root {
+            --primary-bg: #D8D7CE;
+            --dark-bg: #222831;
+            --accent-cyan: #00A6C0;
+            --accent-green: #16A34A;
+            --accent-red: #DC2626;
+            --accent-yellow: #F59E0B;
+            --accent-purple: #7b2ffc;
+            --font-serif: 'Georgia', serif;
+            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+            --font-futuristic: 'Segoe UI', system-ui, sans-serif;
+            --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #D8D7CE !important;
+            background-color: var(--primary-bg) !important;
+            font-family: var(--font-sans);
+            color: var(--dark-bg);
             margin: 0;
             padding: 0;
             min-height: 100vh;
@@ -18,21 +42,21 @@
             display: none !important;
         }
 
-        /* Tablet Layout Wrapper */
+        /* ===== LAYOUT ===== */
         .tablet-wrapper {
             display: grid;
             grid-template-columns: 80px 1fr 340px;
             min-height: 100vh;
-            background: #D8D7CE;
-            box-sizing: border-box;
+            background: var(--primary-bg);
+            transition: grid-template-columns 0.3s ease;
         }
 
-        /* Left Sidebar styling */
+        /* ===== LEFT SIDEBAR - Enhanced ===== */
         .left-sidebar {
-            background: rgba(216, 215, 206, 0.85);
+            background: rgba(216, 215, 206, 0.92);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(34, 40, 49, 0.12);
+            border-right: 1px solid rgba(34, 40, 49, 0.1);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -41,91 +65,228 @@
             position: sticky;
             top: 0;
             height: 100vh;
-            box-sizing: border-box;
-            z-index: 20;
+            z-index: 100;
+            transition: all 0.3s ease;
         }
 
         .sidebar-logo {
             text-align: center;
+            position: relative;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto;
+            box-shadow: 0 4px 16px rgba(0, 166, 192, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: scale(1.05) rotate(-5deg);
         }
 
         .sidebar-menu {
             display: flex;
             flex-direction: column;
-            gap: 28px;
+            gap: 20px;
+            align-items: center;
         }
 
         .menu-item {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             text-decoration: none;
-            color: rgba(34, 40, 49, 0.7);
-            padding: 10px;
+            color: rgba(34, 40, 49, 0.5);
+            padding: 12px;
             border-radius: 14px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s var(--transition-smooth);
+            position: relative;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            background: var(--accent-cyan);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s var(--transition-smooth);
+        }
+
         .menu-item:hover {
-            color: #00A6C0;
-            background: rgba(34, 40, 49, 0.04);
+            color: var(--dark-bg);
+            transform: translateX(2px);
+        }
+
+        .menu-item:hover::before {
+            opacity: 0.08;
+            transform: scale(1);
         }
 
         .menu-item.active {
-            color: #D8D7CE;
-            background: #222831;
-            box-shadow: 0 0 20px rgba(34, 40, 49, 0.15);
+            color: white;
+            background: var(--dark-bg);
+            box-shadow: 0 8px 24px rgba(34, 40, 49, 0.2);
         }
 
-        /* Center Content Area */
+        .menu-item .tooltip {
+            position: absolute;
+            left: 70px;
+            background: var(--dark-bg);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .menu-item:hover .tooltip {
+            opacity: 1;
+            transform: translateX(4px);
+        }
+
+        .sidebar-footer button {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: rgba(34, 40, 49, 0.4);
+            transition: all 0.3s ease;
+            padding: 12px;
+            border-radius: 12px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .sidebar-footer button:hover {
+            color: var(--accent-red);
+            background: rgba(220, 38, 38, 0.08);
+            transform: scale(1.05);
+        }
+
+        /* ===== MAIN CONTENT ===== */
         .main-dashboard-content {
-            padding: 40px;
+            padding: 32px 40px 40px;
             overflow-y: auto;
-            box-sizing: border-box;
+            max-height: 100vh;
+        }
+
+        .main-dashboard-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .main-dashboard-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .main-dashboard-content::-webkit-scrollbar-thumb {
+            background: rgba(34, 40, 49, 0.2);
+            border-radius: 10px;
         }
 
         .main-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 36px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
         .search-bar {
-            background: rgba(255, 255, 255, 0.45);
-            border: 1px solid rgba(34, 40, 49, 0.12);
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(34, 40, 49, 0.1);
             border-radius: 9999px;
             padding: 10px 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+            flex: 1;
+            max-width: 380px;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 4px 16px rgba(0, 166, 192, 0.15);
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 0.85rem;
+            width: 100%;
+            color: var(--dark-bg);
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(34, 40, 49, 0.35);
         }
 
         .header-right {
             display: flex;
             align-items: center;
+            gap: 12px;
         }
 
         .support-tag {
             background: rgba(34, 40, 49, 0.08);
-            color: #222831;
-            font-size: 0.75rem;
+            color: rgba(34, 40, 49, 0.7);
+            font-size: 0.7rem;
             font-weight: 600;
             padding: 6px 14px;
             border-radius: 9999px;
-            margin-right: 16px;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .support-tag .online-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
         }
 
         .header-candidate-id {
             font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: rgba(34, 40, 49, 0.7);
+            font-size: 0.75rem;
+            color: rgba(34, 40, 49, 0.5);
             font-weight: 600;
+            background: rgba(255,255,255,0.3);
+            padding: 4px 14px;
+            border-radius: 12px;
         }
 
-        /* Heading section */
+        /* ===== SECTION TITLE ===== */
         .section-title-row {
             display: flex;
             justify-content: space-between;
@@ -137,15 +298,20 @@
 
         .serif-title {
             font-family: var(--font-serif);
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 500;
-            color: #222831;
+            color: var(--dark-bg);
             margin: 0;
+        }
+
+        .serif-title .highlight {
+            color: var(--accent-cyan);
         }
 
         .mini-metrics {
             display: flex;
-            gap: 16px;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         .mini-metric {
@@ -153,98 +319,178 @@
             align-items: center;
             gap: 10px;
             background: rgba(255, 255, 255, 0.35);
-            border: 1px solid rgba(34, 40, 49, 0.12);
+            border: 1px solid rgba(34, 40, 49, 0.08);
             border-radius: 16px;
-            padding: 8px 18px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            padding: 8px 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        .mini-metric:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
         }
 
         .mini-metric-icon {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
         }
 
         .mini-metric-val {
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.95rem;
-            color: #222831;
+            color: var(--dark-bg);
             display: block;
         }
 
         .mini-metric-lbl {
-            font-size: 0.7rem;
-            color: rgba(34, 40, 49, 0.55);
+            font-size: 0.65rem;
+            color: rgba(34, 40, 49, 0.4);
             white-space: nowrap;
+            font-weight: 500;
         }
 
-        /* Tab options */
+        /* ===== TABS ===== */
         .horizontal-tabs {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
             margin-bottom: 28px;
-            border-bottom: 1px solid rgba(34, 40, 49, 0.08);
+            border-bottom: 1px solid rgba(34, 40, 49, 0.06);
             padding-bottom: 12px;
             overflow-x: auto;
+            flex-wrap: wrap;
+        }
+
+        .horizontal-tabs::-webkit-scrollbar {
+            height: 2px;
+        }
+
+        .horizontal-tabs::-webkit-scrollbar-thumb {
+            background: rgba(34, 40, 49, 0.1);
+            border-radius: 10px;
         }
 
         .tab-item {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 500;
-            color: rgba(34, 40, 49, 0.6);
-            padding: 6px 16px;
+            color: rgba(34, 40, 49, 0.5);
+            padding: 6px 18px;
             border-radius: 9999px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s var(--transition-smooth);
             white-space: nowrap;
         }
 
-        .tab-item:hover, .tab-item.active {
-            color: #222831;
-            background: rgba(255, 255, 255, 0.45);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        .tab-item:hover {
+            color: var(--dark-bg);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .tab-item.active {
+            color: var(--dark-bg);
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .tab-item .badge {
+            background: var(--accent-cyan);
+            color: white;
+            font-size: 0.6rem;
+            padding: 1px 8px;
+            border-radius: 10px;
+            margin-left: 6px;
         }
 
         .tab-item-add {
             font-size: 1.1rem;
-            color: rgba(34, 40, 49, 0.5);
+            color: rgba(34, 40, 49, 0.3);
             cursor: pointer;
-            padding: 0 10px;
+            padding: 0 8px;
+            transition: all 0.3s ease;
         }
 
-        /* Activity capsules bar chart styling */
+        .tab-item-add:hover {
+            color: var(--accent-cyan);
+            transform: rotate(90deg);
+        }
+
+        /* ===== ACTIVITY CHART ===== */
         .activity-chart-card {
-            background: rgba(40, 59, 72, 0.12);
+            background: rgba(255, 255, 255, 0.35);
             border-radius: 28px;
-            border: 1px solid rgba(34, 40, 49, 0.12);
+            border: 1px solid rgba(34, 40, 49, 0.08);
             padding: 28px;
             margin-bottom: 28px;
-            box-shadow: 0 4px 20px rgba(34, 40, 49, 0.03);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        .activity-chart-card:hover {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .chart-header h3 {
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--dark-bg);
+            margin: 0;
+        }
+
+        .chart-header .subtitle {
+            font-size: 0.7rem;
+            color: rgba(34, 40, 49, 0.3);
+            margin-top: 2px;
+        }
+
+        .chart-tags {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .chart-tag {
-            background: rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.4);
             border: 1px solid rgba(34, 40, 49, 0.06);
             border-radius: 9999px;
             padding: 4px 14px;
-            font-size: 0.75rem;
-            color: #222831;
+            font-size: 0.7rem;
+            color: var(--dark-bg);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .chart-tag-plus {
-            font-weight: bold;
-            cursor: pointer;
-            padding: 4px 8px;
-            color: rgba(34, 40, 49, 0.6);
-            font-size: 0.9rem;
+        .chart-tag .status-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
         }
 
+        .chart-tag .status-indicator.online {
+            background: var(--accent-green);
+        }
+
+        /* ===== CAPSULES CHART ===== */
         .capsules-chart-row {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
             height: 160px;
             padding-top: 16px;
-            gap: 12px;
+            gap: 10px;
         }
 
         .chart-bar-container {
@@ -252,43 +498,133 @@
             flex-direction: column;
             align-items: center;
             flex: 1;
+            transition: all 0.3s ease;
+        }
+
+        .chart-bar-container:hover {
+            transform: translateY(-4px);
         }
 
         .chart-bar-capsule {
-            width: 28px;
+            width: 32px;
             height: 120px;
-            background: rgba(255, 255, 255, 0.35);
-            border: 1px solid rgba(34, 40, 49, 0.12);
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(34, 40, 49, 0.08);
             border-radius: 9999px;
             display: flex;
             flex-direction: column-reverse;
             overflow: hidden;
             position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .chart-bar-capsule:hover {
+            border-color: var(--accent-cyan);
         }
 
         .chart-bar-fill {
             width: 100%;
             border-radius: 9999px;
-            transition: height 0.6s cubic-bezier(0.1, 0.8, 0.3, 1);
+            transition: height 0.8s var(--transition-smooth);
+            position: relative;
         }
 
         .chart-bar-fill.level-completed {
-            background: #00A6C0;
-            box-shadow: 0 0 15px rgba(0, 166, 192, 0.4);
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+            box-shadow: 0 0 20px rgba(0, 166, 192, 0.3);
         }
 
         .chart-bar-fill.level-pending {
-            background: rgba(34, 40, 49, 0.1);
+            background: rgba(34, 40, 49, 0.08);
+        }
+
+        .chart-bar-fill.level-in-progress {
+            background: linear-gradient(180deg, var(--accent-yellow), #D97706);
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
         }
 
         .chart-bar-label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 600;
-            color: rgba(34, 40, 49, 0.6);
+            color: rgba(34, 40, 49, 0.4);
             margin-top: 8px;
+            transition: color 0.3s ease;
         }
 
-        /* Bottom panels grid */
+        .chart-bar-container:hover .chart-bar-label {
+            color: var(--dark-bg);
+        }
+
+        .chart-bar-score {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+            margin-top: 2px;
+            font-family: var(--font-mono);
+        }
+
+        /* ===== INVITATION BOX ===== */
+        .invitation-box {
+            padding: 2.5rem;
+            margin-bottom: 28px;
+            border-color: rgba(0, 166, 192, 0.2) !important;
+            background: rgba(0, 166, 192, 0.03) !important;
+            border-radius: 24px;
+            border: 2px solid;
+            display: none;
+            animation: fadeSlideUp 0.6s var(--transition-smooth);
+        }
+
+        .invitation-box.show {
+            display: block;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .invitation-box h3 {
+            font-family: var(--font-serif);
+            color: var(--accent-cyan);
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .invitation-box .subtitle {
+            font-size: 0.85rem;
+            color: rgba(34, 40, 49, 0.4);
+            margin-bottom: 1rem;
+        }
+
+        .invitation-box .invite-content {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(34, 40, 49, 0.06);
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+        }
+
+        .invitation-box .invite-content pre {
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            margin: 0;
+            color: var(--dark-bg);
+        }
+
+        .invitation-box .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* ===== BENCHMARKS ===== */
         .dashboard-bottom-grid {
             display: grid;
             grid-template-columns: 1.2fr 1fr;
@@ -296,138 +632,495 @@
             margin-bottom: 28px;
         }
 
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(34, 40, 49, 0.08);
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        }
+
+        .glass-panel .panel-title {
+            font-family: var(--font-serif);
+            font-size: 1.05rem;
+            font-weight: 500;
+            margin: 0 0 1.25rem 0;
+            color: var(--dark-bg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .benchmark-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 0.85rem;
+            padding: 6px 0;
         }
 
         .benchmark-lbl {
-            color: rgba(34, 40, 49, 0.8);
-            width: 110px;
+            color: rgba(34, 40, 49, 0.6);
+            width: 120px;
             font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        .benchmark-track {
+            flex: 1;
+            height: 6px;
+            background: rgba(34, 40, 49, 0.06);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0 12px;
+            position: relative;
+        }
+
+        .benchmark-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s var(--transition-smooth);
+            position: relative;
+        }
+
+        .benchmark-bar::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 10px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+            border-radius: 4px;
         }
 
         .benchmark-val {
             font-family: var(--font-mono);
-            font-weight: 600;
-            color: #222831;
-            width: 30px;
+            font-weight: 700;
+            color: var(--dark-bg);
+            width: 35px;
             text-align: right;
+            font-size: 0.8rem;
         }
 
+        .benchmark-val.high {
+            color: var(--accent-green);
+        }
+
+        .benchmark-val.medium {
+            color: var(--accent-yellow);
+        }
+
+        .benchmark-val.low {
+            color: var(--accent-red);
+        }
+
+        /* ===== STATUS PANEL ===== */
         .status-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             font-size: 0.8rem;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(34, 40, 49, 0.06);
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
+            animation: pulse-dot 2s ease-in-out infinite;
         }
 
-        .status-color-pending { background-color: var(--accent-yellow); box-shadow: 0 0 8px var(--accent-yellow); }
-        .status-color-selected { background-color: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
-        .status-color-rejected { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
-        .status-color-disqualified { background-color: #dc2626; box-shadow: 0 0 10px #dc2626; }
+        .status-color-pending { 
+            background: var(--accent-yellow); 
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+        }
+        .status-color-selected { 
+            background: var(--accent-green); 
+            box-shadow: 0 0 12px rgba(22, 163, 74, 0.3);
+        }
+        .status-color-rejected { 
+            background: var(--accent-red); 
+            box-shadow: 0 0 12px rgba(220, 38, 38, 0.3);
+        }
+        .status-color-disqualified { 
+            background: #6B7280; 
+            box-shadow: 0 0 12px rgba(107, 114, 128, 0.3);
+        }
 
-        /* Right Sidebar styling */
+        .status-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--dark-bg);
+            letter-spacing: 0.3px;
+        }
+
+        .status-text .highlight {
+            font-weight: 700;
+        }
+
+        #action-vector-card {
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        #action-vector-card .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        #action-vector-card .action-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--dark-bg);
+            margin: 0 0 4px 0;
+        }
+
+        #action-vector-card .action-description {
+            font-size: 0.75rem;
+            color: rgba(34, 40, 49, 0.4);
+            margin: 0 0 14px 0;
+            line-height: 1.4;
+        }
+
+        .btn-futuristic {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s var(--transition-smooth);
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .btn-futuristic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 166, 192, 0.3);
+        }
+
+        .btn-futuristic:active {
+            transform: translateY(0);
+        }
+
+        .btn-futuristic.btn-secondary {
+            background: rgba(34, 40, 49, 0.06);
+            color: var(--dark-bg);
+        }
+
+        .btn-futuristic.btn-secondary:hover {
+            background: rgba(34, 40, 49, 0.1);
+            box-shadow: none;
+        }
+
+        .btn-futuristic.btn-success {
+            background: linear-gradient(135deg, var(--accent-green), #059669);
+        }
+
+        .btn-futuristic.btn-success:hover {
+            box-shadow: 0 8px 24px rgba(22, 163, 74, 0.3);
+        }
+
+        /* ===== RIGHT SIDEBAR ===== */
         .right-sidebar {
-            background: rgba(216, 215, 206, 0.85);
+            background: rgba(255, 255, 255, 0.25);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-left: 1px solid rgba(34, 40, 49, 0.12);
-            padding: 40px 24px;
+            border-left: 1px solid rgba(34, 40, 49, 0.06);
+            padding: 32px 20px;
             display: flex;
             flex-direction: column;
-            gap: 36px;
+            gap: 28px;
             position: sticky;
             top: 0;
             height: 100vh;
-            box-sizing: border-box;
-            z-index: 20;
+            overflow-y: auto;
+        }
+
+        .right-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .right-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(34, 40, 49, 0.1);
+            border-radius: 10px;
+        }
+
+        /* ===== WEBCAM PANEL ===== */
+        .webcam-monitor-panel {
+            text-align: center;
         }
 
         .webcam-camera-frame {
-            width: 150px;
-            height: 150px;
-            border: 2px dashed rgba(34, 40, 49, 0.25);
+            width: 140px;
+            height: 140px;
+            border: 2px dashed rgba(34, 40, 49, 0.15);
             border-radius: 50%;
-            margin: 0 auto 16px auto;
+            margin: 0 auto 12px auto;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .webcam-camera-frame:hover {
+            border-color: var(--accent-cyan);
         }
 
         .camera-circle {
-            width: 130px;
-            height: 130px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.35);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.8rem;
-            color: rgba(34, 40, 49, 0.6);
+            font-size: 2.2rem;
+            color: rgba(34, 40, 49, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .camera-circle.active {
+            border: 3px solid var(--accent-green);
+            box-shadow: 0 0 30px rgba(22, 163, 74, 0.15);
         }
 
         .webcam-indicator-dot {
             position: absolute;
-            bottom: 6px;
+            bottom: 8px;
             right: 12px;
-            background: var(--accent-green);
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            border: 2.5px solid #D8D7CE;
-            box-shadow: 0 0 8px var(--accent-green);
+            border: 2.5px solid var(--primary-bg);
+            transition: all 0.3s ease;
         }
 
-        /* Right Sidebar mission checklists */
+        .webcam-indicator-dot.active {
+            background: var(--accent-green);
+            box-shadow: 0 0 12px rgba(22, 163, 74, 0.4);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .webcam-indicator-dot.inactive {
+            background: var(--accent-red);
+            box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+        }
+
+        .webcam-monitor-panel h4 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--dark-bg);
+            margin: 0;
+        }
+
+        .webcam-monitor-panel .sub {
+            font-size: 0.65rem;
+            color: rgba(34, 40, 49, 0.3);
+            margin: 2px 0 0;
+        }
+
+        /* ===== MISSIONS STACK ===== */
+        .resources-panel h3 {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            font-weight: 500;
+            margin: 0 0 1rem 0;
+            color: var(--dark-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .resources-panel h3 .count {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: rgba(34, 40, 49, 0.3);
+            font-family: var(--font-sans);
+        }
+
         .mission-toggle-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.35);
+            font-size: 0.8rem;
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 12px;
-            border: 1px solid rgba(34, 40, 49, 0.08);
+            border: 1px solid rgba(34, 40, 49, 0.04);
+            transition: all 0.3s ease;
+            margin-bottom: 6px;
+        }
+
+        .mission-toggle-row:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateX(4px);
         }
 
         .mission-toggle-lbl {
             font-weight: 500;
-            color: rgba(34, 40, 49, 0.8);
+            color: rgba(34, 40, 49, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .mission-toggle-indicator {
+        .mission-toggle-lbl .icon {
             font-size: 1rem;
         }
 
-        /* Final circular score card */
+        .mission-toggle-indicator {
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .mission-toggle-indicator.completed {
+            color: var(--accent-green);
+        }
+
+        .mission-toggle-indicator.in-progress {
+            color: var(--accent-yellow);
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+
+        .mission-toggle-indicator.locked {
+            color: rgba(34, 40, 49, 0.15);
+        }
+
+        /* ===== FINAL SCORE DIAL ===== */
         .final-score-dial-card {
-            background: #222831 !important;
-            color: #D8D7CE !important;
+            background: var(--dark-bg) !important;
+            color: var(--primary-bg) !important;
             border-radius: 24px;
-            padding: 24px 20px;
+            padding: 28px 20px;
             text-align: center;
             margin-top: auto;
-            box-shadow: 0 10px 30px rgba(34, 40, 49, 0.15);
+            box-shadow: 0 8px 32px rgba(34, 40, 49, 0.2);
+            border: none !important;
+            transition: all 0.3s ease;
+        }
+
+        .final-score-dial-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(34, 40, 49, 0.25);
         }
 
         .final-score-dial-card .dial-value {
-            color: #D8D7CE !important;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary-bg) !important;
+            font-family: var(--font-mono);
+            line-height: 1;
         }
 
-        .final-score-dial-card div {
-            color: rgba(216, 215, 206, 0.75) !important;
+        .final-score-dial-card .dial-label {
+            font-size: 0.7rem;
+            color: rgba(216, 215, 206, 0.5) !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .final-score-dial-card .dial-sub {
+            margin-top: 14px;
+            font-size: 0.65rem;
+            color: rgba(216, 215, 206, 0.3) !important;
+            border-top: 1px solid rgba(216, 215, 206, 0.06);
+            padding-top: 10px;
+            font-weight: 500;
+        }
+
+        .final-score-dial-card .rank-badge {
+            display: inline-block;
+            background: rgba(0, 166, 192, 0.15);
+            color: var(--accent-cyan);
+            padding: 4px 16px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 380px;
+        }
+
+        .toast {
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: var(--dark-bg);
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            animation: slideInRight 0.4s var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid var(--accent-cyan);
+            font-size: 0.85rem;
+        }
+
+        .toast.success { border-left-color: var(--accent-green); }
+        .toast.error { border-left-color: var(--accent-red); }
+        .toast.warning { border-left-color: var(--accent-yellow); }
+
+        .toast .icon { font-size: 1.2rem; }
+        .toast .message { font-weight: 500; }
+        .toast .close-toast {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.3);
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: auto;
+            padding: 0 4px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.removing {
+            animation: slideOutRight 0.3s ease forwards;
+        }
+
+        @keyframes slideOutRight {
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1300px) {
+            .tablet-wrapper {
+                grid-template-columns: 80px 1fr 280px;
+            }
         }
 
         @media (max-width: 1100px) {
@@ -446,314 +1139,792 @@
             .left-sidebar {
                 display: none;
             }
+            .main-dashboard-content {
+                padding: 16px;
+            }
             .dashboard-bottom-grid {
                 grid-template-columns: 1fr;
+            }
+            .section-title-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .mini-metrics {
+                justify-content: space-between;
+            }
+            .main-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-bar {
+                max-width: 100%;
+            }
+            .invitation-box {
+                padding: 1.5rem;
+            }
+            .capsules-chart-row {
+                height: 120px;
+            }
+            .chart-bar-capsule {
+                height: 80px;
+                width: 24px;
+            }
+            .horizontal-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .mini-metrics {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .mini-metric {
+                width: 100%;
+            }
+            .benchmark-lbl {
+                width: 80px;
+                font-size: 0.7rem;
+            }
+            .benchmark-val {
+                width: 30px;
+                font-size: 0.7rem;
             }
         }
     </style>
 </head>
 <body>
     <div class="tablet-wrapper">
-        <!-- Sticky left sidebar menu -->
+        <!-- ===== LEFT SIDEBAR ===== -->
         <div class="left-sidebar">
             <div class="sidebar-logo">
-                <div class="logo-icon"></div>
+                <div class="logo-icon" aria-hidden="true">✦</div>
             </div>
             <div class="sidebar-menu">
-                <a href="/" class="menu-item" title="Home">🏠</a>
-                <a href="/dashboard" class="menu-item active" title="Dashboard">📊</a>
-                <a href="/profile" class="menu-item" title="My Profile">👤</a>
-                <a href="/challenge" class="menu-item" title="Assessment Arena">⚔️</a>
-                <a href="/admin" class="menu-item" title="Admin Control">⚙️</a>
+                <a href="/" class="menu-item" title="Home">
+                    🏠
+                    <span class="tooltip">Home</span>
+                </a>
+                <a href="/dashboard" class="menu-item active" title="Dashboard">
+                    📊
+                    <span class="tooltip">Dashboard</span>
+                </a>
+                <a href="/profile" class="menu-item" title="Profile">
+                    👤
+                    <span class="tooltip">Profile</span>
+                </a>
+                <a href="/challenge" class="menu-item" title="Challenge">
+                    ⚔️
+                    <span class="tooltip">Challenge</span>
+                </a>
+                <a href="/admin" class="menu-item" title="Admin">
+                    ⚙️
+                    <span class="tooltip">Admin</span>
+                </a>
             </div>
             <div class="sidebar-footer">
-                <button id="btn-user-logout" title="Log Out" style="background: none; border: none; font-size: 1.35rem; cursor: pointer; opacity: 0.7; color: rgba(216, 215, 206, 0.6);">🚪</button>
+                <button id="btn-user-logout" title="Log Out" aria-label="Logout">🚪</button>
             </div>
         </div>
 
-        <!-- Central main content -->
+        <!-- ===== MAIN CONTENT ===== -->
         <div class="main-dashboard-content">
-            <!-- Header bar -->
+            <!-- Header -->
             <div class="main-header">
                 <div class="search-bar">
-                    <span style="color: rgba(216, 215, 206, 0.5); font-size: 0.9rem;">🔍</span>
-                    <input type="text" placeholder="Search assessments..." style="border: none; background: transparent; outline: none; font-size: 0.85rem; width: 180px; color: #D8D7CE;" disabled>
+                    <span style="color: rgba(34, 40, 49, 0.3);">🔍</span>
+                    <input 
+                        type="text" 
+                        id="dashboard-search" 
+                        placeholder="Search assessments, missions..."
+                        aria-label="Search dashboard"
+                    >
                 </div>
                 <div class="header-right">
-                    <span class="support-tag">Online support</span>
-                    <span class="header-candidate-id" id="top-candidate-id">CANDIDATE ID: AINEXT2026-0000</span>
+                    <span class="support-tag">
+                        <span class="online-dot"></span>
+                        Online support
+                    </span>
+                    <span class="header-candidate-id" id="top-candidate-id">
+                        🆔 AINEXT2026-0000
+                    </span>
                 </div>
             </div>
 
-            <!-- Dashboard title -->
+            <!-- Title -->
             <div class="section-title-row">
-                <h1 class="serif-title" id="welcome-message">Welcome Back.</h1>
-                <div class="mini-metrics">
+                <h1 class="serif-title" id="welcome-message">
+                    Welcome Back, <span class="highlight" id="user-name">Candidate</span> 👋
+                </h1>
+                <div class="mini-metrics" id="mini-metrics">
                     <div class="mini-metric">
                         <span class="mini-metric-icon">⏰</span>
                         <div>
-                            <span class="mini-metric-val">124</span>
-                            <span class="mini-metric-lbl">Hours online</span>
+                            <span class="mini-metric-val" id="metric-hours">0</span>
+                            <span class="mini-metric-lbl">Hours invested</span>
                         </div>
                     </div>
                     <div class="mini-metric">
-                        <span class="mini-metric-icon">🌐</span>
+                        <span class="mini-metric-icon">🏆</span>
                         <div>
-                            <span class="mini-metric-val">315</span>
-                            <span class="mini-metric-lbl">Tasks checked</span>
+                            <span class="mini-metric-val" id="metric-xp">0</span>
+                            <span class="mini-metric-lbl">XP Earned</span>
+                        </div>
+                    </div>
+                    <div class="mini-metric">
+                        <span class="mini-metric-icon">📈</span>
+                        <div>
+                            <span class="mini-metric-val" id="metric-progress">0%</span>
+                            <span class="mini-metric-lbl">Completion</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Horizontal navigation tabs -->
-            <div class="horizontal-tabs">
-                <span class="tab-item active">All</span>
-                <span class="tab-item">Activity</span>
-                <span class="tab-item">Protection</span>
-                <span class="tab-item">Update</span>
-                <span class="tab-item">Resources</span>
-                <span class="tab-item-add">+</span>
+            <!-- Tabs -->
+            <div class="horizontal-tabs" id="dashboard-tabs">
+                <span class="tab-item active" data-tab="all">📊 All</span>
+                <span class="tab-item" data-tab="activity">📈 Activity</span>
+                <span class="tab-item" data-tab="missions">🎯 Missions</span>
+                <span class="tab-item" data-tab="achievements">🏅 Achievements</span>
+                <span class="tab-item" data-tab="resources">📚 Resources</span>
+                <span class="tab-item-add" title="More options">+</span>
             </div>
 
-            <!-- Main Activity levels chart card -->
-            <div class="glass-panel activity-chart-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <!-- Activity Chart -->
+            <div class="activity-chart-card">
+                <div class="chart-header">
                     <div>
-                        <h3 style="font-family: var(--font-serif); font-size: 1.15rem; font-weight: 500; color: #D8D7CE; margin: 0;">Your activity</h3>
-                        <p style="font-size: 0.75rem; color: rgba(216, 215, 206, 0.5); margin: 4px 0 0 0;">Completion logs across active security vectors</p>
+                        <h3>📊 Your Progress</h3>
+                        <div class="subtitle">Completion across all 7 missions</div>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <span class="chart-tag">Device: Active</span>
-                        <span class="chart-tag-plus">+</span>
+                    <div class="chart-tags">
+                        <span class="chart-tag">
+                            <span class="status-indicator online"></span>
+                            Active Session
+                        </span>
+                        <span class="chart-tag" id="session-time">⏱️ 00:00</span>
                     </div>
                 </div>
-                <!-- Capsules visual graph representation -->
                 <div class="capsules-chart-row" id="capsules-chart-row">
-                    <!-- Loaded dynamically via modern dashboard renderer -->
+                    <!-- Rendered by JS -->
                 </div>
             </div>
 
-            <!-- Dynamically populated selected candidate invite panel -->
-            <div class="invitation-box glass-panel" id="selected-invitation" style="padding: 2.5rem; margin-bottom: 28px; border-color: rgba(0, 166, 192, 0.25); background: rgba(0, 166, 192, 0.02); display: none;">
-                <h3 style="font-family: var(--font-serif); color: #00A6C0; margin-bottom: 1rem; font-size: 1.25rem; font-weight: 500;">INVITATION PROTOCOL DETECTED</h3>
-                <p style="font-size: 0.9rem; line-height: 1.6; color: rgba(216, 215, 206, 0.8); margin-bottom: 1.5rem;">
-                    Congratulations! You have been successfully shortlisted for the AI Next Gen Workshop 2026. Find your invitation letter details generated below:
-                </p>
-                <div style="margin-bottom: 1.5rem; padding: 1.5rem; background: rgba(40, 59, 72, 0.65); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;">
-                    <pre style="font-family: var(--font-sans); font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; margin: 0; color: #D8D7CE;" id="invitation-text-content"></pre>
+            <!-- Invitation Box -->
+            <div class="invitation-box" id="selected-invitation">
+                <h3>🎉 INVITATION PROTOCOL DETECTED</h3>
+                <div class="subtitle">You have been shortlisted for the AI Next Gen Workshop 2026</div>
+                <div class="invite-content">
+                    <pre id="invitation-text-content"></pre>
                 </div>
-                <button class="btn-futuristic" style="padding: 10px 24px; font-size: 0.8rem;" onclick="window.print()">Print Invite PDF</button>
+                <div class="actions">
+                    <button class="btn-futuristic btn-success" onclick="window.print()">🖨️ Print Invite</button>
+                    <button class="btn-futuristic btn-secondary" id="btn-share-invite">📤 Share</button>
+                </div>
             </div>
 
-            <!-- Bottom row grid -->
+            <!-- Bottom Grid -->
             <div class="dashboard-bottom-grid">
-                <!-- Benchmark statistics progress -->
-                <div class="glass-panel" style="padding: 24px;">
-                    <h3 style="font-family: var(--font-serif); font-size: 1.1rem; font-weight: 500; margin: 0 0 1.25rem 0; color: #D8D7CE;">Benchmarks</h3>
-                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                <!-- Benchmarks -->
+                <div class="glass-panel">
+                    <div class="panel-title">📈 Benchmark Scores</div>
+                    <div style="display:flex; flex-direction:column; gap:12px;" id="benchmarks-container">
                         <div class="benchmark-row">
-                            <span class="benchmark-lbl">Cognitive Logic</span>
-                            <div style="flex: 1; height: 6px; background: rgba(0,0,0,0.15); border-radius: 3px; overflow: hidden; margin: 0 12px;">
-                                <div class="benchmark-bar" id="bar-logic" style="width: 0%; height: 100%; background: #00A6C0; border-radius: 3px; transition: width 0.6s ease;"></div>
+                            <span class="benchmark-lbl">🧠 Cognitive Logic</span>
+                            <div class="benchmark-track">
+                                <div class="benchmark-bar" id="bar-logic" style="width:0%; background:linear-gradient(90deg, #00A6C0, #7b2ffc);"></div>
                             </div>
                             <span class="benchmark-val" id="score-logic">0</span>
                         </div>
                         <div class="benchmark-row">
-                            <span class="benchmark-lbl">Creativity Index</span>
-                            <div style="flex: 1; height: 6px; background: rgba(0,0,0,0.15); border-radius: 3px; overflow: hidden; margin: 0 12px;">
-                                <div class="benchmark-bar" id="bar-creativity" style="width: 0%; height: 100%; background: #00A6C0; border-radius: 3px; transition: width 0.6s ease;"></div>
+                            <span class="benchmark-lbl">🎨 Creativity Index</span>
+                            <div class="benchmark-track">
+                                <div class="benchmark-bar" id="bar-creativity" style="width:0%; background:linear-gradient(90deg, #F59E0B, #EC4899);"></div>
                             </div>
                             <span class="benchmark-val" id="score-creativity">0</span>
                         </div>
                         <div class="benchmark-row">
-                            <span class="benchmark-lbl">AI Literacy</span>
-                            <div style="flex: 1; height: 6px; background: rgba(0,0,0,0.15); border-radius: 3px; overflow: hidden; margin: 0 12px;">
-                                <div class="benchmark-bar" id="bar-ai" style="width: 0%; height: 100%; background: #00A6C0; border-radius: 3px; transition: width 0.6s ease;"></div>
+                            <span class="benchmark-lbl">🤖 AI Literacy</span>
+                            <div class="benchmark-track">
+                                <div class="benchmark-bar" id="bar-ai" style="width:0%; background:linear-gradient(90deg, #16A34A, #00A6C0);"></div>
                             </div>
                             <span class="benchmark-val" id="score-ai">0</span>
+                        </div>
+                        <div class="benchmark-row">
+                            <span class="benchmark-lbl">⚡ Technical Aptitude</span>
+                            <div class="benchmark-track">
+                                <div class="benchmark-bar" id="bar-tech" style="width:0%; background:linear-gradient(90deg, #7b2ffc, #EC4899);"></div>
+                            </div>
+                            <span class="benchmark-val" id="score-tech">0</span>
+                        </div>
+                        <div class="benchmark-row" style="border-top:1px solid rgba(34,40,49,0.06); padding-top:12px; margin-top:4px;">
+                            <span class="benchmark-lbl" style="font-weight:700; color:var(--dark-bg);">🏆 Overall</span>
+                            <div class="benchmark-track">
+                                <div class="benchmark-bar" id="bar-overall" style="width:0%; background:linear-gradient(90deg, #00A6C0, #7b2ffc, #EC4899);"></div>
+                            </div>
+                            <span class="benchmark-val" id="score-overall" style="font-weight:700;">0</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Anti cheating warning review -->
-                <div class="glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div class="status-container" style="margin: 0;">
-                        <span class="status-dot status-color-pending" id="status-light"></span>
-                        <span style="font-size: 0.8rem; font-weight: 600; color: #D8D7CE; letter-spacing: 0.5px; text-transform: uppercase;">SELECTION VECTOR: <span id="status-text" style="color: var(--accent-yellow);">PENDING</span></span>
+                <!-- Status & Action -->
+                <div class="glass-panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+                    <div>
+                        <div class="status-container">
+                            <span class="status-dot status-color-pending" id="status-light"></span>
+                            <span class="status-text">
+                                Status: <span class="highlight" id="status-text">PENDING</span>
+                            </span>
+                        </div>
+                        
+                        <div id="action-vector-card">
+                            <div class="action-icon" id="action-icon">🔒</div>
+                            <div class="action-title" id="action-title">Assessment Locked</div>
+                            <div class="action-description" id="action-description">
+                                Complete your profile to unlock the challenge arena
+                            </div>
+                            <a href="/challenge" class="btn-futuristic" id="btn-action-challenge">
+                                🚀 Start Assessment
+                            </a>
+                        </div>
                     </div>
-                    
-                    <div id="action-vector-card" style="text-align: center; margin-top: 8px;">
-                        <h4 id="action-title" style="font-size: 0.9rem; font-weight: 600; color: #D8D7CE; margin: 0 0 6px 0;">AI Challenge Locked</h4>
-                        <p id="action-description" style="font-size: 0.75rem; color: rgba(216, 215, 206, 0.6); margin: 0 0 14px 0; line-height: 1.4;">Unlock assessment missions. Camera overlays apply.</p>
-                        <a href="/challenge" class="btn-futuristic" id="btn-action-challenge" style="padding: 10px 20px; font-size: 0.8rem; width: 100%;">Unlock Assessment</a>
+
+                    <!-- Quick stats -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:16px; padding-top:16px; border-top:1px solid rgba(34,40,49,0.06);">
+                        <div style="text-align:center;">
+                            <div style="font-size:1.2rem; font-weight:700; color:var(--accent-cyan);" id="quick-questions">0</div>
+                            <div style="font-size:0.6rem; color:rgba(34,40,49,0.3);">Answered</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:1.2rem; font-weight:700; color:var(--accent-green);" id="quick-correct">0</div>
+                            <div style="font-size:0.6rem; color:rgba(34,40,49,0.3);">Correct</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:1.2rem; font-weight:700; color:var(--accent-yellow);" id="quick-accuracy">0%</div>
+                            <div style="font-size:0.6rem; color:rgba(34,40,49,0.3);">Accuracy</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Hidden elements to keep Chart.js radar hooks active and error-free -->
-            <div style="display: none;">
-                <canvas id="dashboardRadar"></canvas>
-                <div id="radar-placeholder"></div>
-                <div id="profile-progress-percent"></div>
-                <div id="profile-progress-fill"></div>
-                <div id="score-final"></div>
-                <div id="dashboard-badges-list"></div>
             </div>
         </div>
 
-        <!-- Right info panel column -->
+        <!-- ===== RIGHT SIDEBAR ===== -->
         <div class="right-sidebar">
-            <!-- Webcam face frame visualization -->
+            <!-- Webcam -->
             <div class="webcam-monitor-panel">
                 <div class="webcam-camera-frame">
-                    <div class="camera-circle">👤</div>
-                    <span class="webcam-indicator-dot" id="right-camera-dot"></span>
+                    <div class="camera-circle" id="camera-circle">👤</div>
+                    <span class="webcam-indicator-dot active" id="right-camera-dot"></span>
                 </div>
-                <h4 style="font-size: 0.85rem; font-weight: 600; color: #D8D7CE; margin: 0;">Identity feed</h4>
-                <p style="font-size: 0.7rem; color: rgba(216, 215, 206, 0.5); margin: 4px 0 0 0;">Viewport tracking active</p>
+                <h4>📷 Identity Feed</h4>
+                <div class="sub" id="webcam-status-text">Viewport tracking active</div>
             </div>
 
-            <!-- Missions completed checklist toggles -->
+            <!-- Missions -->
             <div class="resources-panel">
-                <h3 style="font-family: var(--font-serif); font-size: 1.05rem; font-weight: 500; margin: 0 0 1rem 0; color: #D8D7CE;">Missions Stack</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
+                <h3>
+                    🎯 Missions
+                    <span class="count" id="mission-count">0/7</span>
+                </h3>
+                <div style="display:flex; flex-direction:column; gap:6px;" id="missions-stack">
                     <div class="mission-toggle-row">
-                        <span class="mission-toggle-lbl">Logic Detective</span>
-                        <span class="mission-toggle-indicator" id="ind-m1">⚪</span>
+                        <span class="mission-toggle-lbl"><span class="icon">🔍</span> Logic Detective</span>
+                        <span class="mission-toggle-indicator locked" id="ind-m1">⚪</span>
                     </div>
                     <div class="mission-toggle-row">
-                        <span class="mission-toggle-lbl">Future Thinker</span>
-                        <span class="mission-toggle-indicator" id="ind-m2">⚪</span>
+                        <span class="mission-toggle-lbl"><span class="icon">🚀</span> Future Thinker</span>
+                        <span class="mission-toggle-indicator locked" id="ind-m2">⚪</span>
                     </div>
                     <div class="mission-toggle-row">
-                        <span class="mission-toggle-lbl">AI Architect</span>
-                        <span class="mission-toggle-indicator" id="ind-m3">⚪</span>
+                        <span class="mission-toggle-lbl"><span class="icon">🏗️</span> AI Architect</span>
+                        <span class="mission-toggle-indicator locked" id="ind-m3">⚪</span>
                     </div>
                     <div class="mission-toggle-row">
-                        <span class="mission-toggle-lbl">Prompt Engineer</span>
-                        <span class="mission-toggle-indicator" id="ind-m4">⚪</span>
+                        <span class="mission-toggle-lbl"><span class="icon">✍️</span> Prompt Engineer</span>
+                        <span class="mission-toggle-indicator locked" id="ind-m4">⚪</span>
                     </div>
                     <div class="mission-toggle-row">
-                        <span class="mission-toggle-lbl">RAG Analyst</span>
-                        <span class="mission-toggle-indicator" id="ind-m5">⚪</span>
+                        <span class="mission-toggle-lbl"><span class="icon">🔗</span> RAG Analyst</span>
+                        <span class="mission-toggle-indicator locked" id="ind-m5">⚪</span>
+                    </div>
+                    <div class="mission-toggle-row">
+                        <span class="mission-toggle-lbl"><span class="icon">⚖️</span> Balance Master</span>
+                        <span class="mission-toggle-indicator locked" id="ind-m6">⚪</span>
+                    </div>
+                    <div class="mission-toggle-row">
+                        <span class="mission-toggle-lbl"><span class="icon">🌍</span> Future Builder</span>
+                        <span class="mission-toggle-indicator locked" id="ind-m7">⚪</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Circular score dial display -->
-            <div class="glass-panel final-score-dial-card">
+            <!-- Score Dial -->
+            <div class="final-score-dial-card">
                 <div class="dial-value" id="score-final-dial">0.0</div>
-                <div style="font-size: 0.75rem; color: rgba(34, 40, 49, 0.7); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600;">Final Score %</div>
-                <div style="margin-top: 14px; font-size: 0.7rem; color: rgba(34, 40, 49, 0.6); border-top: 1px solid rgba(34,40,49,0.1); padding-top: 10px; font-weight: 600;">
-                    Expand your possibilities
-                </div>
+                <div class="dial-label">Final Score</div>
+                <div class="rank-badge" id="rank-badge">🏅 Not Ranked</div>
+                <div class="dial-sub">Keep pushing forward 🚀</div>
             </div>
         </div>
     </div>
 
-    <!-- Core dashboard data scripts -->
-    <script src="/static/js/dashboard.js"></script>
+    <!-- ===== TOAST ===== -->
+    <div class="toast-container" id="toast-container"></div>
 
-    <!-- Modern layout renderer script override -->
     <script>
-        // Hook into the original renderDashboardData function to run our modern UI updates
-        if (typeof renderDashboardData === 'function') {
-            const originalRender = renderDashboardData;
-            renderDashboardData = function() {
-                originalRender();
-                renderModernDashboard();
+        // ===== ENHANCED JAVASCRIPT =====
+        (function() {
+            'use strict';
+
+            // ===== MOCK CANDIDATE DATA =====
+            const mockCandidate = {
+                id: 'AINEXT2026-0042',
+                name: 'Alex Rivera',
+                score_final: 78.4,
+                score_logic: 32,
+                score_creativity: 16,
+                score_ai_knowledge: 17,
+                score_tech: 14,
+                webcam_status: 'Active',
+                status: 'pending', // pending, shortlisted, rejected, disqualified
+                xp: 1240,
+                hours_invested: 12,
+                missions_completed: 3,
+                total_questions: 35,
+                correct_answers: 27,
+                level1_ans: JSON.stringify({ q1: 'A', q2: 'B', q3: 'C' }),
+                level2_ans: JSON.stringify({ q1: 'A', q2: 'B', q3: 'C' }),
+                level3_ans: JSON.stringify({ q1: 'A', q2: 'B', q3: 'C' }),
+                level4_ans: '',
+                level5_ans: '',
+                level6_ans: '',
+                level7_ans: '',
+                invited: true,
+                invitation_date: '2026-07-15'
             };
-        }
 
-        function renderModernDashboard() {
-            if (!activeCandidate) return;
+            // ===== DOM REFS =====
+            const $ = (s) => document.querySelector(s);
+            const $$ = (s) => document.querySelectorAll(s);
 
-            // 1. Set final score circular dial
-            const dialScore = document.getElementById('score-final-dial');
-            if (dialScore) {
-                dialScore.textContent = activeCandidate.score_final.toFixed(1);
+            // ===== TOAST =====
+            function showToast(message, type = 'info', duration = 4000) {
+                const container = $('#toast-container');
+                const icons = {
+                    success: '✅',
+                    error: '❌',
+                    warning: '⚠️',
+                    info: 'ℹ️'
+                };
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <span class="icon">${icons[type] || 'ℹ️'}</span>
+                    <span class="message">${message}</span>
+                    <button class="close-toast">✕</button>
+                `;
+                container.appendChild(toast);
+
+                toast.querySelector('.close-toast').addEventListener('click', () => {
+                    toast.classList.add('removing');
+                    setTimeout(() => toast.remove(), 300);
+                });
+
+                setTimeout(() => {
+                    toast.classList.add('removing');
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
             }
 
-            // 2. Set custom progress benchmark bars
-            const barLogic = document.getElementById('bar-logic');
-            if (barLogic) barLogic.style.width = `${(activeCandidate.score_logic / 40) * 100}%`;
-            
-            const barCreativity = document.getElementById('bar-creativity');
-            if (barCreativity) barCreativity.style.width = `${(activeCandidate.score_creativity / 20) * 100}%`;
-            
-            const barAi = document.getElementById('bar-ai');
-            if (barAi) barAi.style.width = `${(activeCandidate.score_ai_knowledge / 20) * 100}%`;
+            // ===== RENDER DASHBOARD =====
+            function renderDashboard(candidate) {
+                if (!candidate) {
+                    // Use mock data if no candidate provided
+                    candidate = mockCandidate;
+                }
 
-            // 3. Set visual capsules bar chart (representing response activity on Level 1 - 7)
-            const capsulesRow = document.getElementById('capsules-chart-row');
-            if (capsulesRow) {
-                capsulesRow.innerHTML = '';
+                // Update header
+                $('#user-name').textContent = candidate.name;
+                $('#top-candidate-id').textContent = `🆔 ${candidate.id}`;
+                $('#welcome-message').innerHTML = `Welcome Back, <span class="highlight">${candidate.name}</span> 👋`;
+
+                // Update metrics
+                $('#metric-hours').textContent = candidate.hours_invested || 0;
+                $('#metric-xp').textContent = candidate.xp || 0;
+                const completion = candidate.missions_completed ? Math.round((candidate.missions_completed / 7) * 100) : 0;
+                $('#metric-progress').textContent = `${completion}%`;
+
+                // Update benchmark bars
+                const maxLogic = 40, maxCreativity = 20, maxAI = 20, maxTech = 20;
+                const logicPct = Math.min((candidate.score_logic / maxLogic) * 100, 100);
+                const creativityPct = Math.min((candidate.score_creativity / maxCreativity) * 100, 100);
+                const aiPct = Math.min((candidate.score_ai_knowledge / maxAI) * 100, 100);
+                const techPct = Math.min((candidate.score_tech / maxTech) * 100, 100);
+                const overall = Math.round((candidate.score_logic + candidate.score_creativity + candidate.score_ai_knowledge + candidate.score_tech) / 1);
+                const overallPct = Math.min(overall, 100);
+
+                $('#bar-logic').style.width = `${logicPct}%`;
+                $('#score-logic').textContent = candidate.score_logic;
+                $('#bar-creativity').style.width = `${creativityPct}%`;
+                $('#score-creativity').textContent = candidate.score_creativity;
+                $('#bar-ai').style.width = `${aiPct}%`;
+                $('#score-ai').textContent = candidate.score_ai_knowledge;
+                $('#bar-tech').style.width = `${techPct}%`;
+                $('#score-tech').textContent = candidate.score_tech;
+                $('#bar-overall').style.width = `${overallPct}%`;
+                $('#score-overall').textContent = overall;
+
+                // Update score dial
+                $('#score-final-dial').textContent = candidate.score_final.toFixed(1);
+
+                // Update status
+                const statusMap = {
+                    'pending': { dot: 'status-color-pending', text: 'PENDING', icon: '🔒', title: 'Assessment Locked', desc: 'Complete your profile to unlock the challenge arena', btn: '🚀 Start Assessment' },
+                    'shortlisted': { dot: 'status-color-selected', text: 'SHORTLISTED 🎉', icon: '🎉', title: 'Congratulations!', desc: 'You have been shortlisted for the workshop!', btn: '📋 View Invitation' },
+                    'rejected': { dot: 'status-color-rejected', text: 'NOT SELECTED', icon: '😔', title: 'Thank You for Participating', desc: 'We appreciate your effort. Keep learning!', btn: '📚 Explore Resources' },
+                    'disqualified': { dot: 'status-color-disqualified', text: 'DISQUALIFIED', icon: '🚫', title: 'Assessment Disqualified', desc: 'Please contact support for more information.', btn: '📧 Contact Support' }
+                };
+
+                const status = statusMap[candidate.status] || statusMap.pending;
+                const statusLight = $('#status-light');
+                statusLight.className = `status-dot ${status.dot}`;
+                $('#status-text').textContent = status.text;
+                $('#action-icon').textContent = status.icon;
+                $('#action-title').textContent = status.title;
+                $('#action-description').textContent = status.desc;
+                const actionBtn = $('#btn-action-challenge');
+                actionBtn.textContent = status.btn;
                 
+                if (candidate.status === 'shortlisted') {
+                    actionBtn.href = '#';
+                    actionBtn.onclick = function(e) {
+                        e.preventDefault();
+                        showInvitation(candidate);
+                    };
+                } else if (candidate.status === 'pending') {
+                    actionBtn.href = '/challenge';
+                }
+
+                // Update quick stats
+                const total = candidate.total_questions || 35;
+                const correct = candidate.correct_answers || 27;
+                $('#quick-questions').textContent = total;
+                $('#quick-correct').textContent = correct;
+                $('#quick-accuracy').textContent = total > 0 ? Math.round((correct / total) * 100) + '%' : '0%';
+
+                // Update rank badge
+                const rankBadge = $('#rank-badge');
+                if (candidate.score_final >= 85) {
+                    rankBadge.textContent = '🏅 Platinum Rank';
+                    rankBadge.style.background = 'rgba(16,185,129,0.2)';
+                    rankBadge.style.color = '#16A34A';
+                } else if (candidate.score_final >= 70) {
+                    rankBadge.textContent = '🥇 Gold Rank';
+                    rankBadge.style.background = 'rgba(245,158,11,0.2)';
+                    rankBadge.style.color = '#F59E0B';
+                } else if (candidate.score_final >= 55) {
+                    rankBadge.textContent = '🥈 Silver Rank';
+                    rankBadge.style.background = 'rgba(156,163,175,0.2)';
+                    rankBadge.style.color = '#9CA3AF';
+                } else if (candidate.score_final >= 40) {
+                    rankBadge.textContent = '🥉 Bronze Rank';
+                    rankBadge.style.background = 'rgba(180,83,9,0.2)';
+                    rankBadge.style.color = '#B45309';
+                } else {
+                    rankBadge.textContent = '🏅 Not Ranked';
+                    rankBadge.style.background = 'rgba(107,114,128,0.1)';
+                    rankBadge.style.color = '#6B7280';
+                }
+
+                // Update webcam status
+                const cameraCircle = $('#camera-circle');
+                const cameraDot = $('#right-camera-dot');
+                const webcamStatus = $('#webcam-status-text');
+                if (candidate.webcam_status === 'Active') {
+                    cameraCircle.className = 'camera-circle active';
+                    cameraDot.className = 'webcam-indicator-dot active';
+                    webcamStatus.textContent = '✅ Viewport tracking active';
+                } else {
+                    cameraCircle.className = 'camera-circle';
+                    cameraDot.className = 'webcam-indicator-dot inactive';
+                    webcamStatus.textContent = '❌ Camera offline';
+                }
+
+                // Render capsules chart
+                renderCapsules(candidate);
+
+                // Render missions
+                renderMissions(candidate);
+
+                // Show invitation if shortlisted
+                if (candidate.status === 'shortlisted' && candidate.invited) {
+                    showInvitation(candidate);
+                }
+
+                // Update mission count
+                const missionCount = document.querySelectorAll('.mission-toggle-indicator.completed').length;
+                $('#mission-count').textContent = `${missionCount}/7`;
+
+                // Session timer
+                startSessionTimer();
+            }
+
+            // ===== RENDER CAPSULES =====
+            function renderCapsules(candidate) {
+                const container = $('#capsules-chart-row');
+                if (!container) return;
+
                 const levels = [
-                    { label: 'L1', completed: activeCandidate.level1_ans ? true : false },
-                    { label: 'L2', completed: activeCandidate.level2_ans ? true : false },
-                    { label: 'L3', completed: activeCandidate.level3_ans ? true : false },
-                    { label: 'L4', completed: activeCandidate.level4_ans ? true : false },
-                    { label: 'L5', completed: activeCandidate.level5_ans ? true : false },
-                    { label: 'L6', completed: activeCandidate.level6_ans ? true : false },
-                    { label: 'L7', completed: activeCandidate.level7_ans ? true : false }
+                    { label: 'L1', data: candidate.level1_ans, name: 'Logic Detective' },
+                    { label: 'L2', data: candidate.level2_ans, name: 'Future Thinker' },
+                    { label: 'L3', data: candidate.level3_ans, name: 'AI Architect' },
+                    { label: 'L4', data: candidate.level4_ans, name: 'Prompt Engineer' },
+                    { label: 'L5', data: candidate.level5_ans, name: 'RAG Analyst' },
+                    { label: 'L6', data: candidate.level6_ans, name: 'Balance Master' },
+                    { label: 'L7', data: candidate.level7_ans, name: 'Future Builder' }
                 ];
-                
-                levels.forEach(lvl => {
-                    const height = lvl.completed ? '120px' : '48px';
-                    const fillClass = lvl.completed ? 'level-completed' : 'level-pending';
-                    const fillHeight = lvl.completed ? '100%' : '20%';
+
+                const completedCount = levels.filter(l => isCompleted(l.data)).length;
+                const inProgress = levels.some(l => isInProgress(l.data));
+
+                container.innerHTML = '';
+                levels.forEach((lvl, index) => {
+                    const completed = isCompleted(lvl.data);
+                    const inProg = isInProgress(lvl.data);
+                    const height = completed ? '120px' : (inProg ? '80px' : '48px');
+                    const fillClass = completed ? 'level-completed' : (inProg ? 'level-in-progress' : 'level-pending');
+                    const fillHeight = completed ? '100%' : (inProg ? '60%' : '20%');
                     
-                    capsulesRow.innerHTML += `
-                        <div class="chart-bar-container">
+                    container.innerHTML += `
+                        <div class="chart-bar-container" title="${lvl.name}">
                             <div class="chart-bar-capsule" style="height: ${height};">
                                 <div class="chart-bar-fill ${fillClass}" style="height: ${fillHeight};"></div>
                             </div>
                             <span class="chart-bar-label">${lvl.label}</span>
+                            ${completed ? '<span class="chart-bar-score">✓</span>' : ''}
                         </div>
                     `;
                 });
+
+                // Animate bars on load
+                setTimeout(() => {
+                    document.querySelectorAll('.chart-bar-fill').forEach((bar, i) => {
+                        setTimeout(() => {
+                            bar.style.height = bar.style.height;
+                        }, i * 100);
+                    });
+                }, 300);
             }
 
-            // 4. Set webcam active monitor dot
-            const cameraDot = document.getElementById('right-camera-dot');
-            if (cameraDot) {
-                if (activeCandidate.webcam_status === 'Active') {
-                    cameraDot.style.backgroundColor = 'var(--accent-green)';
-                    cameraDot.style.boxShadow = '0 0 8px var(--accent-green)';
-                } else {
-                    cameraDot.style.backgroundColor = 'var(--accent-red)';
-                    cameraDot.style.boxShadow = '0 0 8px var(--accent-red)';
-                }
-            }
-
-            // 5. Update missions sidebar indicators
-            const checkCompleted = (ans) => {
-                if (!ans) return '⚪';
+            function isCompleted(data) {
+                if (!data) return false;
                 try {
-                    const parsed = typeof ans === 'string' ? JSON.parse(ans) : ans;
-                    if (Object.keys(parsed).length === 0 || (parsed.q1 === '' && parsed.q2 === '')) return '⚪';
-                    return '🟢';
+                    const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                    if (typeof parsed === 'object' && parsed !== null) {
+                        const values = Object.values(parsed);
+                        return values.some(v => v && v.length > 0);
+                    }
+                    return data.length > 0;
                 } catch(e) {
-                    if (ans.trim() === '') return '⚪';
-                    return '🟢';
+                    return data && data.length > 0;
                 }
-            };
-
-            const ind1 = document.getElementById('ind-m1'); if (ind1) ind1.textContent = checkCompleted(activeCandidate.level1_ans);
-            const ind2 = document.getElementById('ind-m2'); if (ind2) ind2.textContent = checkCompleted(activeCandidate.level2_ans);
-            const ind3 = document.getElementById('ind-m3'); if (ind3) ind3.textContent = checkCompleted(activeCandidate.level3_ans);
-            const ind4 = document.getElementById('ind-m4'); if (ind4) ind4.textContent = checkCompleted(activeCandidate.level4_ans);
-            const ind5 = document.getElementById('ind-m5'); if (ind5) ind5.textContent = checkCompleted(activeCandidate.level5_ans);
-        }
-
-        // Trigger modern rendering on initial script execution
-        setTimeout(() => {
-            if (typeof activeCandidate !== 'undefined' && activeCandidate) {
-                renderModernDashboard();
             }
-        }, 300);
+
+            function isInProgress(data) {
+                if (!data) return false;
+                try {
+                    const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+                    if (typeof parsed === 'object' && parsed !== null) {
+                        const values = Object.values(parsed);
+                        const hasSome = values.some(v => v && v.length > 0);
+                        const hasAll = values.every(v => v && v.length > 0);
+                        return hasSome && !hasAll;
+                    }
+                    return false;
+                } catch(e) {
+                    return false;
+                }
+            }
+
+            // ===== RENDER MISSIONS =====
+            function renderMissions(candidate) {
+                const missions = [
+                    { id: 'm1', indicator: 'ind-m1', data: candidate.level1_ans, name: 'Logic Detective' },
+                    { id: 'm2', indicator: 'ind-m2', data: candidate.level2_ans, name: 'Future Thinker' },
+                    { id: 'm3', indicator: 'ind-m3', data: candidate.level3_ans, name: 'AI Architect' },
+                    { id: 'm4', indicator: 'ind-m4', data: candidate.level4_ans, name: 'Prompt Engineer' },
+                    { id: 'm5', indicator: 'ind-m5', data: candidate.level5_ans, name: 'RAG Analyst' },
+                    { id: 'm6', indicator: 'ind-m6', data: candidate.level6_ans, name: 'Balance Master' },
+                    { id: 'm7', indicator: 'ind-m7', data: candidate.level7_ans, name: 'Future Builder' }
+                ];
+
+                missions.forEach(m => {
+                    const el = document.getElementById(m.indicator);
+                    if (!el) return;
+                    const completed = isCompleted(m.data);
+                    const inProg = isInProgress(m.data);
+                    if (completed) {
+                        el.textContent = '✅';
+                        el.className = 'mission-toggle-indicator completed';
+                    } else if (inProg) {
+                        el.textContent = '⏳';
+                        el.className = 'mission-toggle-indicator in-progress';
+                    } else {
+                        el.textContent = '⚪';
+                        el.className = 'mission-toggle-indicator locked';
+                    }
+                });
+            }
+
+            // ===== SHOW INVITATION =====
+            function showInvitation(candidate) {
+                const box = $('#selected-invitation');
+                box.classList.add('show');
+                
+                const content = $('#invitation-text-content');
+                content.textContent = `
+🎉 OFFICIAL INVITATION - AI NEXT GEN WORKSHOP 2026
+
+Dear ${candidate.name},
+
+Congratulations on being shortlisted!
+
+We are thrilled to invite you to the prestigious AI Next Gen Research Workshop 2026.
+
+📅 Date: August 15-16, 2026
+📍 Location: AI NEXT GEN Research Labs
+👥 Seats: 30 selected candidates
+
+Agenda Highlights:
+• Hands-on LLM Development
+• RAG Database Systems
+• Custom AI Agent Design
+• Semantic Tool Building
+• Networking with Industry Experts
+
+Your Candidate ID: ${candidate.id}
+Selection Score: ${candidate.score_final}/100
+
+Please confirm your attendance by replying within 24 hours.
+
+Welcome to the future of AI!
+
+Best regards,
+Selection Board
+AI NEXT GEN Research Labs
+                `;
+            }
+
+            // ===== SESSION TIMER =====
+            let sessionStart = Date.now();
+            let sessionInterval = null;
+
+            function startSessionTimer() {
+                if (sessionInterval) clearInterval(sessionInterval);
+                sessionInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+                    const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+                    const secs = String(elapsed % 60).padStart(2, '0');
+                    const timerEl = $('#session-time');
+                    if (timerEl) timerEl.textContent = `⏱️ ${mins}:${secs}`;
+                }, 1000);
+            }
+
+            // ===== SEARCH =====
+            const searchInput = $('#dashboard-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.toLowerCase().trim();
+                    if (query.length > 0) {
+                        showToast(`🔍 Searching: "${query}"`, 'info', 2000);
+                    }
+                });
+            }
+
+            // ===== TABS =====
+            document.querySelectorAll('.tab-item').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    showToast(`📋 Showing: ${this.textContent.trim()}`, 'info', 1500);
+                });
+            });
+
+            // ===== LOGOUT =====
+            $('#btn-user-logout').addEventListener('click', function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    showToast('👋 Logging out...', 'info');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 500);
+                }
+            });
+
+            // ===== SHARE INVITE =====
+            $('#btn-share-invite')?.addEventListener('click', function() {
+                const content = $('#invitation-text-content').textContent;
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'AI Next Gen Workshop Invitation',
+                        text: content
+                    }).catch(() => {});
+                } else {
+                    navigator.clipboard.writeText(content).then(() => {
+                        showToast('📤 Invitation copied to clipboard!', 'success');
+                    }).catch(() => {
+                        showToast('📤 Share failed. Please copy manually.', 'error');
+                    });
+                }
+            });
+
+            // ===== KEYBOARD SHORTCUTS =====
+            document.addEventListener('keydown', function(e) {
+                // Ctrl+D for dashboard home
+                if (e.ctrlKey && e.key === 'd') {
+                    e.preventDefault();
+                    showToast('📊 Dashboard', 'info', 1000);
+                }
+                // Ctrl+C for challenge
+                if (e.ctrlKey && e.key === 'c') {
+                    e.preventDefault();
+                    window.location.href = '/challenge';
+                }
+            });
+
+            // ===== INIT =====
+            console.log('🚀 Dashboard Enhanced - AI Next Gen 2026');
+            console.log('📌 Shortcuts: Ctrl+D (Dashboard), Ctrl+C (Challenge)');
+
+            // Check for candidate data from backend
+            if (typeof activeCandidate !== 'undefined' && activeCandidate) {
+                renderDashboard(activeCandidate);
+            } else {
+                // Use mock data with random variations for demo
+                const demoData = { ...mockCandidate };
+                // Randomize some values for demo
+                demoData.score_final = 65 + Math.random() * 30;
+                demoData.score_logic = Math.round(20 + Math.random() * 20);
+                demoData.score_creativity = Math.round(8 + Math.random() * 12);
+                demoData.score_ai_knowledge = Math.round(8 + Math.random() * 12);
+                demoData.score_tech = Math.round(8 + Math.random() * 12);
+                demoData.missions_completed = Math.floor(Math.random() * 5) + 1;
+                demoData.xp = Math.round(500 + Math.random() * 1000);
+                demoData.hours_invested = Math.round(5 + Math.random() * 20);
+                
+                // Make some missions completed
+                const statuses = ['pending', 'pending', 'shortlisted', 'rejected', 'disqualified'];
+                demoData.status = statuses[Math.floor(Math.random() * 3)];
+                
+                renderDashboard(demoData);
+            }
+
+            // Expose for debugging
+            window.__dashboard = { renderDashboard };
+
+        })();
     </script>
 </body>
 </html>

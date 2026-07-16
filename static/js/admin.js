@@ -1,738 +1,631 @@
-let candidatesList = [];
+/**
+ * ============================================
+ * AI NEXT GEN 2026 - ADMIN DASHBOARD SCRIPT
+ * Version: 2.0.0
+ * Description: Complete admin panel functionality
+ * ============================================
+ */
 
-// DOM elements
-const tableBody = document.getElementById('admin-table-body');
-const searchInput = document.getElementById('admin-search-input');
-const collegeFilter = document.getElementById('admin-filter-college');
-const sortSelect = document.getElementById('admin-sort-select');
-const statTotal = document.getElementById('stat-total-applicants');
-const statAvg = document.getElementById('stat-avg-score');
-const statHigh = document.getElementById('stat-high-score');
-const statShortlisted = document.getElementById('stat-shortlisted');
+// ============================================
+// 1. STATE MANAGEMENT
+// ============================================
 
-// Event Listeners
-searchInput.addEventListener('input', renderCandidates);
-collegeFilter.addEventListener('change', renderCandidates);
-sortSelect.addEventListener('change', renderCandidates);
-document.getElementById('btn-admin-logout').addEventListener('click', handleLogout);
-document.getElementById('btn-auto-shortlist').addEventListener('click', handleAutoShortlist);
-document.getElementById('btn-export-csv').addEventListener('click', exportCSV);
-document.getElementById('btn-print-pdf').addEventListener('click', () => window.print());
-document.getElementById('btn-email-templates').addEventListener('click', openEmailsModal);
+const AdminState = {
+    candidates: [],
+    filtered: [],
+    charts: {
+        score: null,
+        college: null,
+        status: null
+    },
+    stats: {
+        total: 0,
+        avgScore: 0,
+        highScore: 0,
+        shortlisted: 0,
+        completed: 0,
+        violations: 0
+    },
+    isLoading: false,
+    lastUpdate: null
+};
 
-// Close Modals
-document.getElementById('btn-close-detail').addEventListener('click', () => {
-    document.getElementById('detail-modal').classList.remove('active');
-});
-document.getElementById('btn-close-emails').addEventListener('click', () => {
-    document.getElementById('emails-modal').classList.remove('active');
-});
+// ============================================
+// 2. DOM CACHE
+// ============================================
 
-function loadCandidatesLocally() {
-    const raw = localStorage.getItem('candidates');
-    let list = raw ? JSON.parse(raw) : [];
-    if (list.length === 0) {
-        list = [
-            { 
-                id: 1, 
-                candidate_id: "AI26-4821", 
-                session_id: "s1-uuid-4821",
-                name: "Pranav Raman", 
-                email: "pranav@iitm.ac.in", 
-                phone: "+91 9444455555", 
-                college: "IIT Madras", 
-                department: "Computer Science", 
-                year: 3, 
-                roll_number: "CS23B045", 
-                time_taken: 360, 
-                tab_switches: 0, 
-                violation_count: 0,
-                violation_logs: '[]',
-                backspace_count: 8,
-                typing_speed_avg: 210,
-                typing_pattern_variance: 45.2,
-                mouse_moves_count: 1420,
-                idle_duration: 12,
-                webcam_status: "Active",
-                location_data: "13.0827, 80.2707",
-                score_logic: 38.0, 
-                score_creativity: 19.0, 
-                score_ai_knowledge: 19.0, 
-                score_problem_solving: 9.5, 
-                score_time: 8.7, 
-                score_final: 94.2, 
-                badges: '["Logic Master", "AI Explorer", "Future Researcher"]', 
-                selected: 1, 
-                level1_ans: '{"q1":"▽","q2":"63"}', 
-                level2_ans: "17 minutes", 
-                level3_ans: "I will establish a critique loop where Claude models structural layout, ChatGPT constructs code, and Gemini evaluates logic and API constraints.", 
-                level4_ans: "<context>Create startup website</context><rules>Use modern layout</rules>", 
-                level5_ans: '{"q1":"Fine-Tuning Model Weights","q2":"RAG injects verified external context into LLM context windows to eliminate general factual logic guesses."}', 
-                level6_ans: '{"q1":"3","q2":"Divide 9 balls into three groups of three. Weigh A and B. Weigh remainder."}', 
-                level7_ans: "Healthcare: AI anomaly diagnostics for remote clinics using satellite telecommunications." 
-            },
-            { 
-                id: 2, 
-                candidate_id: "AI26-1029", 
-                session_id: "s2-uuid-1029",
-                name: "Sanya Sen", 
-                email: "sanya@bits-pilani.ac.in", 
-                phone: "+91 9111122222", 
-                college: "BITS Pilani", 
-                department: "Information Systems", 
-                year: 4, 
-                roll_number: "2022A7PS001G", 
-                time_taken: 290, 
-                tab_switches: 0, 
-                violation_count: 0,
-                violation_logs: '[]',
-                backspace_count: 14,
-                typing_speed_avg: 180,
-                typing_pattern_variance: 55.4,
-                mouse_moves_count: 980,
-                idle_duration: 5,
-                webcam_status: "Active",
-                location_data: "15.9129, 79.7400",
-                score_logic: 36.0, 
-                score_creativity: 18.0, 
-                score_ai_knowledge: 18.0, 
-                score_problem_solving: 9.5, 
-                score_time: 10.0, 
-                score_final: 91.5, 
-                badges: '["Logic Master", "AI Explorer", "Future Researcher"]', 
-                selected: 1, 
-                level1_ans: '{"q1":"▽","q2":"63"}', 
-                level2_ans: "17 minutes", 
-                level3_ans: "Deploy Claude for structural writing, ChatGPT for API integration drafts, and Gemini for cross-checking fact and schema details.", 
-                level4_ans: "Act as front-end expert and write index.html with futuristic CSS.", 
-                level5_ans: '{"q1":"Fine-Tuning Model Weights","q2":"Injecting real-time database queries directly into prompt contexts ensures ground truths."}', 
-                level6_ans: '{"q1":"3","q2":"Divide into three groups of three. Compare weights."}', 
-                level7_ans: "Farming: IoT sensor feeds processed via tinyML on-device models to optimize localized drip irrigation." 
-            },
-            { 
-                id: 3, 
-                candidate_id: "AI26-3021", 
-                session_id: "s3-uuid-3021",
-                name: "Aditya Nair", 
-                email: "aditya@nitt.edu", 
-                phone: "+91 9888877777", 
-                college: "NIT Trichy", 
-                department: "Electronics & Communication", 
-                year: 3, 
-                roll_number: "108123008", 
-                time_taken: 330, 
-                tab_switches: 1, 
-                violation_count: 1,
-                violation_logs: '[{"timestamp":"14:05:22","type":"Tab Switch","detail":"Candidate switched to another window."}]',
-                backspace_count: 22,
-                typing_speed_avg: 240,
-                typing_pattern_variance: 30.1,
-                mouse_moves_count: 1560,
-                idle_duration: 18,
-                webcam_status: "Active",
-                location_data: "10.7905, 78.7047",
-                score_logic: 35.0, 
-                score_creativity: 17.5, 
-                score_ai_knowledge: 17.0, 
-                score_problem_solving: 9.0, 
-                score_time: 9.5, 
-                score_final: 85.0, // Capped/Penalized for 1 violation
-                badges: '["Logic Master", "AI Explorer"]', 
-                selected: 1, 
-                level1_ans: '{"q1":"▽","q2":"63"}', 
-                level2_ans: "17 minutes", 
-                level3_ans: "ChatGPT plans architecture, Claude translates concepts to clean modules, and Gemini reviews security vectors.", 
-                level4_ans: "Construct single page layout inside XML instructions.", 
-                level5_ans: '{"q1":"Fine-Tuning Model Weights","q2":"It augments standard generative completions with deterministic text databases."}', 
-                level6_ans: '{"q1":"3","q2":"Divide balls: 3, 3, 3. Weigh group A vs group B."}', 
-                level7_ans: "Traffic: Smart traffic routing by deploying AI cameras scanning vehicles." 
-            },
-            {
-                id: 4,
-                candidate_id: "AI26-9281",
-                session_id: "s4-uuid-9281",
-                name: "Vikram Seth",
-                email: "vikram@stan.edu",
-                phone: "+91 9999988888",
-                college: "Stanford",
-                department: "AI Research Lab",
-                year: 4,
-                roll_number: "ST2026-09",
-                time_taken: 110,
-                tab_switches: 3,
-                violation_count: 3,
-                violation_logs: '[{"timestamp":"11:10:15","type":"Tab Switch","detail":"Tab switch detected."},{"timestamp":"11:10:45","type":"Copy Attempt","detail":"Copy paste intercepted."},{"timestamp":"11:11:12","type":"Fullscreen Exit","detail":"Leaving assessment full screen."}]',
-                backspace_count: 0,
-                typing_speed_avg: 1800, // suspicious high speed
-                typing_pattern_variance: 2.1,
-                mouse_moves_count: 45,
-                idle_duration: 3,
-                webcam_status: "Denied",
-                location_data: "37.4275, -122.1697",
-                score_logic: 0,
-                score_creativity: 0,
-                score_ai_knowledge: 0,
-                score_problem_solving: 0,
-                score_time: 0,
-                score_final: 0.0,
-                badges: '[]',
-                selected: 3, // Disqualified
-                level1_ans: '{"q1":"","q2":""}',
-                level2_ans: "",
-                level3_ans: "AI automation script copy...",
-                level4_ans: "",
-                level5_ans: '{"q1":"","q2":""}',
-                level6_ans: '{"q1":"","q2":""}',
-                level7_ans: ""
-            }
-        ];
-        localStorage.setItem('candidates', JSON.stringify(list));
-    }
-    candidatesList = list;
-}
-
-// Init load
-async function loadCandidates() {
-    try {
-        const response = await fetch('/api/admin/candidates');
-        if (response.status === 401) {
-            window.location.href = '/admin-login';
-            return;
-        }
-        if (response.ok) {
-            candidatesList = await response.json();
-        } else {
-            loadCandidatesLocally();
-        }
-    } catch (err) {
-        loadCandidatesLocally();
-    }
+const DOM = {
+    tableBody: document.getElementById('admin-table-body'),
+    searchInput: document.getElementById('admin-search-input'),
+    collegeFilter: document.getElementById('admin-filter-college'),
+    statusFilter: document.getElementById('admin-filter-status'),
+    sortSelect: document.getElementById('admin-sort-select'),
     
-    populateCollegeFilterOptions();
-    updateStats();
-    renderCandidates();
-    renderAdminCharts();
-}
-loadCandidates();
-
-function populateCollegeFilterOptions() {
-    const colleges = [...new Set(candidatesList.map(c => c.college.trim()))];
-    collegeFilter.innerHTML = '<option value="">All Colleges</option>';
-    colleges.forEach(col => {
-        if (col) {
-            collegeFilter.innerHTML += `<option value="${escapeHTML(col)}">${escapeHTML(col)}</option>`;
-        }
-    });
-}
-
-function updateStats() {
-    if (candidatesList.length === 0) {
-        statTotal.textContent = '0';
-        statAvg.textContent = '0.0';
-        statHigh.textContent = '0.0';
-        statShortlisted.textContent = '0 / 30';
-        return;
-    }
-
-    const validCandidates = candidatesList.filter(c => c.selected !== 3); // exclude disqualified from avg statistics
-    const total = candidatesList.length;
+    // Stats
+    statTotal: document.getElementById('stat-total-applicants'),
+    statAvg: document.getElementById('stat-avg-score'),
+    statHigh: document.getElementById('stat-high-score'),
+    statShortlisted: document.getElementById('stat-shortlisted'),
     
-    const scores = validCandidates.map(c => c.score_final);
-    const avg = scores.length > 0 ? (scores.reduce((sum, score) => sum + score, 0) / scores.length) : 0.0;
-    const high = scores.length > 0 ? Math.max(...scores) : 0.0;
-    const shortlistedCount = candidatesList.filter(c => c.selected === 1).length;
-
-    statTotal.textContent = total;
-    statAvg.textContent = avg.toFixed(1);
-    statHigh.textContent = high.toFixed(1);
-    statShortlisted.textContent = `${shortlistedCount} / 30`;
-
-    // Modern layout elements updates
-    const rightDial = document.getElementById('right-shortlist-dial');
-    if (rightDial) rightDial.textContent = `${shortlistedCount} / 30`;
-
-    const webcamCount = candidatesList.filter(c => c.webcam_status === 'Active').length;
-    const webcamEl = document.getElementById('feed-webcam-active');
-    if (webcamEl) webcamEl.textContent = webcamCount;
-
-    const totalViolations = candidatesList.reduce((sum, c) => sum + (c.violation_count || 0), 0);
-    const violationsEl = document.getElementById('feed-violations-count');
-    if (violationsEl) violationsEl.textContent = totalViolations;
-
-    const completionsCount = candidatesList.filter(c => c.completed).length;
-    const completionsEl = document.getElementById('feed-completions');
-    if (completionsEl) completionsEl.textContent = completionsCount;
-}
-
-function renderCandidates() {
-    const searchVal = searchInput.value.toLowerCase().trim();
-    const collegeVal = collegeFilter.value.toLowerCase();
-    const sortVal = sortSelect.value;
-
-    let filtered = candidatesList.filter(c => {
-        const matchesSearch = c.name.toLowerCase().includes(searchVal) || 
-                              c.candidate_id.toLowerCase().includes(searchVal) ||
-                              c.email.toLowerCase().includes(searchVal);
-        const matchesCollege = collegeVal === '' || c.college.toLowerCase() === collegeVal;
-        return matchesSearch && matchesCollege;
-    });
-
-    // Apply Sorting
-    filtered.sort((a, b) => {
-        if (sortVal === 'time') {
-            return a.time_taken - b.time_taken;
-        } else if (sortVal === 'creativity') {
-            return b.score_creativity - a.score_creativity;
-        } else {
-            return b.score_final - a.score_final; // top scores desc
-        }
-    });
-
-    tableBody.innerHTML = '';
-    if (filtered.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: var(--text-muted); padding: 3rem;">No candidates match criteria.</td></tr>`;
-        return;
-    }
-
-    filtered.forEach((candidate, index) => {
-        const rank = index + 1;
-        const timeFormatted = formatTime(candidate.time_taken);
-        
-        // Webcam label
-        const webcamLabel = candidate.webcam_status === 'Active'
-            ? `<span style="color: var(--accent-green); font-family: var(--font-mono);">● ACTIVE</span>`
-            : `<span style="color: var(--accent-red); font-family: var(--font-mono);">⚠ DENIED</span>`;
-
-        // Violations count status tag
-        const violationBadge = candidate.violation_count >= 3
-            ? `<span class="badge-cheated" style="font-weight:bold;">3/3 DISQ</span>`
-            : candidate.violation_count > 0
-                ? `<span class="badge-cheated" style="background:rgba(234,179,8,0.15); border-color:rgba(234,179,8,0.3); color:var(--accent-yellow);">${candidate.violation_count}/3 WARN</span>`
-                : `<span class="badge-safe">0/3 SAFE</span>`;
-                
-        // Selection status badge
-        let statusBadge = '';
-        if (candidate.selected === 1) {
-            statusBadge = `<span class="status-badge status-shortlisted">SELECTED</span>`;
-        } else if (candidate.selected === 2) {
-            statusBadge = `<span class="status-badge status-pending" style="background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.3); color:var(--accent-red)">REJECTED</span>`;
-        } else if (candidate.selected === 3) {
-            statusBadge = `<span class="status-badge status-pending" style="background:rgba(239,68,68,0.25); border-color:var(--accent-red); color:var(--accent-red); font-weight:bold;">DISQUALIFIED</span>`;
-        } else {
-            statusBadge = `<span class="status-badge status-pending">WAITLISTED</span>`;
-        }
-
-        const actionText = candidate.selected === 1 ? 'Unmark' : 'Shortlist';
-        const actionBtnClass = candidate.selected === 1 ? 'btn-secondary' : '';
-        const isDisq = candidate.selected === 3;
-
-        tableBody.innerHTML += `
-            <tr id="row-${candidate.candidate_id}" style="${isDisq ? 'opacity: 0.65; background: rgba(239,68,68,0.01);' : ''}">
-                <td class="leaderboard-rank">${rank}</td>
-                <td>
-                    <strong>${escapeHTML(candidate.name)}</strong> ${isDisq ? '💀' : ''}<br>
-                    <small style="color: var(--text-muted); font-family:var(--font-mono); font-size:0.75rem;">${candidate.candidate_id}</small>
-                </td>
-                <td>${escapeHTML(candidate.college)}</td>
-                <td style="font-family: var(--font-mono);">${timeFormatted}</td>
-                <td>${webcamLabel}</td>
-                <td>${violationBadge}</td>
-                <td style="font-family: var(--font-mono); font-size:0.8rem;">${candidate.typing_speed_avg} CPM</td>
-                <td style="font-family: var(--font-mono);">${candidate.score_logic.toFixed(1)}</td>
-                <td style="font-family: var(--font-mono); color: var(--accent-cyan); font-weight: 700;">${candidate.score_final.toFixed(1)}</td>
-                <td>${statusBadge}</td>
-                <td style="text-align: right;">
-                    <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
-                        <button class="btn-futuristic action-icon-btn" onclick="openDetailsModal('${candidate.candidate_id}')" title="Review Details">👁 Review</button>
-                        <button class="btn-futuristic ${actionBtnClass}" style="padding: 4px 10px; font-size: 0.75rem;" ${isDisq ? 'disabled' : ''} onclick="toggleSelection('${candidate.candidate_id}', ${candidate.selected})">
-                            ${actionText}
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function formatTime(seconds) {
-    if (!seconds) return '0s';
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return m > 0 ? `${m}m ${s}s` : `${s}s`;
-}
-
-// API functions
-
-async function handleLogout() {
-    try {
-        const response = await fetch('/api/admin/logout', { method: 'POST' });
-        if (response.ok) {
-            window.location.href = '/admin-login';
-            return;
-        }
-    } catch(err) {}
-    window.location.href = '/admin-login';
-}
-
-async function toggleSelection(candidateId, currentStatus) {
-    const nextStatus = currentStatus === 1 ? 0 : 1;
-    try {
-        const response = await fetch('/api/admin/toggle_selection', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ candidate_id: candidateId, selected: nextStatus })
-        });
-        if (response.ok) {
-            updateSelectionState(candidateId, nextStatus);
-        } else {
-            fallbackLocalToggle(candidateId, nextStatus);
-        }
-    } catch (e) {
-        fallbackLocalToggle(candidateId, nextStatus);
-    }
-}
-
-function updateSelectionState(candidateId, nextStatus) {
-    const candidate = candidatesList.find(c => c.candidate_id === candidateId);
-    if (candidate) {
-        candidate.selected = nextStatus;
-    }
-    updateStats();
-    renderCandidates();
-    renderAdminCharts();
-}
-
-function fallbackLocalToggle(candidateId, nextStatus) {
-    updateSelectionState(candidateId, nextStatus);
-    localStorage.setItem('candidates', JSON.stringify(candidatesList));
-}
-
-async function handleAutoShortlist() {
-    if (!confirm("Are you sure you want to auto-shortlist the top 30 performers? This resets manual shortlists.")) return;
-    try {
-        const response = await fetch('/api/admin/auto_shortlist', { method: 'POST' });
-        if (response.ok) {
-            const result = await response.json();
-            alert(result.message);
-            loadCandidates();
-        } else {
-            fallbackLocalAutoShortlist();
-        }
-    } catch (e) {
-        fallbackLocalAutoShortlist();
-    }
-}
-
-function fallbackLocalAutoShortlist() {
-    // Reset all selection states (except disqualified)
-    candidatesList.forEach(c => {
-        if (c.selected !== 3) c.selected = 0;
-    });
+    // Feed
+    feedWebcam: document.getElementById('feed-webcam-active'),
+    feedViolations: document.getElementById('feed-violations-count'),
+    feedCompletions: document.getElementById('feed-completions'),
+    rightDial: document.getElementById('right-shortlist-dial'),
+    seatFill: document.getElementById('seat-progress-fill'),
     
-    // Sort and shortlist top 30 that aren't disqualified
-    const valid = candidatesList
-        .filter(c => c.selected !== 3)
-        .sort((a, b) => b.score_final - a.score_final || a.time_taken - b.time_taken);
-        
-    for (let i = 0; i < Math.min(30, valid.length); i++) {
-        valid[i].selected = 1;
-    }
+    // Buttons
+    logoutBtn: document.getElementById('btn-admin-logout'),
+    shortlistBtn: document.getElementById('btn-auto-shortlist'),
+    exportBtn: document.getElementById('btn-export-csv'),
+    emailBtn: document.getElementById('btn-email-templates'),
+    refreshBtn: document.getElementById('btn-refresh-data'),
     
-    localStorage.setItem('candidates', JSON.stringify(candidatesList));
-    alert("Top performing candidates shortlisted locally.");
-    updateStats();
-    renderCandidates();
-    renderAdminCharts();
-}
-
-// Render candidate details view modal
-function openDetailsModal(candId) {
-    const candidate = candidatesList.find(c => c.candidate_id === candId);
-    if (!candidate) return;
-
-    document.getElementById('modal-candidate-name').textContent = candidate.name;
-    document.getElementById('modal-candidate-meta').textContent = `${candidate.department} // Year ${candidate.year} // ${candidate.college}`;
-    document.getElementById('modal-val-id').textContent = candidate.candidate_id;
-    document.getElementById('modal-val-email').textContent = candidate.email;
-    document.getElementById('modal-val-roll').textContent = candidate.roll_number;
-    document.getElementById('modal-val-location').textContent = candidate.location_data || 'Not provided';
-    document.getElementById('modal-val-webcam').textContent = candidate.webcam_status || 'Active';
-
-    // Contact hyperlinks
-    const linkedinLink = document.getElementById('modal-val-linkedin');
-    if (candidate.linkedin) {
-        linkedinLink.href = candidate.linkedin;
-        linkedinLink.style.display = 'inline-block';
-    } else {
-        linkedinLink.style.display = 'none';
-    }
-
-    const githubLink = document.getElementById('modal-val-github');
-    if (candidate.github) {
-        githubLink.href = candidate.github;
-        githubLink.style.display = 'inline-block';
-    } else {
-        githubLink.style.display = 'none';
-    }
-
-    // Telemetry displays
-    document.getElementById('telemetry-speed').textContent = `${candidate.typing_speed_avg || 0} CPM`;
-    document.getElementById('telemetry-variance').textContent = `${(candidate.typing_pattern_variance || 0.0).toFixed(1)}ms`;
-    document.getElementById('telemetry-backspaces').textContent = candidate.backspace_count || 0;
-    document.getElementById('telemetry-idle').textContent = `${candidate.idle_duration || 0}s`;
-
-    // Security timeline table rows
-    const logsBody = document.getElementById('violation-logs-body');
-    logsBody.innerHTML = '';
+    // Modals
+    detailModal: document.getElementById('detail-modal'),
+    emailsModal: document.getElementById('emails-modal'),
+    closeDetail: document.getElementById('btn-close-detail'),
+    closeEmails: document.getElementById('btn-close-emails'),
     
-    let logs = [];
-    if (candidate.violation_logs) {
+    // Charts
+    scoreCanvas: document.getElementById('scoreDistChart'),
+    collegeCanvas: document.getElementById('collegeChart'),
+    statusCanvas: document.getElementById('statusChart'),
+    
+    // Search
+    searchCount: document.getElementById('search-count'),
+    updateTime: document.getElementById('update-time')
+};
+
+// ============================================
+// 3. UTILITY FUNCTIONS
+// ============================================
+
+const Utils = {
+    escapeHTML(str) {
+        if (!str) return '';
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        };
+        return str.replace(/[&<>"']/g, m => map[m]);
+    },
+
+    formatTime(seconds) {
+        if (!seconds || seconds < 0) return '0s';
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return m > 0 ? `${m}m ${s}s` : `${s}s`;
+    },
+
+    formatDate(isoString) {
+        if (!isoString) return 'N/A';
         try {
-            logs = typeof candidate.violation_logs === 'string' ? JSON.parse(candidate.violation_logs) : candidate.violation_logs;
-        } catch(e) {
-            logs = [];
+            const date = new Date(isoString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch {
+            return isoString;
         }
+    },
+
+    truncate(str, length = 50) {
+        if (!str) return '';
+        return str.length > length ? str.substring(0, length) + '...' : str;
+    },
+
+    debounce(func, wait = 300) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+
+    throttle(func, limit = 300) {
+        let inThrottle;
+        return function(...args) {
+            if (!inThrottle) {
+                func(...args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
+    },
+
+    parseJSON(str, fallback = {}) {
+        if (!str) return fallback;
+        try {
+            return typeof str === 'string' ? JSON.parse(str) : str;
+        } catch {
+            return fallback;
+        }
+    },
+
+    getStatusText(selected) {
+        const map = {
+            0: { text: 'Waitlisted', class: 'status-pending', color: '#F59E0B' },
+            1: { text: 'Selected ✓', class: 'status-shortlisted', color: '#16A34A' },
+            2: { text: 'Rejected', class: 'status-rejected', color: '#DC2626' },
+            3: { text: 'Disqualified', class: 'status-disqualified', color: '#6B7280' }
+        };
+        return map[selected] || map[0];
+    },
+
+    getViolationBadge(count) {
+        if (count >= 3) {
+            return `<span class="badge badge-error">🚫 ${count}/3 DISQ</span>`;
+        } else if (count > 0) {
+            return `<span class="badge badge-warning">⚠️ ${count}/3 WARN</span>`;
+        }
+        return `<span class="badge badge-success">✅ 0/3 SAFE</span>`;
+    },
+
+    getWebcamStatus(status) {
+        if (status === 'Active') {
+            return `<span class="badge badge-success">● ACTIVE</span>`;
+        }
+        return `<span class="badge badge-error">● OFFLINE</span>`;
+    },
+
+    generateCSV(data, headers) {
+        const rows = data.map(row => 
+            headers.map(h => {
+                const val = row[h] !== undefined ? row[h] : '';
+                return typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : val;
+            }).join(',')
+        );
+        return [headers.join(','), ...rows].join('\n');
+    },
+
+    downloadFile(content, filename, mimeType = 'text/csv') {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     }
-    
-    if (logs && logs.length > 0) {
-        logs.forEach(log => {
-            logsBody.innerHTML += `
+};
+
+// ============================================
+// 4. TOAST NOTIFICATION SYSTEM
+// ============================================
+
+const Toast = {
+    container: null,
+
+    init() {
+        this.container = document.getElementById('toast-container');
+        if (!this.container) {
+            this.container = document.createElement('div');
+            this.container.id = 'toast-container';
+            this.container.className = 'toast-container';
+            document.body.appendChild(this.container);
+        }
+    },
+
+    show(message, type = 'info', duration = 4000) {
+        const icons = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
+            <span class="toast-message">${message}</span>
+            <button class="toast-close" aria-label="Close notification">×</button>
+        `;
+
+        toast.querySelector('.toast-close').addEventListener('click', () => {
+            this.remove(toast);
+        });
+
+        this.container.appendChild(toast);
+
+        // Auto-remove
+        setTimeout(() => {
+            this.remove(toast);
+        }, duration);
+    },
+
+    remove(toast) {
+        toast.classList.add('toast-removing');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    },
+
+    success(message, duration = 4000) {
+        this.show(message, 'success', duration);
+    },
+
+    error(message, duration = 5000) {
+        this.show(message, 'error', duration);
+    },
+
+    warning(message, duration = 4000) {
+        this.show(message, 'warning', duration);
+    },
+
+    info(message, duration = 3000) {
+        this.show(message, 'info', duration);
+    }
+};
+
+// ============================================
+// 5. DATA MANAGEMENT
+// ============================================
+
+const DataManager = {
+    async loadCandidates() {
+        if (AdminState.isLoading) return;
+        AdminState.isLoading = true;
+
+        try {
+            const response = await fetch('/api/admin/candidates');
+            
+            if (response.status === 401) {
+                window.location.href = '/admin-login';
+                return;
+            }
+
+            if (response.ok) {
+                AdminState.candidates = await response.json();
+                this.updateLastUpdate();
+                Toast.success('📊 Data loaded successfully');
+            } else {
+                this.loadLocalData();
+            }
+        } catch (error) {
+            console.warn('⚠️ API error, falling back to local data:', error);
+            this.loadLocalData();
+        } finally {
+            AdminState.isLoading = false;
+        }
+    },
+
+    loadLocalData() {
+        try {
+            const raw = localStorage.getItem('candidates');
+            if (raw) {
+                AdminState.candidates = JSON.parse(raw);
+                Toast.info('📂 Using local data (offline mode)');
+            } else {
+                AdminState.candidates = [];
+                Toast.info('📂 No candidates registered');
+            }
+        } catch (error) {
+            console.error('❌ Failed to load local data:', error);
+            AdminState.candidates = [];
+        }
+        this.updateLastUpdate();
+    },
+
+    updateLastUpdate() {
+        const now = new Date();
+        const timeEl = DOM.updateTime;
+        if (timeEl) {
+            timeEl.textContent = now.toLocaleTimeString();
+        }
+        AdminState.lastUpdate = now;
+    },
+
+    async saveChanges() {
+        try {
+            // In production, save to API
+            localStorage.setItem('candidates', JSON.stringify(AdminState.candidates));
+            return true;
+        } catch (error) {
+            console.error('❌ Failed to save:', error);
+            return false;
+        }
+    },
+
+    refreshData() {
+        this.loadCandidates();
+        Toast.info('🔄 Refreshing data...');
+    }
+};
+
+// ============================================
+// 6. FILTER & SORT ENGINE
+// ============================================
+
+const FilterEngine = {
+    getFilters() {
+        return {
+            search: DOM.searchInput?.value?.toLowerCase().trim() || '',
+            college: DOM.collegeFilter?.value || '',
+            status: DOM.statusFilter?.value || '',
+            sort: DOM.sortSelect?.value || 'score'
+        };
+    },
+
+    applyFilters(candidates) {
+        const filters = this.getFilters();
+        
+        let filtered = [...candidates];
+
+        // Search filter
+        if (filters.search) {
+            const search = filters.search;
+            filtered = filtered.filter(c => 
+                c.name?.toLowerCase().includes(search) ||
+                c.candidate_id?.toLowerCase().includes(search) ||
+                c.email?.toLowerCase().includes(search) ||
+                c.college?.toLowerCase().includes(search)
+            );
+        }
+
+        // College filter
+        if (filters.college) {
+            filtered = filtered.filter(c => 
+                c.college?.toLowerCase() === filters.college.toLowerCase()
+            );
+        }
+
+        // Status filter
+        if (filters.status) {
+            const statusMap = {
+                'shortlisted': 1,
+                'waitlisted': 0,
+                'rejected': 2,
+                'disqualified': 3
+            };
+            const statusValue = statusMap[filters.status];
+            if (statusValue !== undefined) {
+                filtered = filtered.filter(c => c.selected === statusValue);
+            }
+        }
+
+        // Sorting
+        const sortMap = {
+            'score': (a, b) => b.score_final - a.score_final || a.time_taken - b.time_taken,
+            'time': (a, b) => a.time_taken - b.time_taken || b.score_final - a.score_final,
+            'creativity': (a, b) => b.score_creativity - a.score_creativity || b.score_final - a.score_final,
+            'name': (a, b) => (a.name || '').localeCompare(b.name || '')
+        };
+
+        filtered.sort(sortMap[filters.sort] || sortMap.score);
+
+        return filtered;
+    }
+};
+
+// ============================================
+// 7. RENDER ENGINE
+// ============================================
+
+const RenderEngine = {
+    renderAll() {
+        this.updateStats();
+        this.renderTable();
+        this.updateFeed();
+        this.updateCharts();
+        this.updateSearchCount();
+    },
+
+    updateStats() {
+        const candidates = AdminState.candidates;
+        const total = candidates.length;
+        
+        const valid = candidates.filter(c => c.selected !== 3);
+        const scores = valid.map(c => c.score_final || 0);
+        const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
+        const high = scores.length > 0 ? Math.max(...scores) : 0;
+        const shortlisted = candidates.filter(c => c.selected === 1).length;
+        const completed = candidates.filter(c => c.completed).length;
+        const violations = candidates.reduce((sum, c) => sum + (c.violation_count || 0), 0);
+
+        AdminState.stats = { total, avgScore: avg, highScore: high, shortlisted, completed, violations };
+
+        // Update DOM
+        if (DOM.statTotal) DOM.statTotal.textContent = total;
+        if (DOM.statAvg) DOM.statAvg.textContent = avg.toFixed(1);
+        if (DOM.statHigh) DOM.statHigh.textContent = high.toFixed(1);
+        if (DOM.statShortlisted) DOM.statShortlisted.textContent = `${shortlisted} / 30`;
+        if (DOM.rightDial) DOM.rightDial.textContent = `${shortlisted} / 30`;
+        
+        // Update progress bar
+        const progress = Math.min((shortlisted / 30) * 100, 100);
+        if (DOM.seatFill) DOM.seatFill.style.width = `${progress}%`;
+    },
+
+    updateFeed() {
+        const candidates = AdminState.candidates;
+        const webcamCount = candidates.filter(c => c.webcam_status === 'Active').length;
+        const violations = candidates.reduce((sum, c) => sum + (c.violation_count || 0), 0);
+        const completed = candidates.filter(c => c.completed).length;
+
+        if (DOM.feedWebcam) DOM.feedWebcam.textContent = webcamCount;
+        if (DOM.feedViolations) DOM.feedViolations.textContent = violations;
+        if (DOM.feedCompletions) DOM.feedCompletions.textContent = completed;
+    },
+
+    renderTable() {
+        const filtered = FilterEngine.applyFilters(AdminState.candidates);
+        AdminState.filtered = filtered;
+
+        if (!DOM.tableBody) return;
+
+        if (filtered.length === 0) {
+            DOM.tableBody.innerHTML = `
                 <tr>
-                    <td style="padding: 6px 0; font-family: var(--font-mono); color: var(--accent-yellow);">${log.timestamp}</td>
-                    <td style="font-weight:bold; color: var(--accent-red);">${escapeHTML(log.type)}</td>
-                    <td style="color: var(--text-secondary);">${escapeHTML(log.detail)}</td>
+                    <td colspan="11" style="text-align: center; padding: 4rem; color: var(--text-muted);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                        <p>No candidates match your criteria</p>
+                        <p style="font-size: 0.8rem; margin-top: 0.5rem;">Try adjusting your filters</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        let html = '';
+        filtered.forEach((candidate, index) => {
+            const rank = index + 1;
+            const isDisq = candidate.selected === 3;
+            const status = Utils.getStatusText(candidate.selected);
+            
+            html += `
+                <tr class="${isDisq ? 'row-disqualified' : ''}" data-id="${candidate.candidate_id}">
+                    <td>
+                        <span class="rank-number ${rank <= 3 ? `rank-top-${rank}` : ''}">${rank}</span>
+                    </td>
+                    <td>
+                        <div class="candidate-name">${Utils.escapeHTML(candidate.name)}</div>
+                        <div class="candidate-id">${Utils.escapeHTML(candidate.candidate_id)}</div>
+                    </td>
+                    <td>${Utils.escapeHTML(candidate.college)}</td>
+                    <td class="mono-text">${Utils.formatTime(candidate.time_taken)}</td>
+                    <td>${Utils.getWebcamStatus(candidate.webcam_status)}</td>
+                    <td>${Utils.getViolationBadge(candidate.violation_count)}</td>
+                    <td class="mono-text">${candidate.typing_speed_avg || 0} CPM</td>
+                    <td class="mono-text">${(candidate.score_logic || 0).toFixed(1)}</td>
+                    <td class="score-value ${candidate.score_final >= 80 ? 'score-high' : candidate.score_final >= 60 ? 'score-medium' : 'score-low'}">
+                        ${(candidate.score_final || 0).toFixed(1)}
+                    </td>
+                    <td><span class="status-badge ${status.class}">${status.text}</span></td>
+                    <td class="actions-cell">
+                        <button class="btn-icon" onclick="AdminActions.viewDetails('${candidate.candidate_id}')" title="View Details">
+                            👁️
+                        </button>
+                        ${!isDisq ? `
+                            <button class="btn-icon ${candidate.selected === 1 ? 'btn-icon-active' : ''}" 
+                                    onclick="AdminActions.toggleSelection('${candidate.candidate_id}')" 
+                                    title="${candidate.selected === 1 ? 'Unshortlist' : 'Shortlist'}">
+                                ${candidate.selected === 1 ? '⭐' : '☆'}
+                            </button>
+                        ` : ''}
+                        <button class="btn-icon" onclick="AdminActions.flagCandidate('${candidate.candidate_id}')" title="Flag">
+                            🚩
+                        </button>
+                    </td>
                 </tr>
             `;
         });
-    } else {
-        logsBody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--accent-green); padding: 10px 0;">✔ Zero security violation alerts logged for this session.</td></tr>`;
-    }
 
-    // Load Answers
-    const answersContainer = document.getElementById('modal-answers-area');
-    answersContainer.innerHTML = '';
+        DOM.tableBody.innerHTML = html;
+        this.updateSearchCount(filtered.length);
+    },
 
-    function parseJSON(str) {
-        try {
-            return typeof str === 'string' ? JSON.parse(str) : str;
-        } catch(e) {
-            return {};
+    updateSearchCount(filteredCount) {
+        if (!DOM.searchCount) return;
+        const total = AdminState.candidates.length;
+        if (filteredCount < total) {
+            DOM.searchCount.textContent = `${filteredCount} of ${total}`;
+            DOM.searchCount.style.display = 'inline';
+        } else {
+            DOM.searchCount.style.display = 'none';
         }
-    }
+    },
 
-    const l1 = parseJSON(candidate.level1_ans) || {};
-    const l5 = parseJSON(candidate.level5_ans) || {};
-    const l6 = parseJSON(candidate.level6_ans) || {};
+    updateCharts() {
+        this.renderScoreChart();
+        this.renderCollegeChart();
+        this.renderStatusChart();
+    },
 
-    const levels = [
-        { name: "Level 1: Pattern Recognition", ans: `Visual shape selected: ${l1.q1 || 'N/A'}\nQ2 (Numerical: 1,3,7,15,31,?): Answer = ${l1.q2 || 'N/A'}` },
-        { name: "Level 2: Scientist Crossing Bridge Riddle", ans: `Selected Answer: ${candidate.level2_ans || 'No response'}` },
-        { name: "Level 3: Multi-LLM Strategy", ans: candidate.level3_ans || 'No response' },
-        { name: "Level 4: Zero-Shot prompt design", ans: candidate.level4_ans || 'No response' },
-        { name: "Level 5: Modern AI (RAG vs Fine-tuning)", ans: `MCQ (MEMORIZE WEIGHTS): Answer = ${l5.q1 || 'N/A'}\nScenario Comparison: ${l5.q2 || 'No response'}` },
-        { name: "Level 6: 9-Ball Weighings puzzle", ans: `MCQ (Balls to balance): Answer = ${l6.q1 || 'N/A'}\nLogistics logic: ${l6.q2 || 'No response'}` },
-        { name: "Level 7: Secret Sector Zero-GPU Startup Idea (₹1000)", ans: candidate.level7_ans || 'Locked / No response' }
-    ];
+    renderScoreChart() {
+        const canvas = DOM.scoreCanvas;
+        if (!canvas) return;
 
-    levels.forEach(lvl => {
-        answersContainer.innerHTML += `
-            <div class="answer-card">
-                <div class="answer-header">${lvl.name}</div>
-                <pre class="answer-body">${escapeHTML(lvl.ans)}</pre>
-            </div>
-        `;
-    });
-
-    document.getElementById('detail-modal').classList.add('active');
-}
-
-// Emails Modal
-function openEmailsModal() {
-    document.getElementById('emails-modal').classList.add('active');
-}
-
-function copyTemplate(elementId) {
-    const pre = document.getElementById(elementId);
-    navigator.clipboard.writeText(pre.textContent.trim())
-        .then(() => alert("Template copied to clipboard!"))
-        .catch(err => alert("Failed to copy template: " + err));
-}
-
-// Export CSV
-function exportCSV() {
-    if (candidatesList.length === 0) {
-        alert("No records available to export.");
-        return;
-    }
-
-    const headers = ['Candidate ID', 'Name', 'Email', 'College', 'Department', 'Year', 'Roll Number', 'Webcam Status', 'Geolocation', 'Violations Count', 'Avg Typing CPM', 'Backspace Count', 'Logic Score', 'Creativity Score', 'AI Score', 'Problem Solving Score', 'Time Score', 'Final Score', 'Time Taken (s)', 'Status'];
-    const rows = candidatesList.map(c => {
-        let statusStr = 'Waitlisted';
-        if (c.selected === 1) statusStr = 'Selected';
-        else if (c.selected === 2) statusStr = 'Rejected';
-        else if (c.selected === 3) statusStr = 'Disqualified';
+        const ctx = canvas.getContext('2d');
+        const ranges = ['0-20', '21-40', '41-60', '61-80', '81-100'];
+        const counts = ranges.map(() => 0);
         
-        return [
-            `"${c.candidate_id}"`,
-            `"${c.name}"`,
-            `"${c.email}"`,
-            `"${c.college}"`,
-            `"${c.department}"`,
-            c.year,
-            `"${c.roll_number}"`,
-            `"${c.webcam_status}"`,
-            `"${c.location_data || 'None'}"`,
-            c.violation_count,
-            c.typing_speed_avg,
-            c.backspace_count,
-            c.score_logic,
-            c.score_creativity,
-            c.score_ai_knowledge,
-            c.score_problem_solving,
-            c.score_time,
-            c.score_final,
-            c.time_taken,
-            `"${statusStr}"`
-        ];
-    });
+        AdminState.candidates.forEach(c => {
+            const score = c.score_final || 0;
+            if (score <= 20) counts[0]++;
+            else if (score <= 40) counts[1]++;
+            else if (score <= 60) counts[2]++;
+            else if (score <= 80) counts[3]++;
+            else counts[4]++;
+        });
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-        + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-        
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `AI_Workshop_Selection_List_2026.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
+        if (AdminState.charts.score) {
+            AdminState.charts.score.destroy();
+        }
 
-function escapeHTML(str) {
-    if (!str) return '';
-    return str.replace(/[&<>'"]/g, 
-        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-    );
-}
-
-let scoreChartInstance = null;
-let collegeChartInstance = null;
-let statusChartInstance = null;
-
-function renderAdminCharts() {
-    if (!candidatesList || candidatesList.length === 0) return;
-
-    // 1. Scores distribution
-    const scoreRanges = ['0-20', '21-40', '41-60', '61-80', '81-100'];
-    const scoreCounts = [0, 0, 0, 0, 0];
-    
-    candidatesList.forEach(c => {
-        const s = c.score_final;
-        if (s <= 20) scoreCounts[0]++;
-        else if (s <= 40) scoreCounts[1]++;
-        else if (s <= 60) scoreCounts[2]++;
-        else if (s <= 80) scoreCounts[3]++;
-        else scoreCounts[4]++;
-    });
-
-    const scoreCanvas = document.getElementById('scoreDistChart');
-    if (scoreCanvas) {
-        const scoreCtx = scoreCanvas.getContext('2d');
-        if (scoreChartInstance) scoreChartInstance.destroy();
-        scoreChartInstance = new Chart(scoreCtx, {
+        AdminState.charts.score = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: scoreRanges,
+                labels: ranges,
                 datasets: [{
-                    label: 'Candidates Count',
-                    data: scoreCounts,
-                    backgroundColor: 'rgba(0, 166, 192, 0.75)',
+                    label: 'Candidates',
+                    data: counts,
+                    backgroundColor: 'rgba(0, 166, 192, 0.7)',
                     borderColor: '#00A6C0',
                     borderWidth: 1,
-                    borderRadius: 8
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false }
+                },
                 scales: {
-                    x: { grid: { display: false }, ticks: { color: '#222831' } },
-                    y: { grid: { color: 'rgba(34, 40, 49, 0.08)' }, ticks: { color: '#222831', stepSize: 1 } }
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
                 }
             }
         });
-    }
+    },
 
-    // 2. Colleges breakdown
-    const colleges = candidatesList.map(c => c.college || 'Unknown');
-    const collegeCounts = {};
-    colleges.forEach(col => {
-        collegeCounts[col] = (collegeCounts[col] || 0) + 1;
-    });
-    const collegeLabels = Object.keys(collegeCounts);
-    const collegeData = Object.values(collegeCounts);
+    renderCollegeChart() {
+        const canvas = DOM.collegeCanvas;
+        if (!canvas) return;
 
-    const colCanvas = document.getElementById('collegeChart');
-    if (colCanvas) {
-        const colCtx = colCanvas.getContext('2d');
-        if (collegeChartInstance) collegeChartInstance.destroy();
-        collegeChartInstance = new Chart(colCtx, {
-            type: 'bar',
-            data: {
-                labels: collegeLabels,
-                datasets: [{
-                    data: collegeData,
-                    backgroundColor: 'rgba(0, 166, 192, 0.75)',
-                    borderColor: '#00A6C0',
-                    borderWidth: 1,
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { grid: { color: 'rgba(34, 40, 49, 0.08)' }, ticks: { color: '#222831', stepSize: 1 } },
-                    y: { grid: { display: false }, ticks: { color: '#222831' } }
-                }
-            }
+        const ctx = canvas.getContext('2d');
+        const counts = {};
+        
+        AdminState.candidates.forEach(c => {
+            const college = c.college || 'Unknown';
+            counts[college] = (counts[college] || 0) + 1;
         });
-    }
 
-    // 3. Status breakdown
-    let selected = 0;
-    let pending = 0;
-    let archived = 0;
-    let disqualified = 0;
+        const labels = Object.keys(counts);
+        const data = Object.values(counts);
+        const colors = ['#00A6C0', '#7b2ffc', '#16A34A', '#F59E0B', '#DC2626', '#EC4899', '#8B5CF6'];
 
-    candidatesList.forEach(c => {
-        if (c.selected === 1) selected++;
-        else if (c.selected === 2) archived++;
-        else if (c.selected === 3) disqualified++;
-        else pending++;
-    });
+        if (AdminState.charts.college) {
+            AdminState.charts.college.destroy();
+        }
 
-    const statusCanvas = document.getElementById('statusChart');
-    if (statusCanvas) {
-        const statusCtx = statusCanvas.getContext('2d');
-        if (statusChartInstance) statusChartInstance.destroy();
-        statusChartInstance = new Chart(statusCtx, {
+        AdminState.charts.college = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Selected', 'Archived', 'Disqualified', 'Pending'],
+                labels: labels,
                 datasets: [{
-                    data: [selected, archived, disqualified, pending],
-                    backgroundColor: [
-                        'rgba(0, 166, 192, 0.75)',
-                        'rgba(40, 59, 72, 0.75)',
-                        'rgba(34, 40, 49, 0.85)',
-                        'rgba(34, 40, 49, 0.25)'
-                    ],
-                    borderColor: ['#00A6C0', 'rgba(34, 40, 49, 0.12)', '#D8D7CE', 'rgba(34, 40, 49, 0.3)'],
-                    borderWidth: 1
+                    data: data,
+                    backgroundColor: colors.slice(0, labels.length),
+                    borderWidth: 2
                 }]
             },
             options: {
@@ -741,10 +634,484 @@ function renderAdminCharts() {
                 plugins: {
                     legend: {
                         position: 'right',
-                        labels: { color: '#222831', font: { family: 'Inter', size: 10 } }
+                        labels: {
+                            font: { size: 10 },
+                            boxWidth: 12
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    renderStatusChart() {
+        const canvas = DOM.statusCanvas;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const counts = {
+            shortlisted: 0,
+            waitlisted: 0,
+            rejected: 0,
+            disqualified: 0
+        };
+
+        AdminState.candidates.forEach(c => {
+            if (c.selected === 1) counts.shortlisted++;
+            else if (c.selected === 2) counts.rejected++;
+            else if (c.selected === 3) counts.disqualified++;
+            else counts.waitlisted++;
+        });
+
+        if (AdminState.charts.status) {
+            AdminState.charts.status.destroy();
+        }
+
+        AdminState.charts.status = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Shortlisted', 'Waitlisted', 'Rejected', 'Disqualified'],
+                datasets: [{
+                    data: [counts.shortlisted, counts.waitlisted, counts.rejected, counts.disqualified],
+                    backgroundColor: ['#16A34A', '#F59E0B', '#DC2626', '#6B7280'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: { size: 10 },
+                            boxWidth: 12
+                        }
                     }
                 }
             }
         });
     }
+};
+
+// ============================================
+// 8. ADMIN ACTIONS
+// ============================================
+
+const AdminActions = {
+    async toggleSelection(candidateId) {
+        const candidate = AdminState.candidates.find(c => c.candidate_id === candidateId);
+        if (!candidate) return;
+
+        const newStatus = candidate.selected === 1 ? 0 : 1;
+
+        try {
+            const response = await fetch('/api/admin/toggle_selection', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    candidate_id: candidateId, 
+                    selected: newStatus 
+                })
+            });
+
+            if (response.ok) {
+                candidate.selected = newStatus;
+                Toast.success(`✅ ${candidate.name} ${newStatus === 1 ? 'shortlisted' : 'unshortlisted'}`);
+                RenderEngine.renderAll();
+                DataManager.saveChanges();
+            } else {
+                throw new Error('API request failed');
+            }
+        } catch (error) {
+            // Fallback to local
+            candidate.selected = newStatus;
+            Toast.info(`📂 ${candidate.name} ${newStatus === 1 ? 'shortlisted' : 'unshortlisted'} (local mode)`);
+            RenderEngine.renderAll();
+            DataManager.saveChanges();
+        }
+    },
+
+    async autoShortlist() {
+        if (!confirm('⚠️ This will automatically shortlist the top 30 candidates. Continue?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/admin/auto_shortlist', {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                Toast.success('✅ Top 30 candidates shortlisted successfully!');
+                await DataManager.loadCandidates();
+                RenderEngine.renderAll();
+            } else {
+                this.localAutoShortlist();
+            }
+        } catch (error) {
+            this.localAutoShortlist();
+        }
+    },
+
+    localAutoShortlist() {
+        // Reset selections (keep disqualified)
+        AdminState.candidates.forEach(c => {
+            if (c.selected !== 3) c.selected = 0;
+        });
+
+        // Sort and shortlist top 30
+        const eligible = AdminState.candidates
+            .filter(c => c.selected !== 3)
+            .sort((a, b) => b.score_final - a.score_final || a.time_taken - b.time_taken);
+
+        const topCount = Math.min(30, eligible.length);
+        for (let i = 0; i < topCount; i++) {
+            eligible[i].selected = 1;
+        }
+
+        Toast.success(`✅ ${topCount} candidates shortlisted locally`);
+        RenderEngine.renderAll();
+        DataManager.saveChanges();
+    },
+
+    viewDetails(candidateId) {
+        const candidate = AdminState.candidates.find(c => c.candidate_id === candidateId);
+        if (!candidate) {
+            Toast.error('Candidate not found');
+            return;
+        }
+
+        // Populate modal
+        document.getElementById('modal-candidate-name').textContent = candidate.name;
+        document.getElementById('modal-candidate-meta').textContent = 
+            `${candidate.department || 'N/A'} • ${candidate.college || 'N/A'}`;
+        
+        document.getElementById('modal-val-id').textContent = candidate.candidate_id;
+        document.getElementById('modal-val-email').textContent = candidate.email || 'N/A';
+        document.getElementById('modal-val-roll').textContent = candidate.roll_number || 'N/A';
+        document.getElementById('modal-val-college').textContent = candidate.college || 'N/A';
+        
+        const webcamStatus = candidate.webcam_status === 'Active' ? '✅ Active' : '❌ Offline';
+        document.getElementById('modal-val-webcam').textContent = webcamStatus;
+        document.getElementById('modal-val-webcam').style.color = 
+            candidate.webcam_status === 'Active' ? 'var(--accent-green)' : 'var(--accent-red)';
+
+        // Social links
+        const linkedinLink = document.getElementById('modal-val-linkedin');
+        if (candidate.linkedin) {
+            linkedinLink.href = candidate.linkedin;
+            linkedinLink.style.display = 'inline';
+        } else {
+            linkedinLink.style.display = 'none';
+        }
+
+        const githubLink = document.getElementById('modal-val-github');
+        if (candidate.github) {
+            githubLink.href = candidate.github;
+            githubLink.style.display = 'inline';
+        } else {
+            githubLink.style.display = 'none';
+        }
+
+        // Telemetry
+        document.getElementById('telemetry-speed').textContent = `${candidate.typing_speed_avg || 0} CPM`;
+        document.getElementById('telemetry-variance').textContent = `${(candidate.typing_pattern_variance || 0).toFixed(1)}ms`;
+        document.getElementById('telemetry-backspaces').textContent = candidate.backspace_count || 0;
+        document.getElementById('telemetry-idle').textContent = `${candidate.idle_duration || 0}s`;
+
+        // Violation logs
+        const logsBody = document.getElementById('violation-logs-body');
+        let logs = Utils.parseJSON(candidate.violation_logs, []);
+        
+        if (logs && logs.length > 0) {
+            logsBody.innerHTML = logs.map(log => `
+                <tr>
+                    <td>${Utils.escapeHTML(log.timestamp || 'N/A')}</td>
+                    <td><span class="badge badge-error">${Utils.escapeHTML(log.type || 'Unknown')}</span></td>
+                    <td>${Utils.escapeHTML(log.detail || '')}</td>
+                </tr>
+            `).join('');
+        } else {
+            logsBody.innerHTML = `
+                <tr>
+                    <td colspan="3" style="text-align: center; padding: 1rem; color: var(--text-muted);">
+                        ✅ No violations recorded
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Answers
+        const answersContainer = document.getElementById('modal-answers-area');
+        const levels = [
+            { name: 'Level 1: Logic Detective', data: candidate.level1_ans },
+            { name: 'Level 2: Future Thinker', data: candidate.level2_ans },
+            { name: 'Level 3: Prompt Master', data: candidate.level3_ans },
+            { name: 'Level 4: Innovation Lab', data: candidate.level4_ans },
+            { name: 'Level 5: AI Architect', data: candidate.level5_ans },
+            { name: 'Level 6: Balance Master', data: candidate.level6_ans },
+            { name: 'Level 7: Future Builder', data: candidate.level7_ans }
+        ];
+
+        answersContainer.innerHTML = levels.map(level => {
+            let displayData = level.data || 'No response';
+            if (typeof displayData === 'string' && displayData.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(displayData);
+                    displayData = Object.entries(parsed)
+                        .map(([k, v]) => `${k}: ${v}`)
+                        .join('\n');
+                } catch {}
+            }
+            return `
+                <div class="answer-card">
+                    <div class="answer-header">${level.name}</div>
+                    <pre class="answer-body">${Utils.escapeHTML(displayData)}</pre>
+                </div>
+            `;
+        }).join('');
+
+        // Show modal
+        DOM.detailModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    },
+
+    flagCandidate(candidateId) {
+        const candidate = AdminState.candidates.find(c => c.candidate_id === candidateId);
+        if (!candidate) return;
+
+        candidate.violation_count = candidate.violation_count >= 3 ? 0 : candidate.violation_count + 1;
+        
+        // Add to violation logs
+        let logs = Utils.parseJSON(candidate.violation_logs, []);
+        logs.push({
+            timestamp: new Date().toISOString(),
+            type: 'Manual Flag',
+            detail: `Flagged by admin (${candidate.violation_count}/3)`
+        });
+        candidate.violation_logs = JSON.stringify(logs);
+
+        Toast.warning(`🚩 ${candidate.name} flagged (${candidate.violation_count}/3)`);
+        RenderEngine.renderAll();
+        DataManager.saveChanges();
+    },
+
+    async exportCSV() {
+        const candidates = AdminState.filtered.length > 0 ? AdminState.filtered : AdminState.candidates;
+        
+        if (candidates.length === 0) {
+            Toast.warning('No data to export');
+            return;
+        }
+
+        const headers = [
+            'Candidate ID', 'Name', 'Email', 'College', 'Department', 'Year',
+            'Webcam Status', 'Violations', 'Typing Speed', 'Logic Score',
+            'Creativity Score', 'AI Knowledge', 'Time Score', 'Final Score',
+            'Time Taken (s)', 'Status'
+        ];
+
+        const rows = candidates.map(c => ({
+            'Candidate ID': c.candidate_id,
+            'Name': c.name,
+            'Email': c.email,
+            'College': c.college,
+            'Department': c.department,
+            'Year': c.year,
+            'Webcam Status': c.webcam_status,
+            'Violations': c.violation_count,
+            'Typing Speed': c.typing_speed_avg,
+            'Logic Score': c.score_logic,
+            'Creativity Score': c.score_creativity,
+            'AI Knowledge': c.score_ai_knowledge,
+            'Time Score': c.score_time,
+            'Final Score': c.score_final,
+            'Time Taken (s)': c.time_taken,
+            'Status': Utils.getStatusText(c.selected).text
+        }));
+
+        const csv = Utils.generateCSV(rows, headers);
+        const filename = `candidates_${new Date().toISOString().slice(0, 10)}.csv`;
+        Utils.downloadFile(csv, filename);
+        Toast.success('📊 CSV exported successfully');
+    },
+
+    openEmailsModal() {
+        DOM.emailsModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    },
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    },
+
+    copyTemplate(elementId) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+
+        const text = element.textContent.trim();
+        navigator.clipboard.writeText(text)
+            .then(() => Toast.success('📋 Template copied to clipboard!'))
+            .catch(() => {
+                // Fallback
+                const range = document.createRange();
+                range.selectNode(element);
+                window.getSelection().removeAllRanges();
+                window.getSelection().addRange(range);
+                document.execCommand('copy');
+                Toast.success('📋 Template copied!');
+            });
+    },
+
+    async handleLogout() {
+        if (!confirm('Are you sure you want to logout?')) return;
+
+        try {
+            await fetch('/api/admin/logout', { method: 'POST' });
+            window.location.href = '/admin-login';
+        } catch (error) {
+            window.location.href = '/admin-login';
+        }
+    }
+};
+
+// ============================================
+// 9. EVENT BINDINGS
+// ============================================
+
+function initEventListeners() {
+    // Search & Filters
+    DOM.searchInput?.addEventListener('input', Utils.debounce(() => {
+        RenderEngine.renderTable();
+    }, 300));
+
+    DOM.collegeFilter?.addEventListener('change', () => {
+        RenderEngine.renderTable();
+    });
+
+    DOM.statusFilter?.addEventListener('change', () => {
+        RenderEngine.renderTable();
+    });
+
+    DOM.sortSelect?.addEventListener('change', () => {
+        RenderEngine.renderTable();
+    });
+
+    // Buttons
+    DOM.logoutBtn?.addEventListener('click', AdminActions.handleLogout);
+    DOM.shortlistBtn?.addEventListener('click', AdminActions.autoShortlist);
+    DOM.exportBtn?.addEventListener('click', AdminActions.exportCSV);
+    DOM.emailBtn?.addEventListener('click', AdminActions.openEmailsModal);
+    DOM.refreshBtn?.addEventListener('click', () => {
+        DataManager.refreshData();
+    });
+
+    // Modal close
+    DOM.closeDetail?.addEventListener('click', () => {
+        AdminActions.closeModal('detail-modal');
+    });
+
+    DOM.closeEmails?.addEventListener('click', () => {
+        AdminActions.closeModal('emails-modal');
+    });
+
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                AdminActions.closeModal(overlay.id);
+            }
+        });
+    });
+
+    // Close modals on Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                AdminActions.closeModal(modal.id);
+            });
+        }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        // Ctrl+F for search focus
+        if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            DOM.searchInput?.focus();
+            DOM.searchInput?.select();
+        }
+        // Ctrl+R for refresh
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            DataManager.refreshData();
+        }
+    });
 }
+
+// ============================================
+// 10. INITIALIZATION
+// ============================================
+
+async function init() {
+    console.log('🚀 Admin Dashboard Initializing...');
+    
+    // Initialize Toast
+    Toast.init();
+
+    // Load data
+    await DataManager.loadCandidates();
+
+    // Populate filters
+    const colleges = [...new Set(AdminState.candidates.map(c => c.college).filter(Boolean))];
+    if (DOM.collegeFilter) {
+        DOM.collegeFilter.innerHTML = `
+            <option value="">All Colleges</option>
+            ${colleges.map(c => `<option value="${c}">${Utils.escapeHTML(c)}</option>`).join('')}
+        `;
+    }
+
+    // Render everything
+    RenderEngine.renderAll();
+
+    // Bind events
+    initEventListeners();
+
+    // Auto-refresh every 60 seconds
+    setInterval(() => {
+        DataManager.loadCandidates();
+    }, 60000);
+
+    console.log('✅ Admin Dashboard Ready');
+    console.log(`📊 ${AdminState.candidates.length} candidates loaded`);
+    console.log('📌 Shortcuts: Ctrl+F (search), Ctrl+R (refresh)');
+}
+
+// ============================================
+// 11. EXPOSE GLOBALS (for inline onclick)
+// ============================================
+
+window.AdminActions = AdminActions;
+window.AdminState = AdminState;
+window.RenderEngine = RenderEngine;
+window.DataManager = DataManager;
+
+// ============================================
+// 12. STARTUP
+// ============================================
+
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+
+// ============================================
+// END OF SCRIPT
+// ============================================

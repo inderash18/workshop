@@ -7,32 +7,51 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* ===== ENHANCED CSS ===== */
+        :root {
+            --primary-bg: #D8D7CE;
+            --dark-bg: #222831;
+            --accent-cyan: #00A6C0;
+            --accent-green: #16A34A;
+            --accent-red: #DC2626;
+            --font-serif: 'Georgia', serif;
+            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+            --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ===== GLOBAL RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #D8D7CE !important;
+            background-color: var(--primary-bg) !important;
+            font-family: var(--font-sans);
+            color: var(--dark-bg);
             margin: 0;
             padding: 0;
             min-height: 100vh;
         }
 
-        body::before, body::after {
-            display: none !important;
-        }
-
-        /* Tablet Grid Layout Wrapper */
+        /* ===== LAYOUT - Enhanced with better responsiveness ===== */
         .tablet-wrapper {
             display: grid;
             grid-template-columns: 80px 1fr 340px;
             min-height: 100vh;
-            background: #D8D7CE;
-            box-sizing: border-box;
+            background: var(--primary-bg);
+            gap: 0;
+            transition: grid-template-columns 0.3s ease;
         }
 
-        /* Left Navigation Sidebar */
+        /* ===== LEFT SIDEBAR - Enhanced ===== */
         .left-sidebar {
-            background: rgba(216, 215, 206, 0.85);
+            background: rgba(216, 215, 206, 0.92);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(34, 40, 49, 0.12);
+            border-right: 1px solid rgba(34, 40, 49, 0.1);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -41,111 +60,226 @@
             position: sticky;
             top: 0;
             height: 100vh;
-            box-sizing: border-box;
-            z-index: 20;
+            z-index: 100;
+            transition: all 0.3s ease;
         }
 
         .sidebar-logo {
             text-align: center;
+            position: relative;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-cyan), #7b2ffc);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto;
+            box-shadow: 0 4px 16px rgba(0, 166, 192, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: scale(1.05) rotate(-5deg);
         }
 
         .sidebar-menu {
             display: flex;
             flex-direction: column;
-            gap: 28px;
+            gap: 20px;
+            align-items: center;
         }
 
         .menu-item {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             text-decoration: none;
-            color: rgba(34, 40, 49, 0.7);
-            padding: 10px;
+            color: rgba(34, 40, 49, 0.5);
+            padding: 12px;
             border-radius: 14px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s var(--transition-smooth);
+            position: relative;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            background: var(--accent-cyan);
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s var(--transition-smooth);
+        }
+
         .menu-item:hover {
-            color: #00A6C0;
-            background: rgba(34, 40, 49, 0.04);
+            color: var(--dark-bg);
+            transform: translateX(2px);
+        }
+
+        .menu-item:hover::before {
+            opacity: 0.08;
+            transform: scale(1);
         }
 
         .menu-item.active {
-            color: #D8D7CE;
-            background: #222831;
-            box-shadow: 0 0 20px rgba(34, 40, 49, 0.15);
+            color: white;
+            background: var(--dark-bg);
+            box-shadow: 0 8px 24px rgba(34, 40, 49, 0.2);
         }
 
-        /* Central Admin Dashboard Content */
+        .menu-item .tooltip {
+            position: absolute;
+            left: 70px;
+            background: var(--dark-bg);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .menu-item:hover .tooltip {
+            opacity: 1;
+            transform: translateX(4px);
+        }
+
+        .sidebar-footer button {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: rgba(34, 40, 49, 0.4);
+            transition: all 0.3s ease;
+            padding: 12px;
+            border-radius: 12px;
+            width: 50px;
+            height: 50px;
+        }
+
+        .sidebar-footer button:hover {
+            color: var(--accent-red);
+            background: rgba(220, 38, 38, 0.08);
+            transform: scale(1.05);
+        }
+
+        /* ===== MAIN CONTENT - Enhanced ===== */
         .main-dashboard-content {
-            padding: 40px;
+            padding: 32px 40px 40px;
             overflow-y: auto;
-            box-sizing: border-box;
+            max-height: 100vh;
+        }
+
+        .main-dashboard-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .main-dashboard-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .main-dashboard-content::-webkit-scrollbar-thumb {
+            background: rgba(34, 40, 49, 0.2);
+            border-radius: 10px;
         }
 
         .main-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 36px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
-        /* Direct Search filter */
         .search-bar {
-            background: rgba(255, 255, 255, 0.45);
-            border: 1px solid rgba(34, 40, 49, 0.12);
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(34, 40, 49, 0.1);
             border-radius: 9999px;
             padding: 10px 20px;
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+            flex: 1;
+            max-width: 380px;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 4px 16px rgba(0, 166, 192, 0.15);
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 0.85rem;
+            width: 100%;
+            color: var(--dark-bg);
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(34, 40, 49, 0.35);
         }
 
         .header-right {
             display: flex;
             align-items: center;
+            gap: 12px;
         }
 
         .support-tag {
             background: rgba(34, 40, 49, 0.08);
             color: rgba(34, 40, 49, 0.7);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             padding: 6px 14px;
             border-radius: 9999px;
-            margin-right: 16px;
+            letter-spacing: 0.3px;
         }
 
         .admin-online-lbl {
-            font-family: var(--font-futuristic);
-            font-size: 0.8rem;
-            color: #00A6C0;
-            font-weight: bold;
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            font-weight: 700;
             letter-spacing: 0.5px;
-        }
-
-        /* Section Heading Row */
-        .section-title-row {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
+            gap: 6px;
         }
 
-        .serif-title {
-            font-family: var(--font-serif);
-            font-size: 2.2rem;
-            font-weight: 500;
-            color: #222831;
-            margin: 0;
+        .admin-online-lbl::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-dot 2s ease-in-out infinite;
         }
 
-        /* Stats board grid */
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* ===== STATS CARDS - Enhanced ===== */
         .admin-stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -154,54 +288,110 @@
         }
 
         .stat-card {
-            background: rgba(40, 59, 72, 0.12);
-            border: 1px solid rgba(34, 40, 49, 0.12);
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(34, 40, 49, 0.08);
             border-radius: 20px;
-            padding: 18px 24px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            padding: 20px 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s var(--transition-smooth);
+            cursor: default;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), #7b2ffc);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
         }
 
         .stat-value {
-            font-size: 1.8rem;
-            font-family: var(--font-sans);
-            font-weight: 600;
-            color: #222831;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-bg);
             margin-bottom: 4px;
+            font-family: var(--font-sans);
+            letter-spacing: -0.5px;
         }
 
         .stat-label {
-            font-size: 0.75rem;
-            color: rgba(34, 40, 49, 0.55);
+            font-size: 0.7rem;
+            color: rgba(34, 40, 49, 0.5);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
-        /* Analytics charts grid */
+        .stat-card.highlight {
+            border-color: rgba(0, 166, 192, 0.25);
+            background: rgba(0, 166, 192, 0.05);
+        }
+
+        .stat-card.highlight .stat-value {
+            color: var(--accent-cyan);
+        }
+
+        /* ===== CHARTS - Enhanced ===== */
         .admin-charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-bottom: 28px;
         }
 
         .chart-card {
-            background: rgba(40, 59, 72, 0.12);
+            background: rgba(255, 255, 255, 0.4);
             border-radius: 24px;
-            border: 1px solid rgba(34, 40, 49, 0.12);
+            border: 1px solid rgba(34, 40, 49, 0.08);
             padding: 20px;
-            height: 300px;
+            height: 280px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 4px 20px rgba(34, 40, 49, 0.03);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
         }
 
-        /* Form Actions Row */
+        .chart-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .chart-card h3 {
+            font-family: var(--font-serif);
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--dark-bg);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .chart-card .chart-wrapper {
+            flex: 1;
+            position: relative;
+            min-height: 0;
+        }
+
+        /* ===== CONTROLS - Enhanced ===== */
         .admin-controls-card {
-            background: rgba(40, 59, 72, 0.12);
-            border: 1px solid rgba(34, 40, 49, 0.12);
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(34, 40, 49, 0.08);
             border-radius: 24px;
             padding: 20px 24px;
             margin-bottom: 28px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
         }
 
         .admin-controls-wrapper {
@@ -216,121 +406,259 @@
             display: flex;
             gap: 12px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .admin-select {
-            background: rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.6);
             border: 1px solid rgba(34, 40, 49, 0.12);
-            color: #222831;
+            color: var(--dark-bg);
             padding: 0.6rem 1.5rem;
             border-radius: 16px;
             font-family: var(--font-sans);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             outline: none;
             transition: all 0.2s ease;
             appearance: none;
-            -webkit-appearance: none;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23222831' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
             background-position: right 14px center;
             background-size: 12px;
-            padding-right: 32px;
+            padding-right: 36px;
+            min-width: 140px;
         }
 
-        .admin-select option {
-            background: #ffffff;
-            color: #222831;
+        .admin-select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 166, 192, 0.15);
+        }
+
+        .admin-select:hover {
+            border-color: var(--accent-cyan);
         }
 
         .admin-actions-btns {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
-        /* Database table styling */
+        .btn-futuristic {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--accent-cyan), #7b2ffc);
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s var(--transition-smooth);
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-futuristic:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 166, 192, 0.3);
+        }
+
+        .btn-futuristic:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-futuristic:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-futuristic.btn-secondary {
+            background: rgba(34, 40, 49, 0.08);
+            color: var(--dark-bg);
+        }
+
+        .btn-futuristic.btn-secondary:hover {
+            background: rgba(34, 40, 49, 0.15);
+            box-shadow: none;
+        }
+
+        .btn-futuristic .spinner-small {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+
+        .btn-futuristic.loading .spinner-small {
+            display: inline-block;
+        }
+
+        .btn-futuristic.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== TABLE - Enhanced ===== */
         .table-wrapper {
             overflow-x: auto;
             border-radius: 20px;
-            border: 1px solid rgba(34, 40, 49, 0.12);
-            background: rgba(40, 59, 72, 0.12);
+            border: 1px solid rgba(34, 40, 49, 0.08);
+            background: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
         }
 
         .admin-table {
             width: 100%;
             border-collapse: collapse;
-            text-align: left;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
+            min-width: 900px;
+        }
+
+        .admin-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .admin-table th {
-            padding: 14px 18px;
+            padding: 14px 16px;
             font-weight: 600;
-            color: rgba(34, 40, 49, 0.6);
-            border-bottom: 1px solid rgba(34, 40, 49, 0.12);
-            background: rgba(0, 0, 0, 0.05);
+            color: rgba(34, 40, 49, 0.5);
+            border-bottom: 2px solid rgba(34, 40, 49, 0.08);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 0.5px;
+            text-align: left;
         }
 
         .admin-table td {
-            padding: 16px 18px;
+            padding: 14px 16px;
             border-bottom: 1px solid rgba(34, 40, 49, 0.05);
-            color: #222831;
+            color: var(--dark-bg);
+            vertical-align: middle;
         }
 
-        .admin-table tr:last-child td {
-            border-bottom: none;
+        .admin-table tbody tr {
+            transition: background 0.2s ease;
+            cursor: default;
+        }
+
+        .admin-table tbody tr:hover {
+            background: rgba(0, 166, 192, 0.04);
+        }
+
+        .admin-table tbody tr.shortlisted-row {
+            background: rgba(0, 166, 192, 0.06);
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        .admin-table tbody tr.flagged-row {
+            background: rgba(220, 38, 38, 0.04);
         }
 
         .badge-cheated {
             background: rgba(220, 38, 38, 0.1);
             color: var(--accent-red);
-            border: 1px solid rgba(220, 38, 38, 0.2);
-            font-size: 0.7rem;
-            padding: 2px 8px;
+            border: 1px solid rgba(220, 38, 38, 0.15);
+            font-size: 0.65rem;
+            padding: 2px 10px;
             border-radius: 20px;
-            font-family: var(--font-sans);
             font-weight: 600;
+            display: inline-block;
         }
 
         .badge-safe {
             background: rgba(22, 163, 74, 0.1);
             color: var(--accent-green);
-            border: 1px solid rgba(22, 163, 74, 0.2);
-            font-size: 0.7rem;
-            padding: 2px 8px;
+            border: 1px solid rgba(22, 163, 74, 0.15);
+            font-size: 0.65rem;
+            padding: 2px 10px;
             border-radius: 20px;
-            font-family: var(--font-sans);
             font-weight: 600;
+            display: inline-block;
         }
 
         .status-badge {
-            font-size: 0.7rem;
-            padding: 2px 8px;
+            font-size: 0.65rem;
+            padding: 3px 12px;
             border-radius: 20px;
             font-weight: 600;
+            display: inline-block;
         }
 
         .status-shortlisted {
-            background: rgba(22, 163, 74, 0.15);
+            background: rgba(22, 163, 74, 0.12);
             color: var(--accent-green);
-            border: 1px solid rgba(22, 163, 74, 0.25);
+            border: 1px solid rgba(22, 163, 74, 0.15);
         }
 
-        /* Right Sidebar Panel */
+        .status-waitlisted {
+            background: rgba(251, 191, 36, 0.12);
+            color: #D97706;
+            border: 1px solid rgba(251, 191, 36, 0.15);
+        }
+
+        .status-rejected {
+            background: rgba(220, 38, 38, 0.08);
+            color: var(--accent-red);
+            border: 1px solid rgba(220, 38, 38, 0.1);
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            color: rgba(34, 40, 49, 0.4);
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 166, 192, 0.1);
+            color: var(--accent-cyan);
+            transform: scale(1.1);
+        }
+
+        .action-btn.danger:hover {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--accent-red);
+        }
+
+        /* ===== RIGHT SIDEBAR - Enhanced ===== */
         .right-sidebar {
-            background: rgba(216, 215, 206, 0.85);
+            background: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-left: 1px solid rgba(34, 40, 49, 0.12);
-            padding: 40px 24px;
+            border-left: 1px solid rgba(34, 40, 49, 0.08);
+            padding: 32px 20px;
             display: flex;
             flex-direction: column;
-            gap: 36px;
+            gap: 28px;
             position: sticky;
             top: 0;
             height: 100vh;
-            box-sizing: border-box;
-            z-index: 20;
+            overflow-y: auto;
+        }
+
+        .right-sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .right-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(34, 40, 49, 0.15);
+            border-radius: 10px;
         }
 
         .monitor-panel {
@@ -338,57 +666,70 @@
         }
 
         .concentric-circles {
-            width: 140px;
-            height: 140px;
-            border: 2px dashed rgba(34, 40, 49, 0.25);
+            width: 120px;
+            height: 120px;
+            border: 2px dashed rgba(34, 40, 49, 0.15);
             border-radius: 50%;
-            margin: 0 auto 16px auto;
+            margin: 0 auto 12px;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
+            animation: rotate-slow 20s linear infinite;
+        }
+
+        @keyframes rotate-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .concentric-circles .inner-ring {
+            width: 100px;
+            height: 100px;
+            border: 1.5px solid rgba(34, 40, 49, 0.08);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .sys-check-circle {
-            width: 120px;
-            height: 120px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.5);
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 1.8rem;
-            color: rgba(34, 40, 49, 0.6);
+            color: rgba(34, 40, 49, 0.5);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0, 166, 192, 0); }
+            50% { box-shadow: 0 0 30px rgba(0, 166, 192, 0.1); }
         }
 
         .sys-status-dot {
             position: absolute;
-            bottom: 6px;
-            right: 8px;
+            bottom: 8px;
+            right: 10px;
             background: var(--accent-green);
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            border: 2.5px solid #D8D7CE;
-            box-shadow: 0 0 8px var(--accent-green);
+            border: 2.5px solid var(--primary-bg);
+            box-shadow: 0 0 12px rgba(22, 163, 74, 0.4);
+            animation: pulse-dot 2s ease-in-out infinite;
         }
 
-        .seat-allocation-card {
-            background: #222831 !important;
-            color: #D8D7CE !important;
-            border-radius: 24px;
-            padding: 24px 20px;
-            text-align: center;
-            margin-top: auto;
-            box-shadow: 0 10px 30px rgba(34, 40, 49, 0.15);
-        }
-
-        .seat-allocation-card .dial-value {
-            color: #D8D7CE !important;
-        }
-
-        .seat-allocation-card div {
-            color: rgba(216, 215, 206, 0.75) !important;
+        .telemetry-panel h3 {
+            font-family: var(--font-serif);
+            font-size: 1rem;
+            font-weight: 500;
+            margin: 0 0 1rem 0;
+            color: var(--dark-bg);
         }
 
         .alerts-feed-row {
@@ -396,75 +737,367 @@
             justify-content: space-between;
             align-items: center;
             font-size: 0.8rem;
-            padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.35);
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.4);
             border-radius: 12px;
-            border: 1px solid rgba(34, 40, 49, 0.08);
+            border: 1px solid rgba(34, 40, 49, 0.06);
+            transition: all 0.2s ease;
+        }
+
+        .alerts-feed-row:hover {
+            background: rgba(255, 255, 255, 0.6);
         }
 
         .alerts-feed-lbl {
-            font-weight: 600;
-            color: rgba(34, 40, 49, 0.8);
+            font-weight: 500;
+            color: rgba(34, 40, 49, 0.6);
         }
 
         .alerts-feed-val {
             font-weight: 700;
             font-family: var(--font-mono);
-            color: #222831;
+            color: var(--dark-bg);
         }
 
-        /* Modal windows */
+        .alerts-feed-val.danger {
+            color: var(--accent-red);
+        }
+
+        .alerts-feed-val.success {
+            color: var(--accent-green);
+        }
+
+        /* ===== SEAT ALLOCATION CARD ===== */
+        .seat-allocation-card {
+            background: var(--dark-bg) !important;
+            color: var(--primary-bg) !important;
+            border-radius: 24px;
+            padding: 28px 20px;
+            text-align: center;
+            margin-top: auto;
+            box-shadow: 0 8px 32px rgba(34, 40, 49, 0.2);
+            border: none !important;
+            transition: all 0.3s ease;
+        }
+
+        .seat-allocation-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(34, 40, 49, 0.25);
+        }
+
+        .seat-allocation-card .dial-value {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--primary-bg) !important;
+            font-family: var(--font-mono);
+        }
+
+        .seat-allocation-card .dial-label {
+            font-size: 0.7rem;
+            color: rgba(216, 215, 206, 0.6) !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .seat-allocation-card .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+
+        .seat-allocation-card .progress-bar .fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-cyan), #7b2ffc);
+            border-radius: 4px;
+            transition: width 0.6s ease;
+            width: 0%;
+        }
+
+        /* ===== MODALS - Enhanced ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         .modal-content {
-            background: rgba(216, 215, 206, 0.98) !important;
-            border: 1px solid rgba(34, 40, 49, 0.15) !important;
-            box-shadow: 0 0 50px rgba(34, 40, 49, 0.15) !important;
-            color: #222831 !important;
+            background: var(--primary-bg) !important;
+            border: 1px solid rgba(34, 40, 49, 0.1) !important;
+            border-radius: 28px !important;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2) !important;
+            color: var(--dark-bg) !important;
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 720px;
+            padding: 32px;
+            animation: slideUp 0.4s var(--transition-smooth);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            gap: 16px;
         }
 
         .modal-header h2 {
-            color: #222831 !important;
+            font-family: var(--font-serif);
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--dark-bg) !important;
+            margin: 0;
+        }
+
+        .modal-header .subtitle {
+            color: rgba(34, 40, 49, 0.5);
+            font-size: 0.85rem;
+            margin-top: 4px;
         }
 
         .modal-close {
-            color: rgba(34, 40, 49, 0.6) !important;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: rgba(34, 40, 49, 0.3);
+            transition: all 0.2s ease;
+            padding: 4px 8px;
+            line-height: 1;
         }
 
         .modal-close:hover {
-            color: #00A6C0 !important;
+            color: var(--accent-red);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(34, 40, 49, 0.15);
+            border-radius: 10px;
+        }
+
+        .modal-section-title {
+            font-weight: 600;
+            color: var(--dark-bg);
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            letter-spacing: 0.3px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .profile-field {
+            display: flex;
+            flex-direction: column;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 12px;
+            border: 1px solid rgba(34, 40, 49, 0.06);
+        }
+
+        .profile-field .label {
+            font-size: 0.65rem;
+            color: rgba(34, 40, 49, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-weight: 600;
+        }
+
+        .profile-field .value {
+            font-size: 0.9rem;
+            color: var(--dark-bg);
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .profile-field .value.accent {
+            color: var(--accent-cyan);
+        }
+
+        .profile-field .value.mono {
+            font-family: var(--font-mono);
+        }
+
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .telemetry-item {
+            padding: 14px 12px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 14px;
+            border: 1px solid rgba(34, 40, 49, 0.06);
+        }
+
+        .telemetry-item .value {
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-cyan);
+        }
+
+        .telemetry-item .label {
+            font-size: 0.6rem;
+            color: rgba(34, 40, 49, 0.4);
+            text-transform: uppercase;
+            margin-top: 4px;
+            font-weight: 500;
         }
 
         .answer-card {
-            background: rgba(255, 255, 255, 0.45) !important;
-            border: 1px solid rgba(34, 40, 49, 0.08) !important;
-            border-radius: 16px !important;
-            padding: 16px !important;
+            background: rgba(255, 255, 255, 0.35) !important;
+            border: 1px solid rgba(34, 40, 49, 0.06) !important;
+            border-radius: 14px !important;
+            padding: 14px 16px !important;
+            margin-bottom: 10px;
         }
 
-        .answer-header {
-            color: #00A6C0 !important;
+        .answer-card .q {
+            color: var(--accent-cyan) !important;
             font-weight: 600 !important;
-            font-size: 0.85rem !important;
-            margin-bottom: 6px !important;
+            font-size: 0.8rem !important;
+            margin-bottom: 4px;
         }
 
-        .answer-body {
-            color: rgba(216, 215, 206, 0.9) !important;
-            font-family: var(--font-sans) !important;
+        .answer-card .a {
+            color: var(--dark-bg) !important;
             font-size: 0.85rem !important;
             line-height: 1.5 !important;
         }
 
-        @media (max-width: 1280px) {
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 400px;
+        }
+
+        .toast {
+            padding: 16px 20px;
+            border-radius: 16px;
+            background: var(--dark-bg);
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            animation: slideInRight 0.4s var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        .toast.success { border-left-color: var(--accent-green); }
+        .toast.error { border-left-color: var(--accent-red); }
+        .toast.warning { border-left-color: #F59E0B; }
+
+        .toast .icon { font-size: 1.2rem; }
+        .toast .message { font-size: 0.85rem; font-weight: 500; }
+        .toast .close-toast {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-left: auto;
+            padding: 0 4px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.removing {
+            animation: slideOutRight 0.3s ease forwards;
+        }
+
+        @keyframes slideOutRight {
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1400px) {
+            .tablet-wrapper {
+                grid-template-columns: 80px 1fr 280px;
+            }
+            .admin-charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 1200px) {
             .tablet-wrapper {
                 grid-template-columns: 80px 1fr;
             }
             .right-sidebar {
                 display: none;
             }
+            .admin-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 900px) {
+            .admin-charts-grid {
+                grid-template-columns: 1fr;
+            }
             .admin-stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            .telemetry-grid {
                 grid-template-columns: 1fr 1fr;
             }
         }
@@ -475,6 +1108,9 @@
             }
             .left-sidebar {
                 display: none;
+            }
+            .main-dashboard-content {
+                padding: 16px;
             }
             .admin-stats-grid {
                 grid-template-columns: 1fr;
@@ -490,49 +1126,112 @@
             .admin-actions-btns {
                 flex-direction: column;
             }
+            .admin-actions-btns .btn-futuristic {
+                width: 100%;
+                justify-content: center;
+            }
+            .main-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-bar {
+                max-width: 100%;
+            }
+            .modal-content {
+                padding: 20px;
+                margin: 10px;
+            }
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            .telemetry-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* ===== LOADING SHIMMER ===== */
+        .shimmer {
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0.2) 25%, 
+                rgba(255,255,255,0.4) 50%, 
+                rgba(255,255,255,0.2) 75%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
     </style>
 </head>
 <body>
     <div class="tablet-wrapper">
-        <!-- Sticky left sidebar navigation -->
+        <!-- ===== LEFT SIDEBAR ===== -->
         <div class="left-sidebar">
             <div class="sidebar-logo">
-                <div class="logo-icon"></div>
+                <div class="logo-icon" aria-hidden="true">✦</div>
             </div>
             <div class="sidebar-menu">
-                <a href="/" class="menu-item" title="Home">🏠</a>
-                <a href="/dashboard" class="menu-item" title="Dashboard">📊</a>
-                <a href="/profile" class="menu-item" title="My Profile">👤</a>
-                <a href="/challenge" class="menu-item" title="Assessment Arena">⚔️</a>
-                <a href="/admin" class="menu-item active" title="Admin Control">⚙️</a>
+                <a href="/" class="menu-item" title="Home">
+                    🏠
+                    <span class="tooltip">Home</span>
+                </a>
+                <a href="/dashboard" class="menu-item" title="Dashboard">
+                    📊
+                    <span class="tooltip">Dashboard</span>
+                </a>
+                <a href="/profile" class="menu-item" title="My Profile">
+                    👤
+                    <span class="tooltip">Profile</span>
+                </a>
+                <a href="/challenge" class="menu-item" title="Assessment">
+                    ⚔️
+                    <span class="tooltip">Challenge</span>
+                </a>
+                <a href="/admin" class="menu-item active" title="Admin Control">
+                    ⚙️
+                    <span class="tooltip">Admin</span>
+                </a>
             </div>
             <div class="sidebar-footer">
-                <button id="btn-admin-logout" title="Log Out" style="background: none; border: none; font-size: 1.35rem; cursor: pointer; opacity: 0.7; color: rgba(216, 215, 206, 0.6);">🚪</button>
+                <button id="btn-admin-logout" title="Log Out" aria-label="Logout">🚪</button>
             </div>
         </div>
 
-        <!-- Central content panels -->
+        <!-- ===== MAIN CONTENT ===== -->
         <div class="main-dashboard-content">
-            <!-- Header bar with direct table search binding -->
+            <!-- Header -->
             <div class="main-header">
                 <div class="search-bar">
-                    <span style="color: rgba(216, 215, 206, 0.5); font-size: 0.9rem;">🔍</span>
-                    <input type="text" id="admin-search-input" placeholder="Search applicant database..." style="border: none; background: transparent; outline: none; font-size: 0.85rem; width: 220px; color: #D8D7CE;">
+                    <span style="color: rgba(34, 40, 49, 0.3);">🔍</span>
+                    <input 
+                        type="text" 
+                        id="admin-search-input" 
+                        placeholder="Search applicants by name, email, or college..."
+                        aria-label="Search applicants"
+                    >
+                    <span id="search-count" style="font-size:0.7rem; color:rgba(34,40,49,0.3); display:none;"></span>
                 </div>
                 <div class="header-right">
-                    <span class="support-tag">Sys-admin online</span>
+                    <span class="support-tag">🟢 Sys-admin online</span>
                     <span class="admin-online-lbl">ONLINE</span>
                 </div>
             </div>
 
-            <!-- Title header -->
+            <!-- Title -->
             <div class="section-title-row">
-                <h1 class="serif-title">Selection assessment database</h1>
+                <h1 class="serif-title" style="font-family: var(--font-serif); font-size: 2rem; font-weight: 500; color: var(--dark-bg); margin: 0;">
+                    Selection Assessment Database
+                </h1>
+                <span id="last-updated" style="font-size:0.7rem; color:rgba(34,40,49,0.3);">
+                    Last updated: <span id="update-time">Just now</span>
+                </span>
             </div>
 
-            <!-- Stats board cards row -->
-            <div class="admin-stats-grid">
+            <!-- Stats -->
+            <div class="admin-stats-grid" id="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="stat-total-applicants">0</div>
                     <div class="stat-label">Total Applications</div>
@@ -543,271 +1242,288 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-value" id="stat-high-score">0.0</div>
-                    <div class="stat-label">High Score Index</div>
+                    <div class="stat-label">High Score</div>
                 </div>
-                <div class="stat-card" style="border-color: rgba(0, 166, 192, 0.25);">
-                    <div class="stat-value" id="stat-shortlisted" style="color: #00A6C0;">0 / 30</div>
+                <div class="stat-card highlight">
+                    <div class="stat-value" id="stat-shortlisted">0 / 30</div>
                     <div class="stat-label">Shortlisted Seats</div>
                 </div>
             </div>
 
-            <!-- Analytics dynamic charts row -->
+            <!-- Charts -->
             <div class="admin-charts-grid">
-                <!-- Score distribution -->
                 <div class="chart-card">
-                    <h3 style="font-family: var(--font-serif); font-size: 1.05rem; margin: 0 0 0.75rem 0; font-weight: 500; color: #D8D7CE;">Score Distribution</h3>
-                    <div style="flex: 1; position: relative;">
+                    <h3>Score Distribution</h3>
+                    <div class="chart-wrapper">
                         <canvas id="scoreDistChart"></canvas>
                     </div>
                 </div>
-
-                <!-- College distribution -->
                 <div class="chart-card">
-                    <h3 style="font-family: var(--font-serif); font-size: 1.05rem; margin: 0 0 0.75rem 0; font-weight: 500; color: #D8D7CE;">Applicants by College</h3>
-                    <div style="flex: 1; position: relative;">
+                    <h3>Applicants by College</h3>
+                    <div class="chart-wrapper">
                         <canvas id="collegeChart"></canvas>
                     </div>
                 </div>
-
-                <!-- status distribution -->
                 <div class="chart-card">
-                    <h3 style="font-family: var(--font-serif); font-size: 1.05rem; margin: 0 0 0.75rem 0; font-weight: 500; color: #D8D7CE;">Status Breakdown</h3>
-                    <div style="flex: 1; position: relative;">
+                    <h3>Status Breakdown</h3>
+                    <div class="chart-wrapper">
                         <canvas id="statusChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Action inputs and dropdown filters -->
+            <!-- Controls -->
             <div class="admin-controls-card">
                 <div class="admin-controls-wrapper">
                     <div class="admin-search-filters">
                         <select id="admin-filter-college" class="admin-select">
                             <option value="">All Colleges</option>
                         </select>
-
                         <select id="admin-sort-select" class="admin-select">
-                            <option value="score">Sort by: Top Score</option>
-                            <option value="time">Sort by: Fastest Time</option>
-                            <option value="creativity">Sort by: Most Creative</option>
+                            <option value="score">Sort: Top Score</option>
+                            <option value="time">Sort: Fastest Time</option>
+                            <option value="creativity">Sort: Most Creative</option>
+                            <option value="name">Sort: A-Z</option>
+                        </select>
+                        <select id="admin-filter-status" class="admin-select">
+                            <option value="">All Status</option>
+                            <option value="shortlisted">Shortlisted</option>
+                            <option value="waitlisted">Waitlisted</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="pending">Pending</option>
                         </select>
                     </div>
-                    
                     <div class="admin-actions-btns">
-                        <button class="btn-futuristic" id="btn-auto-shortlist">⚡ Auto-Shortlist Top 30</button>
-                        <button class="btn-futuristic btn-secondary" id="btn-export-csv" style="padding: 10px 18px; font-size: 0.8rem;">Export CSV</button>
-                        <button class="btn-futuristic btn-secondary" id="btn-print-pdf" style="padding: 10px 18px; font-size: 0.8rem;">PDF Summary</button>
-                        <button class="btn-futuristic btn-secondary" id="btn-email-templates" style="padding: 10px 18px; font-size: 0.8rem;">Emails</button>
+                        <button class="btn-futuristic" id="btn-auto-shortlist">
+                            <span class="btn-text">⚡ Auto-Shortlist</span>
+                            <span class="spinner-small"></span>
+                        </button>
+                        <button class="btn-futuristic btn-secondary" id="btn-export-csv">📊 Export CSV</button>
+                        <button class="btn-futuristic btn-secondary" id="btn-email-templates">✉️ Emails</button>
+                        <button class="btn-futuristic btn-secondary" id="btn-refresh-data">🔄 Refresh</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Applicants Matrix Data table -->
+            <!-- Table -->
             <div class="table-wrapper">
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Candidate Details</th>
+                            <th>#</th>
+                            <th>Candidate</th>
                             <th>College</th>
-                            <th>Total Time</th>
-                            <th>Webcam Status</th>
+                            <th>Time</th>
+                            <th>Webcam</th>
                             <th>Violations</th>
-                            <th>Avg Typing</th>
+                            <th>Typing</th>
                             <th>Logic</th>
-                            <th>Final Score</th>
+                            <th>Score</th>
                             <th>Status</th>
-                            <th style="text-align: right;">Action</th>
+                            <th style="text-align:right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="admin-table-body">
                         <tr>
-                            <td colspan="11" style="text-align: center; color: rgba(216, 215, 206, 0.5); padding: 4rem;">Loading selection database matrix...</td>
+                            <td colspan="11" style="text-align:center; color:rgba(34,40,49,0.3); padding:4rem; font-size:0.9rem;">
+                                <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+                                    <span style="font-size:2rem;">📡</span>
+                                    <span>Loading selection database...</span>
+                                </div>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Right sidebar information panel -->
+        <!-- ===== RIGHT SIDEBAR ===== -->
         <div class="right-sidebar">
+            <!-- Monitor -->
             <div class="monitor-panel">
                 <div class="concentric-circles">
-                    <div class="sys-check-circle">⚙️</div>
+                    <div class="inner-ring">
+                        <div class="sys-check-circle">⚙️</div>
+                    </div>
                     <span class="sys-status-dot"></span>
                 </div>
-                <h4 style="font-size: 0.85rem; font-weight: 600; color: #D8D7CE; margin: 0;">Sec-Ops Status</h4>
-                <p style="font-size: 0.7rem; color: rgba(216, 215, 206, 0.5); margin: 4px 0 0 0;">Monitoring engine active</p>
+                <h4 style="font-size:0.8rem; font-weight:600; color:var(--dark-bg); margin:0;">Sec-Ops Status</h4>
+                <p style="font-size:0.65rem; color:rgba(34,40,49,0.4); margin:4px 0 0;">Monitoring active</p>
             </div>
 
-            <!-- Global statistics summary feed -->
+            <!-- Telemetry -->
             <div class="telemetry-panel">
-                <h3 style="font-family: var(--font-serif); font-size: 1.05rem; font-weight: 500; margin: 0 0 1rem 0; color: #D8D7CE;">Analytics Feed</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
+                <h3>Analytics Feed</h3>
+                <div style="display:flex; flex-direction:column; gap:8px;">
                     <div class="alerts-feed-row">
-                        <span class="alerts-feed-lbl">Webcam OK</span>
-                        <span class="alerts-feed-val" id="feed-webcam-active">0</span>
+                        <span class="alerts-feed-lbl">📷 Webcam OK</span>
+                        <span class="alerts-feed-val success" id="feed-webcam-active">0</span>
                     </div>
                     <div class="alerts-feed-row">
-                        <span class="alerts-feed-lbl">Security Flags</span>
-                        <span class="alerts-feed-val" id="feed-violations-count" style="color: var(--accent-red);">0</span>
+                        <span class="alerts-feed-lbl">🚨 Security Flags</span>
+                        <span class="alerts-feed-val danger" id="feed-violations-count">0</span>
                     </div>
                     <div class="alerts-feed-row">
-                        <span class="alerts-feed-lbl">Completion Count</span>
+                        <span class="alerts-feed-lbl">✅ Completed</span>
                         <span class="alerts-feed-val" id="feed-completions">0</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Shortlisted Dial Card matching mockup -->
-            <div class="glass-panel seat-allocation-card">
+            <!-- Seat Allocation -->
+            <div class="seat-allocation-card">
                 <div class="dial-value" id="right-shortlist-dial">0 / 30</div>
-                <div style="font-size: 0.75rem; color: rgba(34, 40, 49, 0.7); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600;">Shortlisted Seats</div>
-                <div style="margin-top: 14px; font-size: 0.7rem; color: rgba(34, 40, 49, 0.6); border-top: 1px solid rgba(34,40,49,0.1); padding-top: 10px; font-weight: 500;">
+                <div class="dial-label">Shortlisted Seats</div>
+                <div class="progress-bar">
+                    <div class="fill" id="seat-progress-fill"></div>
+                </div>
+                <div style="margin-top:12px; font-size:0.65rem; color:rgba(216,215,206,0.4);">
                     Roster allocation limit
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 1: CANDIDATE DETAIL PROFILE -->
+    <!-- ===== MODAL: Candidate Detail ===== -->
     <div class="modal-overlay" id="detail-modal">
-        <div class="glass-panel modal-content" style="max-width: 650px;">
+        <div class="modal-content">
             <div class="modal-header">
                 <div>
-                    <h2 class="form-title" style="text-align: left; margin: 0; font-family: var(--font-serif);" id="modal-candidate-name">Alex Johnson</h2>
-                    <p style="color: rgba(216, 215, 206, 0.7); font-size: 0.85rem;" id="modal-candidate-meta">Computer Science // 3rd Year</p>
+                    <h2 id="modal-candidate-name">Candidate Name</h2>
+                    <div class="subtitle" id="modal-candidate-meta">Department • Year</div>
                 </div>
-                <button class="modal-close" id="btn-close-detail">&times;</button>
+                <button class="modal-close" id="btn-close-detail">✕</button>
             </div>
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding-right: 8px;">
-                <div class="modal-section-title" style="font-weight: 600; color: #D8D7CE;">Academic & Contact Grid</div>
-                <div class="candidate-profile-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                    <div class="profile-field" style="display: flex; flex-direction: column;">
-                        <span class="profile-field-label" style="font-size: 0.75rem; color: rgba(216, 215, 206, 0.5);">Candidate ID</span>
-                        <span class="profile-field-value" id="modal-val-id" style="font-family: var(--font-mono); color: #00A6C0; font-weight: bold; font-size: 0.9rem;">AI26-1000</span>
+            <div class="modal-body">
+                <!-- Profile -->
+                <div class="modal-section-title">Academic & Contact</div>
+                <div class="profile-grid">
+                    <div class="profile-field">
+                        <span class="label">Candidate ID</span>
+                        <span class="value mono accent" id="modal-val-id">—</span>
                     </div>
-                    <div class="profile-field" style="display: flex; flex-direction: column;">
-                        <span class="profile-field-label" style="font-size: 0.75rem; color: rgba(216, 215, 206, 0.5);">Email Address</span>
-                        <span class="profile-field-value" id="modal-val-email" style="font-size: 0.9rem;">alex@college.edu</span>
+                    <div class="profile-field">
+                        <span class="label">Email</span>
+                        <span class="value" id="modal-val-email">—</span>
                     </div>
-                    <div class="profile-field" style="display: flex; flex-direction: column;">
-                        <span class="profile-field-label" style="font-size: 0.75rem; color: rgba(216, 215, 206, 0.5);">Roll Number</span>
-                        <span class="profile-field-value" id="modal-val-roll" style="font-size: 0.9rem;">CS2026-98</span>
+                    <div class="profile-field">
+                        <span class="label">Roll Number</span>
+                        <span class="value" id="modal-val-roll">—</span>
                     </div>
-                    <div class="profile-field" style="display: flex; flex-direction: column;">
-                        <span class="profile-field-label" style="font-size: 0.75rem; color: rgba(216, 215, 206, 0.5);">Location Coordinate</span>
-                        <span class="profile-field-value" id="modal-val-location" style="font-family: var(--font-mono); font-size: 0.9rem;">Geolocation pending</span>
+                    <div class="profile-field">
+                        <span class="label">College</span>
+                        <span class="value" id="modal-val-college">—</span>
                     </div>
-                    <div class="profile-field" style="display: flex; flex-direction: column;">
-                        <span class="profile-field-label" style="font-size: 0.75rem; color: rgba(216, 215, 206, 0.5);">Webcam Monitor Status</span>
-                        <span class="profile-field-value" id="modal-val-webcam" style="font-size: 0.9rem;">Active</span>
+                    <div class="profile-field">
+                        <span class="label">Webcam Status</span>
+                        <span class="value" id="modal-val-webcam">—</span>
                     </div>
-                    <div class="profile-field" style="display: flex; flex-direction: column;">
-                        <span class="profile-field-label" style="font-size: 0.75rem; color: rgba(216, 215, 206, 0.5);">Profiles Info</span>
-                        <span class="profile-field-value" style="font-size: 0.9rem;">
-                            <a href="#" id="modal-val-linkedin" target="_blank" style="color: #00A6C0; margin-right: 15px; font-weight: 500; text-decoration: none;">LinkedIn</a>
-                            <a href="#" id="modal-val-github" target="_blank" style="color: #00A6C0; font-weight: 500; text-decoration: none;">GitHub</a>
+                    <div class="profile-field">
+                        <span class="label">Links</span>
+                        <span class="value">
+                            <a href="#" id="modal-val-linkedin" target="_blank" style="color:var(--accent-cyan); text-decoration:none; margin-right:12px;">LinkedIn</a>
+                            <a href="#" id="modal-val-github" target="_blank" style="color:var(--accent-cyan); text-decoration:none;">GitHub</a>
                         </span>
                     </div>
                 </div>
 
-                <div class="modal-section-title" style="font-weight: 600; color: #D8D7CE; margin-top: 1rem;">AI Behavioral Telemetry</div>
-                <div class="candidate-profile-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
-                    <div class="glass-panel" style="padding: 12px; text-align: center; border-radius: 14px; background: rgba(34, 40, 49, 0.4); border: 1px solid rgba(255,255,255,0.04);">
-                        <div style="font-family: var(--font-mono); font-size: 1rem; color: #00A6C0; font-weight: 600;" id="telemetry-speed">0 CPM</div>
-                        <div style="font-size: 0.65rem; color: rgba(216, 215, 206, 0.5); text-transform: uppercase; margin-top: 4px; font-weight: 500;">Typing Speed</div>
+                <!-- Telemetry -->
+                <div class="modal-section-title">AI Behavioral Telemetry</div>
+                <div class="telemetry-grid">
+                    <div class="telemetry-item">
+                        <div class="value" id="telemetry-speed">0 CPM</div>
+                        <div class="label">Typing Speed</div>
                     </div>
-                    <div class="glass-panel" style="padding: 12px; text-align: center; border-radius: 14px; background: rgba(34, 40, 49, 0.4); border: 1px solid rgba(255,255,255,0.04);">
-                        <div style="font-family: var(--font-mono); font-size: 1rem; color: #00A6C0; font-weight: 600;" id="telemetry-variance">0ms</div>
-                        <div style="font-size: 0.65rem; color: rgba(216, 215, 206, 0.5); text-transform: uppercase; margin-top: 4px; font-weight: 500;">Variance</div>
+                    <div class="telemetry-item">
+                        <div class="value" id="telemetry-variance">0ms</div>
+                        <div class="label">Variance</div>
                     </div>
-                    <div class="glass-panel" style="padding: 12px; text-align: center; border-radius: 14px; background: rgba(34, 40, 49, 0.4); border: 1px solid rgba(255,255,255,0.04);">
-                        <div style="font-family: var(--font-mono); font-size: 1rem; color: #00A6C0; font-weight: 600;" id="telemetry-backspaces">0</div>
-                        <div style="font-size: 0.65rem; color: rgba(216, 215, 206, 0.5); text-transform: uppercase; margin-top: 4px; font-weight: 500;">Backspace</div>
+                    <div class="telemetry-item">
+                        <div class="value" id="telemetry-backspaces">0</div>
+                        <div class="label">Backspaces</div>
                     </div>
-                    <div class="glass-panel" style="padding: 12px; text-align: center; border-radius: 14px; background: rgba(34, 40, 49, 0.4); border: 1px solid rgba(255,255,255,0.04);">
-                        <div style="font-family: var(--font-mono); font-size: 1rem; color: #00A6C0; font-weight: 600;" id="telemetry-idle">0s</div>
-                        <div style="font-size: 0.65rem; color: rgba(216, 215, 206, 0.5); text-transform: uppercase; margin-top: 4px; font-weight: 500;">Idle Time</div>
+                    <div class="telemetry-item">
+                        <div class="value" id="telemetry-idle">0s</div>
+                        <div class="label">Idle Time</div>
                     </div>
                 </div>
 
-                <div class="modal-section-title" style="font-weight: 600; color: #D8D7CE; margin-top: 1rem;">Security Violation Logs Timeline</div>
-                <div style="padding: 12px; background: rgba(34, 40, 49, 0.4); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.04); margin-bottom: 16px;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.8rem;" id="violation-logs-table">
+                <!-- Violations -->
+                <div class="modal-section-title">Security Violation Logs</div>
+                <div style="padding:12px; background:rgba(255,255,255,0.25); border-radius:14px; border:1px solid rgba(34,40,49,0.06); margin-bottom:20px;">
+                    <table style="width:100%; border-collapse:collapse; font-size:0.8rem;" id="violation-logs-table">
                         <thead>
-                            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: rgba(216, 215, 206, 0.6);">
-                                <th style="padding: 6px 0;">Timestamp</th>
-                                <th>Violation Type</th>
-                                <th>Details</th>
+                            <tr style="border-bottom:1px solid rgba(34,40,49,0.06); color:rgba(34,40,49,0.4);">
+                                <th style="padding:6px 0; text-align:left;">Timestamp</th>
+                                <th style="text-align:left;">Type</th>
+                                <th style="text-align:left;">Details</th>
                             </tr>
                         </thead>
                         <tbody id="violation-logs-body">
-                            <!-- Populated dynamically -->
+                            <tr><td colspan="3" style="text-align:center; color:rgba(34,40,49,0.3); padding:12px;">No violations recorded</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <div class="modal-section-title" style="font-weight: 600; color: #D8D7CE; margin-top: 1rem;">Challenge Answers Index</div>
-                <div id="modal-answers-area" style="display: flex; flex-direction: column; gap: 12px;">
-                    <!-- Dynamic answers rendering -->
-                </div>
+                <!-- Answers -->
+                <div class="modal-section-title">Challenge Answers</div>
+                <div id="modal-answers-area"></div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 2: EMAIL TEMPLATES VIEW -->
+    <!-- ===== MODAL: Email Templates ===== -->
     <div class="modal-overlay" id="emails-modal">
-        <div class="glass-panel modal-content" style="max-width: 650px;">
+        <div class="modal-content">
             <div class="modal-header">
                 <div>
-                    <h2 class="form-title" style="text-align: left; margin: 0; font-family: var(--font-serif);">WORKSHOP EMAIL COMPILE ENGINE</h2>
-                    <p style="color: rgba(216, 215, 206, 0.7); font-size: 0.85rem;">Review templates formatted for the candidate stack.</p>
+                    <h2>Email Template Engine</h2>
+                    <div class="subtitle">Review and copy selection email templates</div>
                 </div>
-                <button class="modal-close" id="btn-close-emails">&times;</button>
+                <button class="modal-close" id="btn-close-emails">✕</button>
             </div>
-            
-            <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding-right: 8px;">
-                <div class="modal-section-title" style="font-weight: 600; color: #D8D7CE;">Selected Student Template</div>
-                <div style="margin-bottom: 20px; padding: 1.25rem; background: rgba(34, 40, 49, 0.4); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.04);">
-                    <button class="btn-futuristic btn-secondary" style="float: right; padding: 4px 10px; font-size: 0.75rem;" onclick="copyTemplate('selected-email')">Copy Template</button>
-                    <pre id="selected-email" style="font-family: var(--font-sans); font-size: 0.8rem; line-height: 1.6; white-space: pre-wrap; margin: 0; padding-top: 10px; color: #D8D7CE;">
-Subject: [ACTION REQUIRED] Selection Confirmation - AI NEXT GEN RESEARCH WORKSHOP 2026
+            <div class="modal-body">
+                <div class="modal-section-title">Selected Student Template</div>
+                <div style="margin-bottom:20px; padding:16px; background:rgba(255,255,255,0.25); border-radius:14px; border:1px solid rgba(34,40,49,0.06);">
+                    <button class="btn-futuristic btn-secondary" style="float:right; padding:4px 12px; font-size:0.7rem;" onclick="copyTemplate('selected-email')">📋 Copy</button>
+                    <pre id="selected-email" style="font-family:var(--font-sans); font-size:0.8rem; line-height:1.6; white-space:pre-wrap; margin:0; padding-top:8px; color:var(--dark-bg);">
+Subject: [ACTION REQUIRED] Selection Confirmation - AI NEXT GEN 2026
 
 Dear {CandidateName},
 
-Congratulations.
+Congratulations! Based on your outstanding performance ({FinalScore}/100), you have been SELECTED for the AI Next Gen Research Workshop 2026.
 
-Our selection vector has completed processing. Based on your Logic and AI Knowledge profile score ({FinalScore}/100), we are pleased to confirm that you have been SELECTED as one of the 30 minds for the AI Next Gen Research Workshop 2026 on August 15-16.
+📅 Date: August 15-16, 2026
+📍 Location: AI NEXT GEN Research Labs
 
-This is a premium hands-on workshop covering LLMs, custom Agent design, RAG databases, and semantic tool building. 
+Topics covered: LLMs, Agent Design, RAG Databases, Semantic Tool Building.
 
-Confirm your attendance by replying to this email within 24 hours. Failure to reply will result in forfeiture of your seat to waitlisted applicants.
+Please confirm your attendance by replying within 24 hours.
 
-Welcome to the lab.
+Welcome to the lab!
 
 Best regards,
-Selection Board,
+Selection Board
 AI NEXT GEN Research Labs
                     </pre>
                 </div>
 
-                <div class="modal-section-title" style="font-weight: 600; color: #D8D7CE;">Waitlisted / Non-Selected Template</div>
-                <div style="padding: 1.25rem; background: rgba(34, 40, 49, 0.4); border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.04);">
-                    <button class="btn-futuristic btn-secondary" style="float: right; padding: 4px 10px; font-size: 0.75rem;" onclick="copyTemplate('waitlist-email')">Copy Template</button>
-                    <pre id="waitlist-email" style="font-family: var(--font-sans); font-size: 0.8rem; line-height: 1.6; white-space: pre-wrap; margin: 0; padding-top: 10px; color: #D8D7CE;">
-Subject: Selection Review Status - AI NEXT GEN RESEARCH WORKSHOP 2026
+                <div class="modal-section-title">Waitlist Template</div>
+                <div style="padding:16px; background:rgba(255,255,255,0.25); border-radius:14px; border:1px solid rgba(34,40,49,0.06);">
+                    <button class="btn-futuristic btn-secondary" style="float:right; padding:4px 12px; font-size:0.7rem;" onclick="copyTemplate('waitlist-email')">📋 Copy</button>
+                    <pre id="waitlist-email" style="font-family:var(--font-sans); font-size:0.8rem; line-height:1.6; white-space:pre-wrap; margin:0; padding-top:8px; color:var(--dark-bg);">
+Subject: Selection Status - AI NEXT GEN 2026
 
 Dear {CandidateName},
 
-We appreciate your interest and performance in the Selection Challenge.
+Thank you for your participation. Due to limited capacity (30 seats), you have been placed on our waitlist.
 
-Due to the high application volume and our limit of 30 seats, we regret to inform you that you have not been shortlisted for the active roster this year. Your profile score ({FinalScore}/100) has been archived in our waitlist queue in case of candidate cancellations.
+Your score: {FinalScore}/100
 
-We wish you the very best in your AI journey.
+We will notify you if a seat becomes available.
 
 Best regards,
-Selection Board,
+Selection Board
 AI NEXT GEN Research Labs
                     </pre>
                 </div>
@@ -815,7 +1531,618 @@ AI NEXT GEN Research Labs
         </div>
     </div>
 
-    <!-- Admin backend controllers -->
-    <script src="/static/js/admin.js"></script>
+    <!-- ===== TOAST CONTAINER ===== -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        // ===== ENHANCED JAVASCRIPT =====
+        (function() {
+            'use strict';
+
+            // ===== STATE =====
+            const state = {
+                applicants: [],
+                filteredApplicants: [],
+                charts: {},
+                shortlistedCount: 0,
+                isLoading: false
+            };
+
+            // ===== DOM REFS =====
+            const $ = (s) => document.querySelector(s);
+            const $$ = (s) => document.querySelectorAll(s);
+
+            const tableBody = $('#admin-table-body');
+            const searchInput = $('#admin-search-input');
+            const searchCount = $('#search-count');
+            const filterCollege = $('#admin-filter-college');
+            const filterStatus = $('#admin-filter-status');
+            const sortSelect = $('#admin-sort-select');
+            const refreshBtn = $('#btn-refresh-data');
+            const shortlistBtn = $('#btn-auto-shortlist');
+            const exportBtn = $('#btn-export-csv');
+            const emailBtn = $('#btn-email-templates');
+            const logoutBtn = $('#btn-admin-logout');
+
+            // Stats
+            const statTotal = $('#stat-total-applicants');
+            const statAvg = $('#stat-avg-score');
+            const statHigh = $('#stat-high-score');
+            const statShort = $('#stat-shortlisted');
+            const rightDial = $('#right-shortlist-dial');
+            const seatFill = $('#seat-progress-fill');
+
+            // Feed
+            const feedWebcam = $('#feed-webcam-active');
+            const feedViolations = $('#feed-violations-count');
+            const feedCompletions = $('#feed-completions');
+
+            // ===== TOAST SYSTEM =====
+            function showToast(message, type = 'info', duration = 4000) {
+                const container = $('#toast-container');
+                const icons = {
+                    success: '✅',
+                    error: '❌',
+                    warning: '⚠️',
+                    info: 'ℹ️'
+                };
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <span class="icon">${icons[type] || 'ℹ️'}</span>
+                    <span class="message">${message}</span>
+                    <button class="close-toast">✕</button>
+                `;
+                container.appendChild(toast);
+
+                toast.querySelector('.close-toast').addEventListener('click', () => {
+                    removeToast(toast);
+                });
+
+                setTimeout(() => removeToast(toast), duration);
+            }
+
+            function removeToast(toast) {
+                toast.classList.add('removing');
+                setTimeout(() => toast.remove(), 300);
+            }
+
+            // ===== COPY TO CLIPBOARD =====
+            window.copyTemplate = function(id) {
+                const el = document.getElementById(id);
+                const text = el.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('Template copied to clipboard!', 'success');
+                }).catch(() => {
+                    // Fallback
+                    const range = document.createRange();
+                    range.selectNode(el);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                    document.execCommand('copy');
+                    showToast('Template copied!', 'success');
+                });
+            };
+
+            // ===== MOCK DATA GENERATOR =====
+            function generateMockData(count = 50) {
+                const colleges = ['MIT', 'Stanford', 'Harvard', 'Oxford', 'Cambridge', 'IIT Delhi', 'ETH Zurich', 'KAIST', 'Tokyo Tech', 'Tsinghua'];
+                const names = ['Alex Johnson', 'Sam Rivera', 'Taylor Kim', 'Jordan Lee', 'Morgan Chen', 'Riley Patel', 'Avery Wu', 'Quinn Zhang', 'Parker Brown', 'Logan Miller'];
+                const statuses = ['pending', 'shortlisted', 'waitlisted', 'rejected'];
+                const years = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate'];
+
+                const data = [];
+                for (let i = 0; i < count; i++) {
+                    const score = Math.round((Math.random() * 40 + 50) * 10) / 10;
+                    const status = score > 80 ? 'shortlisted' : (score > 65 ? 'waitlisted' : (score > 50 ? 'pending' : 'rejected'));
+                    data.push({
+                        id: `AI26-${String(1000 + i).padStart(4, '0')}`,
+                        name: names[i % names.length] + (i > names.length ? ` ${i}` : ''),
+                        college: colleges[i % colleges.length],
+                        year: years[i % years.length],
+                        email: `candidate${i}@${colleges[i % colleges.length].toLowerCase().replace(' ', '')}.edu`,
+                        roll: `${colleges[i % colleges.length].substring(0, 2)}${String(2026 - i % 4)}-${String(100 + i).padStart(3, '0')}`,
+                        linkedin: '#',
+                        github: '#',
+                        score: score,
+                        logicScore: Math.round((Math.random() * 30 + 30) * 10) / 10,
+                        typingSpeed: Math.round(Math.random() * 40 + 40),
+                        variance: Math.round(Math.random() * 80 + 20),
+                        backspaces: Math.round(Math.random() * 15),
+                        idleTime: Math.round(Math.random() * 20),
+                        totalTime: Math.round(Math.random() * 45 + 15),
+                        webcam: Math.random() > 0.15,
+                        violations: Math.random() > 0.7 ? Math.floor(Math.random() * 3) + 1 : 0,
+                        status: status,
+                        answers: [
+                            { q: 'What is a Transformer model?', a: 'A Transformer is a deep learning model that uses self-attention mechanisms to process sequential data.' },
+                            { q: 'Explain RAG in AI', a: 'Retrieval-Augmented Generation combines retrieval systems with generative models for enhanced knowledge.' },
+                            { q: 'What is fine-tuning?', a: 'Fine-tuning adapts a pre-trained model to specific tasks using additional training data.' }
+                        ],
+                        violationLogs: Math.random() > 0.7 ? [
+                            { time: '10:23:15', type: 'Tab Switch', detail: 'Switched to external tab' },
+                            { time: '10:24:02', type: 'Face Detection', detail: 'Multiple faces detected' }
+                        ] : []
+                    });
+                }
+                return data;
+            }
+
+            // ===== INIT DATA =====
+            function initData() {
+                state.applicants = generateMockData(50);
+                state.filteredApplicants = [...state.applicants];
+                populateCollegeFilter();
+                updateUI();
+                updateCharts();
+                showToast('Data loaded successfully!', 'success');
+            }
+
+            // ===== POPULATE COLLEGE FILTER =====
+            function populateCollegeFilter() {
+                const colleges = [...new Set(state.applicants.map(a => a.college))].sort();
+                filterCollege.innerHTML = '<option value="">All Colleges</option>' +
+                    colleges.map(c => `<option value="${c}">${c}</option>`).join('');
+            }
+
+            // ===== FILTER & SORT =====
+            function filterAndSort() {
+                const search = searchInput.value.toLowerCase().trim();
+                const college = filterCollege.value;
+                const status = filterStatus.value;
+                const sort = sortSelect.value;
+
+                let filtered = state.applicants.filter(a => {
+                    const matchSearch = !search || 
+                        a.name.toLowerCase().includes(search) || 
+                        a.email.toLowerCase().includes(search) ||
+                        a.college.toLowerCase().includes(search) ||
+                        a.id.toLowerCase().includes(search);
+                    const matchCollege = !college || a.college === college;
+                    const matchStatus = !status || a.status === status;
+                    return matchSearch && matchCollege && matchStatus;
+                });
+
+                // Sort
+                const sortMap = {
+                    'score': (a, b) => b.score - a.score,
+                    'time': (a, b) => a.totalTime - b.totalTime,
+                    'creativity': (a, b) => (b.logicScore || 0) - (a.logicScore || 0),
+                    'name': (a, b) => a.name.localeCompare(b.name)
+                };
+                filtered.sort(sortMap[sort] || sortMap.score);
+
+                state.filteredApplicants = filtered;
+                return filtered;
+            }
+
+            // ===== RENDER TABLE =====
+            function renderTable(data) {
+                if (!data || data.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="11" style="text-align:center; color:rgba(34,40,49,0.3); padding:3rem;">
+                                <span style="font-size:2rem;">🔍</span><br>
+                                No applicants found
+                            </td>
+                        </tr>
+                    `;
+                    searchCount.textContent = '';
+                    searchCount.style.display = 'none';
+                    return;
+                }
+
+                let html = '';
+                data.forEach((a, i) => {
+                    const rank = i + 1;
+                    const isShortlisted = a.status === 'shortlisted';
+                    const isFlagged = a.violations > 0;
+                    const rowClass = isShortlisted ? 'shortlisted-row' : (isFlagged ? 'flagged-row' : '');
+
+                    const statusBadge = {
+                        'shortlisted': '<span class="status-badge status-shortlisted">✅ Shortlisted</span>',
+                        'waitlisted': '<span class="status-badge status-waitlisted">⏳ Waitlisted</span>',
+                        'rejected': '<span class="status-badge status-rejected">❌ Rejected</span>',
+                        'pending': '<span class="status-badge" style="background:rgba(107,114,128,0.1); color:#6B7280; border:1px solid rgba(107,114,128,0.1);">⏳ Pending</span>'
+                    }[a.status] || '<span class="status-badge">—</span>';
+
+                    const webcamStatus = a.webcam ? 
+                        '<span class="badge-safe">✅ OK</span>' : 
+                        '<span class="badge-cheated">🚫 Off</span>';
+
+                    html += `
+                        <tr class="${rowClass}" data-id="${a.id}">
+                            <td><strong style="color:${isShortlisted ? 'var(--accent-cyan)' : 'inherit'}">#${rank}</strong></td>
+                            <td>
+                                <div style="font-weight:600;">${a.name}</div>
+                                <div style="font-size:0.7rem; color:rgba(34,40,49,0.4);">${a.id}</div>
+                            </td>
+                            <td>${a.college}</td>
+                            <td>${a.totalTime}m</td>
+                            <td>${webcamStatus}</td>
+                            <td>${a.violations > 0 ? `<span class="badge-cheated">⚠️ ${a.violations}</span>` : '<span style="color:rgba(34,40,49,0.3);">0</span>'}</td>
+                            <td>${a.typingSpeed} CPM</td>
+                            <td>${a.logicScore || '—'}</td>
+                            <td><strong style="color:${a.score > 80 ? 'var(--accent-green)' : (a.score > 60 ? 'var(--accent-cyan)' : 'inherit')}">${a.score}</strong></td>
+                            <td>${statusBadge}</td>
+                            <td style="text-align:right; white-space:nowrap;">
+                                <button class="action-btn" data-action="view" data-id="${a.id}" title="View Details">👁️</button>
+                                <button class="action-btn danger" data-action="flag" data-id="${a.id}" title="Flag">🚩</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableBody.innerHTML = html;
+
+                // Show search count
+                const total = state.applicants.length;
+                const shown = data.length;
+                if (shown < total) {
+                    searchCount.textContent = `${shown} of ${total}`;
+                    searchCount.style.display = 'inline';
+                } else {
+                    searchCount.style.display = 'none';
+                }
+
+                // Bind row actions
+                tableBody.querySelectorAll('[data-action="view"]').forEach(btn => {
+                    btn.addEventListener('click', () => openDetail(btn.dataset.id));
+                });
+                tableBody.querySelectorAll('[data-action="flag"]').forEach(btn => {
+                    btn.addEventListener('click', () => toggleFlag(btn.dataset.id));
+                });
+            }
+
+            // ===== UPDATE STATS =====
+            function updateStats() {
+                const total = state.applicants.length;
+                const scores = state.applicants.map(a => a.score);
+                const avg = total > 0 ? (scores.reduce((s, v) => s + v, 0) / total) : 0;
+                const high = total > 0 ? Math.max(...scores) : 0;
+                const shortlisted = state.applicants.filter(a => a.status === 'shortlisted').length;
+                const completed = state.applicants.filter(a => a.status !== 'pending').length;
+                const violations = state.applicants.filter(a => a.violations > 0).length;
+                const webcamOk = state.applicants.filter(a => a.webcam).length;
+
+                statTotal.textContent = total;
+                statAvg.textContent = avg.toFixed(1);
+                statHigh.textContent = high.toFixed(1);
+                statShort.textContent = `${shortlisted} / 30`;
+                rightDial.textContent = `${shortlisted} / 30`;
+                seatFill.style.width = `${Math.min((shortlisted / 30) * 100, 100)}%`;
+
+                feedWebcam.textContent = webcamOk;
+                feedViolations.textContent = violations;
+                feedCompletions.textContent = completed;
+
+                state.shortlistedCount = shortlisted;
+
+                // Update update time
+                document.getElementById('update-time').textContent = new Date().toLocaleTimeString();
+            }
+
+            // ===== UPDATE UI =====
+            function updateUI() {
+                const filtered = filterAndSort();
+                renderTable(filtered);
+                updateStats();
+            }
+
+            // ===== CHARTS =====
+            function updateCharts() {
+                const data = state.applicants;
+
+                // Score Distribution
+                const scoreBins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+                const scoreCounts = scoreBins.slice(0, -1).map((bin, i) => {
+                    return data.filter(a => a.score >= bin && a.score < scoreBins[i + 1]).length;
+                });
+
+                if (state.charts.score) {
+                    state.charts.score.destroy();
+                }
+                const ctx1 = document.getElementById('scoreDistChart').getContext('2d');
+                state.charts.score = new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['0-10', '10-20', '20-30', '30-40', '40-50', '50-60', '60-70', '70-80', '80-90', '90-100'],
+                        datasets: [{
+                            label: 'Applicants',
+                            data: scoreCounts,
+                            backgroundColor: 'rgba(0, 166, 192, 0.6)',
+                            borderColor: 'rgba(0, 166, 192, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                // College Distribution
+                const collegeData = {};
+                data.forEach(a => { collegeData[a.college] = (collegeData[a.college] || 0) + 1; });
+                const collegeLabels = Object.keys(collegeData);
+                const collegeValues = Object.values(collegeData);
+                const colors = ['#00A6C0', '#7b2ffc', '#16A34A', '#DC2626', '#F59E0B', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#6366F1'];
+
+                if (state.charts.college) {
+                    state.charts.college.destroy();
+                }
+                const ctx2 = document.getElementById('collegeChart').getContext('2d');
+                state.charts.college = new Chart(ctx2, {
+                    type: 'pie',
+                    data: {
+                        labels: collegeLabels,
+                        datasets: [{
+                            data: collegeValues,
+                            backgroundColor: colors.slice(0, collegeLabels.length)
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } }
+                    }
+                });
+
+                // Status Distribution
+                const statusData = {
+                    'shortlisted': data.filter(a => a.status === 'shortlisted').length,
+                    'waitlisted': data.filter(a => a.status === 'waitlisted').length,
+                    'rejected': data.filter(a => a.status === 'rejected').length,
+                    'pending': data.filter(a => a.status === 'pending').length
+                };
+
+                if (state.charts.status) {
+                    state.charts.status.destroy();
+                }
+                const ctx3 = document.getElementById('statusChart').getContext('2d');
+                state.charts.status = new Chart(ctx3, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Shortlisted', 'Waitlisted', 'Rejected', 'Pending'],
+                        datasets: [{
+                            data: [statusData.shortlisted, statusData.waitlisted, statusData.rejected, statusData.pending],
+                            backgroundColor: ['#16A34A', '#F59E0B', '#DC2626', '#6B7280']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } }
+                    }
+                });
+            }
+
+            // ===== OPEN DETAIL MODAL =====
+            function openDetail(id) {
+                const applicant = state.applicants.find(a => a.id === id);
+                if (!applicant) return;
+
+                const modal = $('#detail-modal');
+                $('#modal-candidate-name').textContent = applicant.name;
+                $('#modal-candidate-meta').textContent = `${applicant.college} • ${applicant.year}`;
+                $('#modal-val-id').textContent = applicant.id;
+                $('#modal-val-email').textContent = applicant.email;
+                $('#modal-val-roll').textContent = applicant.roll;
+                $('#modal-val-college').textContent = applicant.college;
+                $('#modal-val-webcam').textContent = applicant.webcam ? '✅ Active' : '🚫 Offline';
+                $('#modal-val-webcam').style.color = applicant.webcam ? 'var(--accent-green)' : 'var(--accent-red)';
+                $('#modal-val-linkedin').href = applicant.linkedin || '#';
+                $('#modal-val-github').href = applicant.github || '#';
+                $('#telemetry-speed').textContent = `${applicant.typingSpeed || 0} CPM`;
+                $('#telemetry-variance').textContent = `${applicant.variance || 0}ms`;
+                $('#telemetry-backspaces').textContent = applicant.backspaces || 0;
+                $('#telemetry-idle').textContent = `${applicant.idleTime || 0}s`;
+
+                // Violations
+                const logsBody = $('#violation-logs-body');
+                if (applicant.violationLogs && applicant.violationLogs.length > 0) {
+                    logsBody.innerHTML = applicant.violationLogs.map(log => `
+                        <tr style="border-bottom:1px solid rgba(34,40,49,0.04);">
+                            <td style="padding:6px 0; font-size:0.75rem;">${log.time}</td>
+                            <td style="font-size:0.75rem;"><span class="badge-cheated">${log.type}</span></td>
+                            <td style="font-size:0.75rem; color:rgba(34,40,49,0.6);">${log.detail}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    logsBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:rgba(34,40,49,0.3); padding:12px;">No violations recorded</td></tr>`;
+                }
+
+                // Answers
+                const answersArea = $('#modal-answers-area');
+                if (applicant.answers && applicant.answers.length > 0) {
+                    answersArea.innerHTML = applicant.answers.map(ans => `
+                        <div class="answer-card">
+                            <div class="q">📌 ${ans.q}</div>
+                            <div class="a">${ans.a}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    answersArea.innerHTML = `<p style="color:rgba(34,40,49,0.3); text-align:center; padding:12px;">No answers available</p>`;
+                }
+
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            // ===== TOGGLE FLAG =====
+            function toggleFlag(id) {
+                const applicant = state.applicants.find(a => a.id === id);
+                if (!applicant) return;
+                applicant.violations = applicant.violations > 0 ? 0 : 1;
+                if (applicant.violations > 0) {
+                    applicant.violationLogs = [{
+                        time: new Date().toLocaleTimeString(),
+                        type: 'Manual Flag',
+                        detail: 'Flagged by admin'
+                    }];
+                    showToast(`🚩 ${applicant.name} has been flagged`, 'warning');
+                } else {
+                    applicant.violationLogs = [];
+                    showToast(`✅ ${applicant.name} flag removed`, 'success');
+                }
+                updateUI();
+            }
+
+            // ===== AUTO-SHORTLIST =====
+            function autoShortlist() {
+                if (state.isLoading) return;
+                state.isLoading = true;
+                shortlistBtn.classList.add('loading');
+                shortlistBtn.disabled = true;
+
+                // Simulate API call
+                setTimeout(() => {
+                    const sorted = [...state.applicants].sort((a, b) => b.score - a.score);
+                    const top = sorted.slice(0, 30);
+                    state.applicants.forEach(a => {
+                        const isTop = top.includes(a);
+                        a.status = isTop ? 'shortlisted' : (a.status === 'shortlisted' ? 'waitlisted' : a.status);
+                    });
+
+                    state.isLoading = false;
+                    shortlistBtn.classList.remove('loading');
+                    shortlistBtn.disabled = false;
+                    updateUI();
+                    showToast(`✅ Top 30 applicants shortlisted!`, 'success');
+                }, 800);
+            }
+
+            // ===== EXPORT CSV =====
+            function exportCSV() {
+                const data = state.filteredApplicants;
+                if (data.length === 0) {
+                    showToast('No data to export', 'warning');
+                    return;
+                }
+
+                const headers = ['ID', 'Name', 'College', 'Score', 'Status', 'Time', 'Violations', 'Typing', 'Logic'];
+                const rows = data.map(a => [
+                    a.id, a.name, a.college, a.score, a.status, a.totalTime, a.violations, a.typingSpeed, a.logicScore
+                ]);
+                const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `applicants_${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('📊 CSV exported successfully!', 'success');
+            }
+
+            // ===== REFRESH =====
+            function refreshData() {
+                if (state.isLoading) return;
+                state.isLoading = true;
+                refreshBtn.classList.add('loading');
+                refreshBtn.disabled = true;
+
+                setTimeout(() => {
+                    // Re-generate data with random changes
+                    const newData = generateMockData(50);
+                    // Preserve shortlist status
+                    const shortlistedIds = new Set(state.applicants.filter(a => a.status === 'shortlisted').map(a => a.id));
+                    newData.forEach(a => {
+                        if (shortlistedIds.has(a.id)) {
+                            a.status = 'shortlisted';
+                        }
+                    });
+                    state.applicants = newData;
+                    state.isLoading = false;
+                    refreshBtn.classList.remove('loading');
+                    refreshBtn.disabled = false;
+                    updateUI();
+                    updateCharts();
+                    showToast('🔄 Data refreshed!', 'success');
+                }, 600);
+            }
+
+            // ===== MODAL CONTROLS =====
+            function closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+
+            // Close modals
+            $('#btn-close-detail').addEventListener('click', () => closeModal('detail-modal'));
+            $('#btn-close-emails').addEventListener('click', () => closeModal('emails-modal'));
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) closeModal(overlay.id);
+                });
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id));
+                }
+            });
+
+            // ===== EVENT BINDINGS =====
+            searchInput.addEventListener('input', debounce(updateUI, 300));
+            filterCollege.addEventListener('change', updateUI);
+            filterStatus.addEventListener('change', updateUI);
+            sortSelect.addEventListener('change', updateUI);
+            refreshBtn.addEventListener('click', refreshData);
+            shortlistBtn.addEventListener('click', autoShortlist);
+            exportBtn.addEventListener('click', exportCSV);
+
+            emailBtn.addEventListener('click', () => {
+                const modal = $('#emails-modal');
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to logout?')) {
+                    showToast('Logging out...', 'info');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 500);
+                }
+            });
+
+            // ===== DEBOUNCE =====
+            function debounce(fn, delay) {
+                let timer;
+                return function(...args) {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => fn.apply(this, args), delay);
+                };
+            }
+
+            // ===== KEYBOARD SHORTCUTS =====
+            document.addEventListener('keydown', (e) => {
+                // Ctrl+F to focus search
+                if (e.ctrlKey && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                    searchInput.select();
+                }
+                // Ctrl+R to refresh
+                if (e.ctrlKey && e.key === 'r') {
+                    e.preventDefault();
+                    refreshData();
+                }
+            });
+
+            // ===== INIT =====
+            initData();
+
+            console.log('🚀 Admin Panel Enhanced - AI Next Gen 2026');
+            console.log('📌 Shortcuts: Ctrl+F (search), Ctrl+R (refresh)');
+
+        })();
+    </script>
 </body>
 </html>
