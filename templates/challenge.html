@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Arena - AI NEXT GEN 2026</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .arena-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        /* Sidebar Missions Menu */
+        .missions-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .mission-item {
+            padding: 1rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.01);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            font-size: 0.8rem;
+        }
+
+        .mission-item.active {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.04);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+
+        .mission-item.completed {
+            border-color: var(--accent-green);
+            background: rgba(16, 185, 129, 0.04);
+        }
+
+        .mission-item.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .mission-item-title {
+            font-family: var(--font-futuristic);
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .mission-status-icon {
+            font-size: 1.1rem;
+        }
+
+        /* Floating Video */
+        #floating-webcam-feed {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 150px;
+            height: 110px;
+            border-radius: 8px;
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            z-index: 999;
+            object-fit: cover;
+            background: black;
+            pointer-events: none;
+            display: block;
+        }
+
+        /* Watermark */
+        #dynamic-watermark {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.015);
+            display: block;
+            user-select: none;
+            white-space: nowrap;
+        }
+        
+        .watermark-text {
+            position: absolute;
+            animation: moveWatermark 25s infinite linear;
+            transform: rotate(-15deg);
+        }
+
+        @keyframes moveWatermark {
+            0% { top: -5%; left: -5%; }
+            50% { top: 95%; left: 95%; }
+            100% { top: -5%; left: -5%; }
+        }
+
+        /* Screen blur on violation */
+        .blur-overlay {
+            filter: blur(25px) !important;
+            transition: filter 0.3s ease;
+        }
+
+        .shape-match-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .shape-card-grid {
+            border: 1px solid var(--card-border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.01);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .shape-card-grid:hover {
+            border-color: var(--accent-indigo);
+            background: rgba(99, 102, 241, 0.05);
+        }
+        .shape-card-grid.selected {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 240, 255, 0.08);
+        }
+
+        @media (max-width: 800px) {
+            .arena-grid {
+                grid-template-columns: 1fr;
+            }
+            .missions-sidebar {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 0.5rem;
+            }
+            .mission-item {
+                flex-shrink: 0;
+                min-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="dynamic-watermark">
+        <span class="watermark-text" id="watermark-content">AINEXT2026-0000 // ACTIVE ASSESSMENT</span>
+    </div>
+
+    <!-- Live Webcam Overlay -->
+    <video id="floating-webcam-feed" autoplay muted playsinline></video>
+
+    <div class="container" id="main-content-wrapper">
+        <!-- HEADER -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AI NEXT GEN CHALLENGE</span>
+            </div>
+            <div class="selection-ratio" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: var(--accent-red); font-family: var(--font-futuristic); font-size: 0.8rem;" id="violation-display">
+                Violations: 0/3
+            </div>
+        </header>
+
+        <!-- Main Challenge Arena Layout -->
+        <div class="arena-grid">
+            
+            <!-- Side Missions progression board -->
+            <div class="missions-sidebar">
+                <div class="mission-item locked" id="m-item-1">
+                    <span class="mission-item-title">MISSION 01: LOGIC DETECTIVE</span>
+                    <span class="mission-status-icon" id="m-status-1">🔒</span>
+                </div>
+                <div class="mission-item locked" id="m-item-2">
+                    <span class="mission-item-title">MISSION 02: FUTURE THINKER</span>
+                    <span class="mission-status-icon" id="m-status-2">🔒</span>
+                </div>
+                <div class="mission-item locked" id="m-item-3">
+                    <span class="mission-item-title">MISSION 03: AI ARCHITECT</span>
+                    <span class="mission-status-icon" id="m-status-3">🔒</span>
+                </div>
+                <div class="mission-item locked" id="m-item-4">
+                    <span class="mission-item-title">MISSION 04: PROMPT ENGINEER</span>
+                    <span class="mission-status-icon" id="m-status-4">🔒</span>
+                </div>
+                <div class="mission-item locked" id="m-item-5">
+                    <span class="mission-item-title">MISSION 05: RAG ANALYST</span>
+                    <span class="mission-status-icon" id="m-status-5">🔒</span>
+                </div>
+                <div class="mission-item locked" id="m-item-6">
+                    <span class="mission-item-title">MISSION 06: BALANCE MASTER</span>
+                    <span class="mission-status-icon" id="m-status-6">🔒</span>
+                </div>
+                <div class="mission-item locked" id="m-item-7">
+                    <span class="mission-item-title">MISSION 07: FUTURE BUILDER</span>
+                    <span class="mission-status-icon" id="m-status-7">🔒</span>
+                </div>
+            </div>
+
+            <!-- Interactive Questions Pane -->
+            <div class="glass-panel challenge-container" style="margin: 0;">
+                <div class="challenge-header" style="border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                    <div class="challenge-level-info">
+                        <span class="level-indicator" id="challenge-level-indicator">MISSION 01 OF 07</span>
+                        <span class="level-name" id="challenge-level-name">AI Logic Detective</span>
+                    </div>
+                    <div class="challenge-stats">
+                        <div class="xp-counter">XP: <span id="challenge-xp">0</span></div>
+                        <div class="timer-box" style="margin-left: 1.5rem;">
+                            <span>⏱</span> <span id="challenge-timer">00:00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress bar fill -->
+                <div class="progress-bar-container" style="margin-bottom: 2rem;">
+                    <div class="progress-bar-fill" id="challenge-progress-fill"></div>
+                </div>
+
+                <div class="secret-level-banner" id="secret-level-indicator" style="display: none;">
+                    ⚠ SECRET VECTOR: BUDGET ₹1000 // NO GPU LIMIT // MAX 150 WORDS ⚠
+                </div>
+
+                <div class="challenge-body">
+                    <div id="question-render-area">
+                        <!-- Javascript insertions -->
+                    </div>
+
+                    <div class="form-actions">
+                        <span id="word-counter-display" style="display:none; font-family: var(--font-mono); color: var(--text-secondary); align-self: center;">
+                            Words: <span id="word-count-num">0</span>/150
+                        </span>
+                        <button type="button" class="btn-futuristic" id="btn-next-level">
+                            Next Mission ➔
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast Anti-cheat Alert container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

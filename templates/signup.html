@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - AI NEXT GEN 2026</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .signup-container {
+            max-width: 650px;
+            margin: 5vh auto;
+            padding: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AI NEXT GEN</span>
+            </div>
+            <a href="/" class="btn-futuristic btn-secondary" style="padding: 0.4rem 1.2rem; font-size: 0.8rem;">Home</a>
+        </header>
+
+        <div class="glass-panel signup-container">
+            <h2 class="form-title">CREATE APPLICANT IDENTITY</h2>
+            <p class="form-subtitle">Register your details before starting the selection vector challenge.</p>
+
+            <form id="signup-form">
+                <div class="form-group-grid">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" required placeholder="e.g., Alex Johnson">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Academic Email</label>
+                        <input type="email" id="email" required placeholder="e.g., alex@college.edu">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" required placeholder="e.g., +91 9444455555">
+                    </div>
+                    <div class="form-group">
+                        <label for="college">College / University</label>
+                        <input type="text" id="college" required placeholder="e.g., IIT Madras">
+                    </div>
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <input type="text" id="department" required placeholder="e.g., Computer Science">
+                    </div>
+                    <div class="form-group">
+                        <label for="year">Year of Study</label>
+                        <select id="year" required>
+                            <option value="" disabled selected>Select Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required placeholder="Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm Password</label>
+                        <input type="password" id="confirm-password" required placeholder="Confirm Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn Profile <span style="color: var(--text-muted); font-size: 0.7rem;">(Optional)</span></label>
+                        <input type="url" id="linkedin" placeholder="https://linkedin.com/in/...">
+                    </div>
+                    <div class="form-group">
+                        <label for="github">GitHub Profile <span style="color: var(--text-muted); font-size: 0.7rem;">(Optional)</span></label>
+                        <input type="url" id="github" placeholder="https://github.com/...">
+                    </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 2rem;">
+                    <a href="/login" style="align-self: center; margin-right: auto; color: var(--accent-cyan); font-size: 0.9rem; text-decoration: none; font-family: var(--font-futuristic); letter-spacing: 1px;">Have an Account? Login</a>
+                    <button type="submit" class="btn-futuristic">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            if (password !== confirmPassword) {
+                alert("Passwords do not match.");
+                return;
+            }
+
+            const signupData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                college: document.getElementById('college').value,
+                department: document.getElementById('department').value,
+                year: parseInt(document.getElementById('year').value),
+                password: password,
+                linkedin: document.getElementById('linkedin').value,
+                github: document.getElementById('github').value
+            };
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(signupData)
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Redirect to dashboard on success (API sets session automatically)
+                    window.location.href = '/dashboard';
+                } else {
+                    alert(result.error || 'Signup failed');
+                }
+            } catch (err) {
+                // Local Sandbox Fallback Mode
+                const raw = localStorage.getItem('candidates');
+                let list = raw ? JSON.parse(raw) : [];
+                
+                if (list.some(c => c.email.toLowerCase() === signupData.email.toLowerCase())) {
+                    alert("Email address is already registered.");
+                    return;
+                }
+                
+                const c_id = `AINEXT2026-${Math.floor(1000 + Math.random() * 9000)}`;
+                const s_id = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2);
+                
+                const candidateObj = {
+                    candidate_id: c_id,
+                    session_id: s_id,
+                    name: signupData.name,
+                    email: signupData.email,
+                    phone: signupData.phone,
+                    college: signupData.college,
+                    department: signupData.department,
+                    year: signupData.year,
+                    password: signupData.password,
+                    linkedin: signupData.linkedin,
+                    github: signupData.github,
+                    started: false,
+                    completed: false,
+                    level1_ans: '', level2_ans: '', level3_ans: '', level4_ans: '', level5_ans: '', level6_ans: '', level7_ans: '',
+                    time_taken: 0,
+                    tab_switches: 0,
+                    violation_count: 0,
+                    violation_logs: '[]',
+                    backspace_count: 0,
+                    typing_speed_avg: 0.0,
+                    typing_pattern_variance: 0.0,
+                    mouse_moves_count: 0,
+                    idle_duration: 0,
+                    webcam_status: 'Active',
+                    location_data: '13.0827, 80.2707',
+                    score_logic: 0,
+                    score_creativity: 0,
+                    score_ai_knowledge: 0,
+                    score_problem_solving: 0,
+                    score_time: 0,
+                    score_final: 0,
+                    badges: '[]',
+                    selected: 0,
+                    created_at: new Date().toISOString()
+                };
+                
+                list.push(candidateObj);
+                localStorage.setItem('candidates', JSON.stringify(list));
+                
+                // Set temporary session in local storage for local dashboards
+                localStorage.setItem('active_session_email', signupData.email);
+                localStorage.setItem('active_session_candidate_id', c_id);
+                
+                alert("Server offline. Registered details locally in sandbox database.");
+                window.location.href = '/dashboard';
+            }
+        });
+    </script>
+</body>
+</html>

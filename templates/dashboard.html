@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI NEXT GEN 2026</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .dashboard-left {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .dashboard-right {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: var(--font-futuristic);
+            font-size: 0.95rem;
+            margin-top: 1rem;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulseGlow 1.5s infinite alternate;
+        }
+        .status-color-pending { background-color: var(--accent-yellow); box-shadow: 0 0 10px var(--accent-yellow); }
+        .status-color-selected { background-color: var(--accent-green); box-shadow: 0 0 10px var(--accent-green); }
+        .status-color-rejected { background-color: var(--accent-red); box-shadow: 0 0 10px var(--accent-red); }
+        .status-color-disqualified { background-color: #ef4444; box-shadow: 0 0 15px #ef4444; }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .metric-mini-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        .metric-mini-card {
+            padding: 1.2rem 1rem;
+            text-align: center;
+        }
+
+        .invitation-box {
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.04);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .metric-mini-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <div class="container" style="max-width: 1200px;">
+        <!-- Header -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AI NEXT GEN LAB</span>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <span class="status-container" style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);" id="top-candidate-id">CANDIDATE ID: AINEXT2026-0000</span>
+                <button class="btn-futuristic btn-secondary" id="btn-user-logout" style="padding: 0.4rem 1.2rem; font-size: 0.8rem;">LOGOUT</button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD CONTAINER -->
+        <div class="dashboard-grid">
+            
+            <!-- LEFT SECTION -->
+            <div class="dashboard-left">
+                <!-- Welcome Card -->
+                <div class="glass-panel" style="padding: 2.5rem; position: relative; overflow: hidden;">
+                    <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
+                    
+                    <span class="pre-title" style="letter-spacing: 3px;">Control Center</span>
+                    <h2 class="form-title" style="text-align: left; margin: 0.5rem 0;" id="welcome-message">Welcome, John.</h2>
+                    
+                    <div class="status-container">
+                        <span class="status-dot status-color-pending" id="status-light"></span>
+                        <span>APPLICATION VECTOR: <span id="status-text" style="color: var(--accent-yellow);">PENDING SELECTION REVIEW</span></span>
+                    </div>
+                </div>
+
+                <!-- Progress Details Grid -->
+                <div class="glass-panel" style="padding: 2rem;">
+                    <h3 class="timeline-title" style="margin-bottom: 1.5rem;">Selection Assessment Benchmarks</h3>
+                    
+                    <!-- Progress bars -->
+                    <div style="margin-bottom: 2rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                            <span style="color: var(--text-secondary);">Profile Completion Index</span>
+                            <span id="profile-progress-percent" style="font-family: var(--font-mono); color: var(--accent-cyan);">40%</span>
+                        </div>
+                        <div class="progress-bar-container" style="margin: 0;">
+                            <div class="progress-bar-fill" id="profile-progress-fill" style="width: 40%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Scores parameters mini cards -->
+                    <div class="metric-mini-grid">
+                        <div class="glass-panel metric-mini-card">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Cognitive Logic</div>
+                            <div style="font-size: 1.8rem; font-family: var(--font-futuristic); color: var(--accent-cyan); margin-top: 0.5rem;" id="score-logic">0</div>
+                        </div>
+                        <div class="glass-panel metric-mini-card">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Creativity Index</div>
+                            <div style="font-size: 1.8rem; font-family: var(--font-futuristic); color: var(--accent-cyan); margin-top: 0.5rem;" id="score-creativity">0</div>
+                        </div>
+                        <div class="glass-panel metric-mini-card">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">AI Knowledge</div>
+                            <div style="font-size: 1.8rem; font-family: var(--font-futuristic); color: var(--accent-cyan); margin-top: 0.5rem;" id="score-ai">0</div>
+                        </div>
+                        <div class="glass-panel metric-mini-card">
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Final Score %</div>
+                            <div style="font-size: 1.8rem; font-family: var(--font-futuristic); color: var(--accent-cyan); margin-top: 0.5rem;" id="score-final">0.0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Card -->
+                <div class="glass-panel" style="padding: 2.5rem; text-align: center; border-color: rgba(99, 102, 241, 0.2);" id="action-vector-card">
+                    <h3 class="timeline-title" style="margin-bottom: 0.5rem;" id="action-title">AI Research Challenge Locked</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;" id="action-description">
+                        Unlock and engage the 7 missions of the AI Selection assessments. Viewport monitoring and anti-cheating protocols apply.
+                    </p>
+                    <a href="/challenge" class="btn-futuristic" id="btn-action-challenge" style="padding: 1rem 3rem;">Unlock Research Challenge</a>
+                </div>
+
+                <!-- Selected Student Invitation Box -->
+                <div class="invitation-box" id="selected-invitation">
+                    <h3 class="timeline-title" style="color: var(--accent-green); margin-bottom: 1rem;">INVITATION PROTOCOL DETECTED</h3>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        Congratulations! You have been successfully shortlisted for the AI Next Gen Workshop 2026. 
+                        Your score ranked within the top 7% select vector. Find your letter parameters generated below:
+                    </p>
+                    <div class="answer-card" style="margin-bottom: 1rem; border-color: rgba(16, 185, 129, 0.25); background: rgba(0,0,0,0.4);">
+                        <pre style="font-family: var(--font-sans); font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap;" id="invitation-text-content">
+Subject: Official Selection Letter - AI NEXT GEN RESEARCH WORKSHOP 2026
+
+Dear {CandidateName},
+
+Based on your selection score ({FinalScore}%), the lab committee has approved your admission.
+Venue: AI Research Hub, MIT Media Lab / Virtual Sandbox
+Date: August 15-16, 2026
+
+Welcome to the Next Gen cohort.
+                        </pre>
+                    </div>
+                    <button class="btn-futuristic" style="padding: 0.5rem 1.5rem; font-size: 0.8rem; background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));" onclick="window.print()">Print Invite PDF</button>
+                </div>
+            </div>
+
+            <!-- RIGHT SECTION -->
+            <div class="dashboard-right">
+                <!-- Workshop details -->
+                <div class="glass-panel" style="padding: 1.5rem 2rem;">
+                    <h3 class="timeline-title" style="margin-bottom: 1.5rem; font-size: 1.1rem;">Workshop Logistics</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 1.2rem; font-size: 0.9rem;">
+                        <div>
+                            <span style="color: var(--text-muted); display: block; font-size: 0.75rem; text-transform: uppercase;">Workshop Date</span>
+                            <strong style="color: var(--text-primary);">August 15-16, 2026</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--text-muted); display: block; font-size: 0.75rem; text-transform: uppercase;">Venue Location</span>
+                            <strong style="color: var(--text-primary);">AI Labs, MIT Media Lab Sandbox</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--text-muted); display: block; font-size: 0.75rem; text-transform: uppercase;">Available Seats</span>
+                            <strong style="color: var(--text-primary);">30 Candidates Max</strong>
+                        </div>
+                        <div>
+                            <span style="color: var(--text-muted); display: block; font-size: 0.75rem; text-transform: uppercase;">Shortlist Criteria</span>
+                            <strong style="color: var(--text-primary);">Cognitive score >= Top 30 threshold</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Radar Chart / Badges Card -->
+                <div class="glass-panel" style="padding: 2rem; display: flex; flex-direction: column; align-items: center;" id="dashboard-chart-card">
+                    <h3 class="timeline-title" style="margin-bottom: 1rem; align-self: flex-start; font-size: 1.1rem;">Cognitive Vector</h3>
+                    
+                    <!-- Radar Canvas -->
+                    <div style="width: 100%; height: 200px; position: relative;" id="radar-canvas-container">
+                        <canvas id="dashboardRadar"></canvas>
+                        <div id="radar-placeholder" style="text-align: center; padding-top: 80px; color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-futuristic);">Unlock assessment to map vector</div>
+                    </div>
+
+                    <!-- Badges -->
+                    <div style="width: 100%; margin-top: 1.5rem;">
+                        <span style="color: var(--text-muted); display: block; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.5rem;">Earned Badges</span>
+                        <div class="badge-list" id="dashboard-badges-list" style="margin: 0;">
+                            <span style="color: var(--text-muted); font-size: 0.8rem;">No badges earned yet.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI NEXT GEN 2026</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .login-card {
+            max-width: 450px;
+            margin: 10vh auto;
+            padding: 3rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="logo">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AI NEXT GEN</span>
+            </div>
+            <a href="/" class="btn-futuristic btn-secondary" style="padding: 0.4rem 1.2rem; font-size: 0.8rem;">Home</a>
+        </header>
+
+        <div class="glass-panel login-card">
+            <div class="logo-icon" style="width: 40px; height: 40px; margin: 0 auto 1.5rem auto;"></div>
+            <h2 class="form-title" style="margin-bottom: 0.5rem; font-size: 1.4rem;">IDENTITY VERIFICATION</h2>
+            <p class="form-subtitle" style="margin-bottom: 2rem;">Log in to access your Candidate Dashboard.</p>
+
+            <form id="login-form">
+                <div class="form-group" style="text-align: left;">
+                    <label for="email">Academic Email</label>
+                    <input type="email" id="email" required placeholder="e.g., alex@college.edu">
+                </div>
+                <div class="form-group" style="text-align: left; margin-bottom: 2rem;">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter password">
+                </div>
+                
+                <button type="submit" class="btn-futuristic" style="width: 100%;">
+                    Log In
+                </button>
+
+                <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; font-size: 0.85rem;">
+                    <a href="/signup" style="color: var(--accent-cyan); text-decoration: none; font-family: var(--font-futuristic); letter-spacing: 0.5px;">Register Account</a>
+                    <a href="#" onclick="alert('Contact the selection board helper to restore academic identity.')" style="color: var(--text-muted); text-decoration: none;">Forgot Password?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    window.location.href = '/dashboard';
+                } else {
+                    alert(result.error || 'Authentication failed');
+                }
+            } catch (err) {
+                // Local Sandbox Fallback
+                const raw = localStorage.getItem('candidates');
+                const list = raw ? JSON.parse(raw) : [];
+                
+                const candidate = list.find(c => c.email.toLowerCase() === email && c.password === password);
+                if (candidate) {
+                    localStorage.setItem('active_session_email', email);
+                    localStorage.setItem('active_session_candidate_id', candidate.candidate_id);
+                    alert("Logged in locally in sandbox database mode.");
+                    window.location.href = '/dashboard';
+                } else {
+                    alert("Invalid local credentials. Create an account first.");
+                }
+            }
+        });
+    </script>
+</body>
+</html>

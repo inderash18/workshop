@@ -10,7 +10,6 @@ DATABASE_FILE = 'database.json'
 
 def load_db():
     if not os.path.exists(DATABASE_FILE):
-        # Initialize default structure
         db = {
             "candidates": [],
             "admins": [
@@ -23,7 +22,6 @@ def load_db():
         with open(DATABASE_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
     except Exception:
-        # Fallback if file is corrupted
         db = {
             "candidates": [],
             "admins": [
@@ -37,21 +35,56 @@ def save_db(db):
     with open(DATABASE_FILE, 'w', encoding='utf-8') as f:
         json.dump(db, f, indent=4)
 
-# Initialize database file on startup
+# Init db file
 load_db()
 
 def generate_candidate_id(db):
     while True:
         num = random.randint(1000, 9999)
-        c_id = f"AI26-{num}"
-        # Check uniqueness
+        c_id = f"AINEXT2026-{num}"
         exists = any(c.get('candidate_id') == c_id for c in db['candidates'])
         if not exists:
             return c_id
 
+# --- Page Routes ---
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/signup')
+def signup_page():
+    if 'user_email' in session:
+        return redirect(url_for('dashboard_page'))
+    return render_template('signup.html')
+
+@app.route('/login')
+def login_page():
+    if 'user_email' in session:
+        return redirect(url_for('dashboard_page'))
+    return render_template('login.html')
+
+@app.route('/dashboard')
+def dashboard_page():
+    if 'user_email' not in session:
+        return redirect(url_for('login_page'))
+    return render_template('dashboard.html')
+
+@app.route('/challenge')
+def challenge_page():
+    if 'user_email' not in session:
+        return redirect(url_for('login_page'))
+    
+    db = load_db()
+    candidate = next((c for c in db['candidates'] if c.get('email') == session['user_email']), None)
+    if not candidate:
+        session.pop('user_email', None)
+        return redirect(url_for('login_page'))
+        
+    if candidate.get('completed'):
+        return redirect(url_for('dashboard_page'))
+        
+    return render_template('challenge.html')
 
 @app.route('/admin')
 def admin():
@@ -65,29 +98,25 @@ def admin_login_page():
         return redirect(url_for('admin'))
     return render_template('admin_login.html')
 
-# --- API Endpoints ---
+# --- User Account & Auth APIs ---
 
-@app.route('/api/register', methods=['POST'])
-def register():
+@app.route('/api/signup', methods=['POST'])
+def api_signup():
     data = request.json or {}
     name = data.get('name', '').strip()
     college = data.get('college', '').strip()
     department = data.get('department', '').strip()
     year = data.get('year')
-    roll_number = data.get('roll_number', '').strip()
     email = data.get('email', '').strip().lower()
     phone = data.get('phone', '').strip()
-    linkedin = data.get('linkedin', '').strip()
-    github = data.get('github', '').strip()
+    password = data.get('password', '')
 
-    if not (name and college and department and year and roll_number and email and phone):
+    if not (name and college and department and year and email and phone and password):
         return jsonify({'error': 'Missing required fields'}), 400
 
     db = load_db()
-    
-    # Check duplicate email
     if any(c.get('email') == email for c in db['candidates']):
-        return jsonify({'error': 'Candidate with this email already exists'}), 400
+        return jsonify({'error': 'An account with this email address already exists.'}), 400
 
     c_id = generate_candidate_id(db)
     s_id = str(uuid.uuid4())
@@ -100,11 +129,13 @@ def register():
         "college": college,
         "department": department,
         "year": year,
-        "roll_number": roll_number,
         "email": email,
         "phone": phone,
-        "linkedin": linkedin,
-        "github": github,
+        "password": password, # Hashed in production, plain text for sandbox simplicity
+        "linkedin": data.get('linkedin', '').strip(),
+        "github": data.get('github', '').strip(),
+        "started": False,
+        "completed": False,
         "level1_ans": "",
         "level2_ans": "",
         "level3_ans": "",
@@ -131,32 +162,95 @@ def register():
         "score_final": 0.0,
         "badges": "[]",
         "selected": 0,
-        "created_at": str(uuid.uuid4()) # simple identifier for timestamp/order
+        "created_at": str(uuid.uuid4())
     }
 
     db['candidates'].append(new_candidate)
     save_db(db)
 
+    # Auto log in the candidate
+    session['user_email'] = email
+    session['candidate_id'] = c_id
+
+    return jsonify({'success': True, 'candidate_id': c_id})
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    data = request.json or {}
+    email = data.get('email', '').strip().lower()
+    password = data.get('password', '')
+
+    if not (email and password):
+        return jsonify({'error': 'Email and password are required.'}), 400
+
+    db = load_db()
+    candidate = next((c for c in db['candidates'] if c.get('email') == email and c.get('password') == password), None)
+    
+    if not candidate:
+        return jsonify({'error': 'Invalid email or password.'}), 401
+
+    session['user_email'] = email
+    session['candidate_id'] = candidate['candidate_id']
+
+    return jsonify({'success': True, 'candidate_id': candidate['candidate_id']})
+
+@app.route('/api/logout', methods=['POST'])
+def api_logout():
+    session.pop('user_email', None)
+    session.pop('candidate_id', None)
+    return jsonify({'success': True})
+
+@app.route('/api/session', methods=['GET'])
+def get_session():
+    if 'user_email' not in session:
+        return jsonify({'logged_in': False}), 401
+    
+    db = load_db()
+    candidate = next((c for c in db['candidates'] if c.get('email') == session['user_email']), None)
+    if not candidate:
+        session.pop('user_email', None)
+        return jsonify({'logged_in': False}), 401
+
+    # Hide passwords
+    c_data = dict(candidate)
+    c_data.pop('password', None)
+    
+    # Safely parse JSON properties
+    try:
+        c_data['badges'] = json.loads(c_data['badges']) if c_data['badges'] else []
+    except:
+        c_data['badges'] = []
+        
     return jsonify({
-        'message': 'Registration successful',
-        'candidate_id': c_id,
-        'session_id': s_id,
-        'db_id': new_candidate['id']
+        'logged_in': True,
+        'candidate': c_data
     })
+
+@app.route('/api/challenge/start', methods=['POST'])
+def start_challenge():
+    if 'user_email' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    db = load_db()
+    candidate = next((c for c in db['candidates'] if c.get('email') == session['user_email']), None)
+    if not candidate:
+        return jsonify({'error': 'Candidate not found'}), 404
+        
+    candidate['started'] = True
+    save_db(db)
+    return jsonify({'success': True})
 
 @app.route('/api/submit_challenge', methods=['POST'])
 def submit_challenge():
-    data = request.json or {}
-    candidate_id = data.get('candidate_id')
-    
-    if not candidate_id:
-        return jsonify({'error': 'Candidate ID is required'}), 400
+    if 'user_email' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
 
+    data = request.json or {}
     db = load_db()
-    candidate = next((c for c in db['candidates'] if c.get('candidate_id') == candidate_id), None)
+    candidate = next((c for c in db['candidates'] if c.get('email') == session['user_email']), None)
     
     if not candidate:
-        return jsonify({'error': 'Candidate not found'}), 404
+        return jsonify({'error': 'Candidate session not found'}), 404
 
     level1 = data.get('level1', {})
     level2 = data.get('level2', '')
@@ -185,7 +279,7 @@ def submit_challenge():
     score_logic = 0.0
     
     l1_q1 = str(level1.get('q1', '')).strip()
-    if l1_q1 == '63' or l1_q1 == '▽':
+    if l1_q1 == '▽':
         score_logic += 10.0
         
     l1_q2 = str(level1.get('q2', '')).strip().upper()
@@ -282,7 +376,7 @@ def submit_challenge():
         deduction = min(15.0, violation_count * 3.0)
         score_final = max(0.0, score_final - deduction)
 
-    # Anomaly Typing Check
+    # Anomaly Check
     if typing_speed_avg > 1500 and (len(l3_text) > 100 or len(l4_text) > 100):
         violation_logs.append({
             'timestamp': 'Submission Audit',
@@ -311,6 +405,7 @@ def submit_challenge():
             badges.append('AI Aspirant')
 
     # Update candidate fields
+    candidate["completed"] = True
     candidate["level1_ans"] = json.dumps(level1)
     candidate["level2_ans"] = level2
     candidate["level3_ans"] = level3
@@ -358,10 +453,8 @@ def submit_challenge():
 @app.route('/api/leaderboard', methods=['GET'])
 def leaderboard():
     db = load_db()
-    # Filter non-disqualified candidates
-    valid_list = [c for c in db['candidates'] if c.get('selected') != 3]
-    # Sort
-    valid_list.sort(key=lambda c: (-c.get('score_final', 0), c.get('time_taken', 9999)))
+    valid_list = [c for c in db['candidates'] if c.get('selected') != 3 and c.get('completed')]
+    valid_list.sort(key=lambda c: (-c.get('score_final', 0), c.get('time_taken', 99999)))
     
     leaderboard_data = []
     for c in valid_list[:10]:
@@ -404,11 +497,9 @@ def get_candidates():
     db = load_db()
     candidates = db['candidates']
 
-    # Filter
     if college_filter:
         candidates = [c for c in candidates if college_filter.lower() in c.get('college', '').lower()]
 
-    # Sort
     if sort_by == 'time':
         candidates.sort(key=lambda c: (c.get('time_taken', 99999), -c.get('score_final', 0)))
     elif sort_by == 'creativity':
@@ -416,7 +507,6 @@ def get_candidates():
     else:
         candidates.sort(key=lambda c: (-c.get('score_final', 0), c.get('time_taken', 99999)))
 
-    # Process badges & violation_logs
     candidates_processed = []
     for candidate in candidates:
         c = dict(candidate)
@@ -439,16 +529,13 @@ def auto_shortlist():
 
     db = load_db()
     
-    # Reset selection status (except disqualified)
     for c in db['candidates']:
         if c.get('selected') != 3:
             c['selected'] = 0
 
-    # Sort non-disqualified candidates
-    non_disq = [c for c in db['candidates'] if c.get('selected') != 3]
+    non_disq = [c for c in db['candidates'] if c.get('selected') != 3 and c.get('completed')]
     non_disq.sort(key=lambda c: (-c.get('score_final', 0), c.get('time_taken', 99999)))
 
-    # Shortlist top 30
     for c in non_disq[:30]:
         c['selected'] = 1
 
