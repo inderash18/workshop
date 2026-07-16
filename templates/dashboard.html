@@ -7,229 +7,753 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .dashboard-grid {
+        body {
+            background-color: #D8D7CE !important;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        body::before, body::after {
+            display: none !important;
+        }
+
+        /* Tablet Layout Wrapper */
+        .tablet-wrapper {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-top: 2rem;
+            grid-template-columns: 80px 1fr 340px;
+            min-height: 100vh;
+            background: #D8D7CE;
+            box-sizing: border-box;
         }
-        .dashboard-left {
+
+        /* Left Sidebar styling */
+        .left-sidebar {
+            background: rgba(216, 215, 206, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(34, 40, 49, 0.12);
             display: flex;
             flex-direction: column;
-            gap: 2rem;
-        }
-        .dashboard-right {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-        .status-container {
-            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            font-family: var(--font-futuristic);
-            font-size: 0.95rem;
-            margin-top: 1rem;
-        }
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            animation: pulseGlow 1.5s infinite alternate;
-        }
-        .status-color-pending { background-color: var(--accent-yellow); box-shadow: 0 0 10px var(--accent-yellow); }
-        .status-color-selected { background-color: var(--accent-green); box-shadow: 0 0 10px var(--accent-green); }
-        .status-color-rejected { background-color: var(--accent-red); box-shadow: 0 0 10px var(--accent-red); }
-        .status-color-disqualified { background-color: #ef4444; box-shadow: 0 0 15px #ef4444; }
-
-        @keyframes pulseGlow {
-            0% { transform: scale(0.9); opacity: 0.6; }
-            100% { transform: scale(1.1); opacity: 1; }
+            padding: 32px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-sizing: border-box;
+            z-index: 20;
         }
 
-        .metric-mini-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-        }
-
-        .metric-mini-card {
-            padding: 1.2rem 1rem;
+        .sidebar-logo {
             text-align: center;
         }
 
-        .invitation-box {
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            background: rgba(16, 185, 129, 0.04);
-            border-radius: 12px;
-            padding: 2rem;
-            margin-top: 2rem;
-            display: none;
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
         }
 
-        @media (max-width: 900px) {
-            .dashboard-grid {
+        .menu-item {
+            font-size: 1.25rem;
+            text-decoration: none;
+            color: rgba(34, 40, 49, 0.7);
+            padding: 10px;
+            border-radius: 14px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-item:hover {
+            color: #00A6C0;
+            background: rgba(34, 40, 49, 0.04);
+        }
+
+        .menu-item.active {
+            color: #D8D7CE;
+            background: #222831;
+            box-shadow: 0 0 20px rgba(34, 40, 49, 0.15);
+        }
+
+        /* Center Content Area */
+        .main-dashboard-content {
+            padding: 40px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 36px;
+        }
+
+        .search-bar {
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(34, 40, 49, 0.12);
+            border-radius: 9999px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .support-tag {
+            background: rgba(34, 40, 49, 0.08);
+            color: #222831;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            margin-right: 16px;
+        }
+
+        .header-candidate-id {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: rgba(34, 40, 49, 0.7);
+            font-weight: 600;
+        }
+
+        /* Heading section */
+        .section-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .serif-title {
+            font-family: var(--font-serif);
+            font-size: 2.2rem;
+            font-weight: 500;
+            color: #222831;
+            margin: 0;
+        }
+
+        .mini-metrics {
+            display: flex;
+            gap: 16px;
+        }
+
+        .mini-metric {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.35);
+            border: 1px solid rgba(34, 40, 49, 0.12);
+            border-radius: 16px;
+            padding: 8px 18px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .mini-metric-icon {
+            font-size: 1.25rem;
+        }
+
+        .mini-metric-val {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #222831;
+            display: block;
+        }
+
+        .mini-metric-lbl {
+            font-size: 0.7rem;
+            color: rgba(34, 40, 49, 0.55);
+            white-space: nowrap;
+        }
+
+        /* Tab options */
+        .horizontal-tabs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 28px;
+            border-bottom: 1px solid rgba(34, 40, 49, 0.08);
+            padding-bottom: 12px;
+            overflow-x: auto;
+        }
+
+        .tab-item {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(34, 40, 49, 0.6);
+            padding: 6px 16px;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-item:hover, .tab-item.active {
+            color: #222831;
+            background: rgba(255, 255, 255, 0.45);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .tab-item-add {
+            font-size: 1.1rem;
+            color: rgba(34, 40, 49, 0.5);
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
+        /* Activity capsules bar chart styling */
+        .activity-chart-card {
+            background: rgba(40, 59, 72, 0.12);
+            border-radius: 28px;
+            border: 1px solid rgba(34, 40, 49, 0.12);
+            padding: 28px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 20px rgba(34, 40, 49, 0.03);
+        }
+
+        .chart-tag {
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(34, 40, 49, 0.06);
+            border-radius: 9999px;
+            padding: 4px 14px;
+            font-size: 0.75rem;
+            color: #222831;
+        }
+
+        .chart-tag-plus {
+            font-weight: bold;
+            cursor: pointer;
+            padding: 4px 8px;
+            color: rgba(34, 40, 49, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .capsules-chart-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 160px;
+            padding-top: 16px;
+            gap: 12px;
+        }
+
+        .chart-bar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .chart-bar-capsule {
+            width: 28px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.35);
+            border: 1px solid rgba(34, 40, 49, 0.12);
+            border-radius: 9999px;
+            display: flex;
+            flex-direction: column-reverse;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-bar-fill {
+            width: 100%;
+            border-radius: 9999px;
+            transition: height 0.6s cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
+
+        .chart-bar-fill.level-completed {
+            background: #00A6C0;
+            box-shadow: 0 0 15px rgba(0, 166, 192, 0.4);
+        }
+
+        .chart-bar-fill.level-pending {
+            background: rgba(34, 40, 49, 0.1);
+        }
+
+        .chart-bar-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: rgba(34, 40, 49, 0.6);
+            margin-top: 8px;
+        }
+
+        /* Bottom panels grid */
+        .dashboard-bottom-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .benchmark-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .benchmark-lbl {
+            color: rgba(34, 40, 49, 0.8);
+            width: 110px;
+            font-weight: 500;
+        }
+
+        .benchmark-val {
+            font-family: var(--font-mono);
+            font-weight: 600;
+            color: #222831;
+            width: 30px;
+            text-align: right;
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-color-pending { background-color: var(--accent-yellow); box-shadow: 0 0 8px var(--accent-yellow); }
+        .status-color-selected { background-color: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
+        .status-color-rejected { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
+        .status-color-disqualified { background-color: #dc2626; box-shadow: 0 0 10px #dc2626; }
+
+        /* Right Sidebar styling */
+        .right-sidebar {
+            background: rgba(216, 215, 206, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-left: 1px solid rgba(34, 40, 49, 0.12);
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-sizing: border-box;
+            z-index: 20;
+        }
+
+        .webcam-camera-frame {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed rgba(34, 40, 49, 0.25);
+            border-radius: 50%;
+            margin: 0 auto 16px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .camera-circle {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.35);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            color: rgba(34, 40, 49, 0.6);
+        }
+
+        .webcam-indicator-dot {
+            position: absolute;
+            bottom: 6px;
+            right: 12px;
+            background: var(--accent-green);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2.5px solid #D8D7CE;
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        /* Right Sidebar mission checklists */
+        .mission-toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 12px;
+            border: 1px solid rgba(34, 40, 49, 0.08);
+        }
+
+        .mission-toggle-lbl {
+            font-weight: 500;
+            color: rgba(34, 40, 49, 0.8);
+        }
+
+        .mission-toggle-indicator {
+            font-size: 1rem;
+        }
+
+        /* Final circular score card */
+        .final-score-dial-card {
+            background: #222831 !important;
+            color: #D8D7CE !important;
+            border-radius: 24px;
+            padding: 24px 20px;
+            text-align: center;
+            margin-top: auto;
+            box-shadow: 0 10px 30px rgba(34, 40, 49, 0.15);
+        }
+
+        .final-score-dial-card .dial-value {
+            color: #D8D7CE !important;
+        }
+
+        .final-score-dial-card div {
+            color: rgba(216, 215, 206, 0.75) !important;
+        }
+
+        @media (max-width: 1100px) {
+            .tablet-wrapper {
+                grid-template-columns: 80px 1fr;
+            }
+            .right-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tablet-wrapper {
                 grid-template-columns: 1fr;
             }
-            .metric-mini-grid {
-                grid-template-columns: 1fr 1fr;
+            .left-sidebar {
+                display: none;
+            }
+            .dashboard-bottom-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="grid-bg"></div>
-
-    <div class="container" style="max-width: 1200px;">
-        <!-- Header -->
-        <header>
-            <div class="logo">
+    <div class="tablet-wrapper">
+        <!-- Sticky left sidebar menu -->
+        <div class="left-sidebar">
+            <div class="sidebar-logo">
                 <div class="logo-icon"></div>
-                <span class="logo-text">AI NEXT GEN LAB</span>
             </div>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <span class="status-container" style="margin: 0; font-size: 0.8rem; color: var(--text-secondary);" id="top-candidate-id">CANDIDATE ID: AINEXT2026-0000</span>
-                <button class="btn-futuristic btn-secondary" id="btn-user-logout" style="padding: 0.4rem 1.2rem; font-size: 0.8rem;">LOGOUT</button>
+            <div class="sidebar-menu">
+                <a href="/" class="menu-item" title="Home">🏠</a>
+                <a href="/dashboard" class="menu-item active" title="Dashboard">📊</a>
+                <a href="/profile" class="menu-item" title="My Profile">👤</a>
+                <a href="/challenge" class="menu-item" title="Assessment Arena">⚔️</a>
+                <a href="/admin" class="menu-item" title="Admin Control">⚙️</a>
             </div>
-        </header>
+            <div class="sidebar-footer">
+                <button id="btn-user-logout" title="Log Out" style="background: none; border: none; font-size: 1.35rem; cursor: pointer; opacity: 0.7; color: rgba(216, 215, 206, 0.6);">🚪</button>
+            </div>
+        </div>
 
-        <!-- DASHBOARD CONTAINER -->
-        <div class="dashboard-grid">
-            
-            <!-- LEFT SECTION -->
-            <div class="dashboard-left">
-                <!-- Welcome Card -->
-                <div class="glass-panel" style="padding: 2.5rem; position: relative; overflow: hidden;">
-                    <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%); pointer-events: none;"></div>
-                    
-                    <span class="pre-title" style="letter-spacing: 3px;">Control Center</span>
-                    <h2 class="form-title" style="text-align: left; margin: 0.5rem 0;" id="welcome-message">Welcome, John.</h2>
-                    
-                    <div class="status-container">
+        <!-- Central main content -->
+        <div class="main-dashboard-content">
+            <!-- Header bar -->
+            <div class="main-header">
+                <div class="search-bar">
+                    <span style="color: rgba(216, 215, 206, 0.5); font-size: 0.9rem;">🔍</span>
+                    <input type="text" placeholder="Search assessments..." style="border: none; background: transparent; outline: none; font-size: 0.85rem; width: 180px; color: #D8D7CE;" disabled>
+                </div>
+                <div class="header-right">
+                    <span class="support-tag">Online support</span>
+                    <span class="header-candidate-id" id="top-candidate-id">CANDIDATE ID: AINEXT2026-0000</span>
+                </div>
+            </div>
+
+            <!-- Dashboard title -->
+            <div class="section-title-row">
+                <h1 class="serif-title" id="welcome-message">Welcome Back.</h1>
+                <div class="mini-metrics">
+                    <div class="mini-metric">
+                        <span class="mini-metric-icon">⏰</span>
+                        <div>
+                            <span class="mini-metric-val">124</span>
+                            <span class="mini-metric-lbl">Hours online</span>
+                        </div>
+                    </div>
+                    <div class="mini-metric">
+                        <span class="mini-metric-icon">🌐</span>
+                        <div>
+                            <span class="mini-metric-val">315</span>
+                            <span class="mini-metric-lbl">Tasks checked</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Horizontal navigation tabs -->
+            <div class="horizontal-tabs">
+                <span class="tab-item active">All</span>
+                <span class="tab-item">Activity</span>
+                <span class="tab-item">Protection</span>
+                <span class="tab-item">Update</span>
+                <span class="tab-item">Resources</span>
+                <span class="tab-item-add">+</span>
+            </div>
+
+            <!-- Main Activity levels chart card -->
+            <div class="glass-panel activity-chart-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <div>
+                        <h3 style="font-family: var(--font-serif); font-size: 1.15rem; font-weight: 500; color: #D8D7CE; margin: 0;">Your activity</h3>
+                        <p style="font-size: 0.75rem; color: rgba(216, 215, 206, 0.5); margin: 4px 0 0 0;">Completion logs across active security vectors</p>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="chart-tag">Device: Active</span>
+                        <span class="chart-tag-plus">+</span>
+                    </div>
+                </div>
+                <!-- Capsules visual graph representation -->
+                <div class="capsules-chart-row" id="capsules-chart-row">
+                    <!-- Loaded dynamically via modern dashboard renderer -->
+                </div>
+            </div>
+
+            <!-- Dynamically populated selected candidate invite panel -->
+            <div class="invitation-box glass-panel" id="selected-invitation" style="padding: 2.5rem; margin-bottom: 28px; border-color: rgba(0, 166, 192, 0.25); background: rgba(0, 166, 192, 0.02); display: none;">
+                <h3 style="font-family: var(--font-serif); color: #00A6C0; margin-bottom: 1rem; font-size: 1.25rem; font-weight: 500;">INVITATION PROTOCOL DETECTED</h3>
+                <p style="font-size: 0.9rem; line-height: 1.6; color: rgba(216, 215, 206, 0.8); margin-bottom: 1.5rem;">
+                    Congratulations! You have been successfully shortlisted for the AI Next Gen Workshop 2026. Find your invitation letter details generated below:
+                </p>
+                <div style="margin-bottom: 1.5rem; padding: 1.5rem; background: rgba(40, 59, 72, 0.65); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;">
+                    <pre style="font-family: var(--font-sans); font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap; margin: 0; color: #D8D7CE;" id="invitation-text-content"></pre>
+                </div>
+                <button class="btn-futuristic" style="padding: 10px 24px; font-size: 0.8rem;" onclick="window.print()">Print Invite PDF</button>
+            </div>
+
+            <!-- Bottom row grid -->
+            <div class="dashboard-bottom-grid">
+                <!-- Benchmark statistics progress -->
+                <div class="glass-panel" style="padding: 24px;">
+                    <h3 style="font-family: var(--font-serif); font-size: 1.1rem; font-weight: 500; margin: 0 0 1.25rem 0; color: #D8D7CE;">Benchmarks</h3>
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div class="benchmark-row">
+                            <span class="benchmark-lbl">Cognitive Logic</span>
+                            <div style="flex: 1; height: 6px; background: rgba(0,0,0,0.15); border-radius: 3px; overflow: hidden; margin: 0 12px;">
+                                <div class="benchmark-bar" id="bar-logic" style="width: 0%; height: 100%; background: #00A6C0; border-radius: 3px; transition: width 0.6s ease;"></div>
+                            </div>
+                            <span class="benchmark-val" id="score-logic">0</span>
+                        </div>
+                        <div class="benchmark-row">
+                            <span class="benchmark-lbl">Creativity Index</span>
+                            <div style="flex: 1; height: 6px; background: rgba(0,0,0,0.15); border-radius: 3px; overflow: hidden; margin: 0 12px;">
+                                <div class="benchmark-bar" id="bar-creativity" style="width: 0%; height: 100%; background: #00A6C0; border-radius: 3px; transition: width 0.6s ease;"></div>
+                            </div>
+                            <span class="benchmark-val" id="score-creativity">0</span>
+                        </div>
+                        <div class="benchmark-row">
+                            <span class="benchmark-lbl">AI Literacy</span>
+                            <div style="flex: 1; height: 6px; background: rgba(0,0,0,0.15); border-radius: 3px; overflow: hidden; margin: 0 12px;">
+                                <div class="benchmark-bar" id="bar-ai" style="width: 0%; height: 100%; background: #00A6C0; border-radius: 3px; transition: width 0.6s ease;"></div>
+                            </div>
+                            <span class="benchmark-val" id="score-ai">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Anti cheating warning review -->
+                <div class="glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div class="status-container" style="margin: 0;">
                         <span class="status-dot status-color-pending" id="status-light"></span>
-                        <span>APPLICATION VECTOR: <span id="status-text" style="color: var(--accent-yellow);">PENDING SELECTION REVIEW</span></span>
+                        <span style="font-size: 0.8rem; font-weight: 600; color: #D8D7CE; letter-spacing: 0.5px; text-transform: uppercase;">SELECTION VECTOR: <span id="status-text" style="color: var(--accent-yellow);">PENDING</span></span>
                     </div>
-                </div>
-
-                <!-- Progress Details Grid -->
-                <div class="glass-panel" style="padding: 2rem;">
-                    <h3 class="timeline-title" style="margin-bottom: 1.5rem;">Selection Assessment Benchmarks</h3>
                     
-                    <!-- Progress bars -->
-                    <div style="margin-bottom: 2rem;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem;">
-                            <span style="color: var(--text-secondary);">Profile Completion Index</span>
-                            <span id="profile-progress-percent" style="font-family: var(--font-mono); color: var(--accent-cyan);">40%</span>
-                        </div>
-                        <div class="progress-bar-container" style="margin: 0;">
-                            <div class="progress-bar-fill" id="profile-progress-fill" style="width: 40%"></div>
-                        </div>
+                    <div id="action-vector-card" style="text-align: center; margin-top: 8px;">
+                        <h4 id="action-title" style="font-size: 0.9rem; font-weight: 600; color: #D8D7CE; margin: 0 0 6px 0;">AI Challenge Locked</h4>
+                        <p id="action-description" style="font-size: 0.75rem; color: rgba(216, 215, 206, 0.6); margin: 0 0 14px 0; line-height: 1.4;">Unlock assessment missions. Camera overlays apply.</p>
+                        <a href="/challenge" class="btn-futuristic" id="btn-action-challenge" style="padding: 10px 20px; font-size: 0.8rem; width: 100%;">Unlock Assessment</a>
                     </div>
-
-                    <!-- Scores parameters mini cards -->
-                    <div class="metric-mini-grid">
-                        <div class="glass-panel metric-mini-card">
-                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Cognitive Logic</div>
-                            <div style="font-size: 1.8rem; font-family: var(--font-futuristic); color: var(--accent-cyan); margin-top: 0.5rem;" id="score-logic">0</div>
-                        </div>
-                        <div class="glass-panel metric-mini-card">
-                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Creativity Index</div>
-                            <div style="font-size: 1.8rem; font-family: var(--font-futuristic); color: var(--accent-cyan); margin-top: 0.5rem;" id="score-creativity">0</div>
-                        </div>
-                        <div class="glass-panel metric-mini-card">
-                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">AI Knowledge</div>
-                            <div style="font-size: 1.8rem; font-family: var(--font-futuristic); color: var(--accent-cyan); margin-top: 0.5rem;" id="score-ai">0</div>
-                        </div>
-                        <div class="glass-panel metric-mini-card">
-                            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Final Score %</div>
-                            <div style="font-size: 1.8rem; font-family: var(--font-futuristic); color: var(--accent-cyan); margin-top: 0.5rem;" id="score-final">0.0</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Card -->
-                <div class="glass-panel" style="padding: 2.5rem; text-align: center; border-color: rgba(99, 102, 241, 0.2);" id="action-vector-card">
-                    <h3 class="timeline-title" style="margin-bottom: 0.5rem;" id="action-title">AI Research Challenge Locked</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;" id="action-description">
-                        Unlock and engage the 7 missions of the AI Selection assessments. Viewport monitoring and anti-cheating protocols apply.
-                    </p>
-                    <a href="/challenge" class="btn-futuristic" id="btn-action-challenge" style="padding: 1rem 3rem;">Unlock Research Challenge</a>
-                </div>
-
-                <!-- Selected Student Invitation Box -->
-                <div class="invitation-box" id="selected-invitation">
-                    <h3 class="timeline-title" style="color: var(--accent-green); margin-bottom: 1rem;">INVITATION PROTOCOL DETECTED</h3>
-                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.5rem;">
-                        Congratulations! You have been successfully shortlisted for the AI Next Gen Workshop 2026. 
-                        Your score ranked within the top 7% select vector. Find your letter parameters generated below:
-                    </p>
-                    <div class="answer-card" style="margin-bottom: 1rem; border-color: rgba(16, 185, 129, 0.25); background: rgba(0,0,0,0.4);">
-                        <pre style="font-family: var(--font-sans); font-size: 0.85rem; line-height: 1.6; white-space: pre-wrap;" id="invitation-text-content">
-Subject: Official Selection Letter - AI NEXT GEN RESEARCH WORKSHOP 2026
-
-Dear {CandidateName},
-
-Based on your selection score ({FinalScore}%), the lab committee has approved your admission.
-Venue: AI Research Hub, MIT Media Lab / Virtual Sandbox
-Date: August 15-16, 2026
-
-Welcome to the Next Gen cohort.
-                        </pre>
-                    </div>
-                    <button class="btn-futuristic" style="padding: 0.5rem 1.5rem; font-size: 0.8rem; background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));" onclick="window.print()">Print Invite PDF</button>
                 </div>
             </div>
 
-            <!-- RIGHT SECTION -->
-            <div class="dashboard-right">
-                <!-- Workshop details -->
-                <div class="glass-panel" style="padding: 1.5rem 2rem;">
-                    <h3 class="timeline-title" style="margin-bottom: 1.5rem; font-size: 1.1rem;">Workshop Logistics</h3>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 1.2rem; font-size: 0.9rem;">
-                        <div>
-                            <span style="color: var(--text-muted); display: block; font-size: 0.75rem; text-transform: uppercase;">Workshop Date</span>
-                            <strong style="color: var(--text-primary);">August 15-16, 2026</strong>
-                        </div>
-                        <div>
-                            <span style="color: var(--text-muted); display: block; font-size: 0.75rem; text-transform: uppercase;">Venue Location</span>
-                            <strong style="color: var(--text-primary);">AI Labs, MIT Media Lab Sandbox</strong>
-                        </div>
-                        <div>
-                            <span style="color: var(--text-muted); display: block; font-size: 0.75rem; text-transform: uppercase;">Available Seats</span>
-                            <strong style="color: var(--text-primary);">30 Candidates Max</strong>
-                        </div>
-                        <div>
-                            <span style="color: var(--text-muted); display: block; font-size: 0.75rem; text-transform: uppercase;">Shortlist Criteria</span>
-                            <strong style="color: var(--text-primary);">Cognitive score >= Top 30 threshold</strong>
-                        </div>
-                    </div>
+            <!-- Hidden elements to keep Chart.js radar hooks active and error-free -->
+            <div style="display: none;">
+                <canvas id="dashboardRadar"></canvas>
+                <div id="radar-placeholder"></div>
+                <div id="profile-progress-percent"></div>
+                <div id="profile-progress-fill"></div>
+                <div id="score-final"></div>
+                <div id="dashboard-badges-list"></div>
+            </div>
+        </div>
+
+        <!-- Right info panel column -->
+        <div class="right-sidebar">
+            <!-- Webcam face frame visualization -->
+            <div class="webcam-monitor-panel">
+                <div class="webcam-camera-frame">
+                    <div class="camera-circle">👤</div>
+                    <span class="webcam-indicator-dot" id="right-camera-dot"></span>
                 </div>
+                <h4 style="font-size: 0.85rem; font-weight: 600; color: #D8D7CE; margin: 0;">Identity feed</h4>
+                <p style="font-size: 0.7rem; color: rgba(216, 215, 206, 0.5); margin: 4px 0 0 0;">Viewport tracking active</p>
+            </div>
 
-                <!-- Radar Chart / Badges Card -->
-                <div class="glass-panel" style="padding: 2rem; display: flex; flex-direction: column; align-items: center;" id="dashboard-chart-card">
-                    <h3 class="timeline-title" style="margin-bottom: 1rem; align-self: flex-start; font-size: 1.1rem;">Cognitive Vector</h3>
-                    
-                    <!-- Radar Canvas -->
-                    <div style="width: 100%; height: 200px; position: relative;" id="radar-canvas-container">
-                        <canvas id="dashboardRadar"></canvas>
-                        <div id="radar-placeholder" style="text-align: center; padding-top: 80px; color: var(--text-muted); font-size: 0.85rem; font-family: var(--font-futuristic);">Unlock assessment to map vector</div>
+            <!-- Missions completed checklist toggles -->
+            <div class="resources-panel">
+                <h3 style="font-family: var(--font-serif); font-size: 1.05rem; font-weight: 500; margin: 0 0 1rem 0; color: #D8D7CE;">Missions Stack</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div class="mission-toggle-row">
+                        <span class="mission-toggle-lbl">Logic Detective</span>
+                        <span class="mission-toggle-indicator" id="ind-m1">⚪</span>
                     </div>
-
-                    <!-- Badges -->
-                    <div style="width: 100%; margin-top: 1.5rem;">
-                        <span style="color: var(--text-muted); display: block; font-size: 0.75rem; text-transform: uppercase; margin-bottom: 0.5rem;">Earned Badges</span>
-                        <div class="badge-list" id="dashboard-badges-list" style="margin: 0;">
-                            <span style="color: var(--text-muted); font-size: 0.8rem;">No badges earned yet.</span>
-                        </div>
+                    <div class="mission-toggle-row">
+                        <span class="mission-toggle-lbl">Future Thinker</span>
+                        <span class="mission-toggle-indicator" id="ind-m2">⚪</span>
+                    </div>
+                    <div class="mission-toggle-row">
+                        <span class="mission-toggle-lbl">AI Architect</span>
+                        <span class="mission-toggle-indicator" id="ind-m3">⚪</span>
+                    </div>
+                    <div class="mission-toggle-row">
+                        <span class="mission-toggle-lbl">Prompt Engineer</span>
+                        <span class="mission-toggle-indicator" id="ind-m4">⚪</span>
+                    </div>
+                    <div class="mission-toggle-row">
+                        <span class="mission-toggle-lbl">RAG Analyst</span>
+                        <span class="mission-toggle-indicator" id="ind-m5">⚪</span>
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Circular score dial display -->
+            <div class="glass-panel final-score-dial-card">
+                <div class="dial-value" id="score-final-dial">0.0</div>
+                <div style="font-size: 0.75rem; color: rgba(34, 40, 49, 0.7); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600;">Final Score %</div>
+                <div style="margin-top: 14px; font-size: 0.7rem; color: rgba(34, 40, 49, 0.6); border-top: 1px solid rgba(34,40,49,0.1); padding-top: 10px; font-weight: 600;">
+                    Expand your possibilities
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Core dashboard data scripts -->
     <script src="/static/js/dashboard.js"></script>
+
+    <!-- Modern layout renderer script override -->
+    <script>
+        // Hook into the original renderDashboardData function to run our modern UI updates
+        if (typeof renderDashboardData === 'function') {
+            const originalRender = renderDashboardData;
+            renderDashboardData = function() {
+                originalRender();
+                renderModernDashboard();
+            };
+        }
+
+        function renderModernDashboard() {
+            if (!activeCandidate) return;
+
+            // 1. Set final score circular dial
+            const dialScore = document.getElementById('score-final-dial');
+            if (dialScore) {
+                dialScore.textContent = activeCandidate.score_final.toFixed(1);
+            }
+
+            // 2. Set custom progress benchmark bars
+            const barLogic = document.getElementById('bar-logic');
+            if (barLogic) barLogic.style.width = `${(activeCandidate.score_logic / 40) * 100}%`;
+            
+            const barCreativity = document.getElementById('bar-creativity');
+            if (barCreativity) barCreativity.style.width = `${(activeCandidate.score_creativity / 20) * 100}%`;
+            
+            const barAi = document.getElementById('bar-ai');
+            if (barAi) barAi.style.width = `${(activeCandidate.score_ai_knowledge / 20) * 100}%`;
+
+            // 3. Set visual capsules bar chart (representing response activity on Level 1 - 7)
+            const capsulesRow = document.getElementById('capsules-chart-row');
+            if (capsulesRow) {
+                capsulesRow.innerHTML = '';
+                
+                const levels = [
+                    { label: 'L1', completed: activeCandidate.level1_ans ? true : false },
+                    { label: 'L2', completed: activeCandidate.level2_ans ? true : false },
+                    { label: 'L3', completed: activeCandidate.level3_ans ? true : false },
+                    { label: 'L4', completed: activeCandidate.level4_ans ? true : false },
+                    { label: 'L5', completed: activeCandidate.level5_ans ? true : false },
+                    { label: 'L6', completed: activeCandidate.level6_ans ? true : false },
+                    { label: 'L7', completed: activeCandidate.level7_ans ? true : false }
+                ];
+                
+                levels.forEach(lvl => {
+                    const height = lvl.completed ? '120px' : '48px';
+                    const fillClass = lvl.completed ? 'level-completed' : 'level-pending';
+                    const fillHeight = lvl.completed ? '100%' : '20%';
+                    
+                    capsulesRow.innerHTML += `
+                        <div class="chart-bar-container">
+                            <div class="chart-bar-capsule" style="height: ${height};">
+                                <div class="chart-bar-fill ${fillClass}" style="height: ${fillHeight};"></div>
+                            </div>
+                            <span class="chart-bar-label">${lvl.label}</span>
+                        </div>
+                    `;
+                });
+            }
+
+            // 4. Set webcam active monitor dot
+            const cameraDot = document.getElementById('right-camera-dot');
+            if (cameraDot) {
+                if (activeCandidate.webcam_status === 'Active') {
+                    cameraDot.style.backgroundColor = 'var(--accent-green)';
+                    cameraDot.style.boxShadow = '0 0 8px var(--accent-green)';
+                } else {
+                    cameraDot.style.backgroundColor = 'var(--accent-red)';
+                    cameraDot.style.boxShadow = '0 0 8px var(--accent-red)';
+                }
+            }
+
+            // 5. Update missions sidebar indicators
+            const checkCompleted = (ans) => {
+                if (!ans) return '⚪';
+                try {
+                    const parsed = typeof ans === 'string' ? JSON.parse(ans) : ans;
+                    if (Object.keys(parsed).length === 0 || (parsed.q1 === '' && parsed.q2 === '')) return '⚪';
+                    return '🟢';
+                } catch(e) {
+                    if (ans.trim() === '') return '⚪';
+                    return '🟢';
+                }
+            };
+
+            const ind1 = document.getElementById('ind-m1'); if (ind1) ind1.textContent = checkCompleted(activeCandidate.level1_ans);
+            const ind2 = document.getElementById('ind-m2'); if (ind2) ind2.textContent = checkCompleted(activeCandidate.level2_ans);
+            const ind3 = document.getElementById('ind-m3'); if (ind3) ind3.textContent = checkCompleted(activeCandidate.level3_ans);
+            const ind4 = document.getElementById('ind-m4'); if (ind4) ind4.textContent = checkCompleted(activeCandidate.level4_ans);
+            const ind5 = document.getElementById('ind-m5'); if (ind5) ind5.textContent = checkCompleted(activeCandidate.level5_ans);
+        }
+
+        // Trigger modern rendering on initial script execution
+        setTimeout(() => {
+            if (typeof activeCandidate !== 'undefined' && activeCandidate) {
+                renderModernDashboard();
+            }
+        }, 300);
+    </script>
 </body>
 </html>

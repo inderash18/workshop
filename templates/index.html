@@ -3,412 +3,646 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI NEXT GEN 2026 - Invitation Challenge</title>
-    <meta name="description" content="Only the Future Innovators Will Be Selected. Apply now for the exclusive 2-day AI Research Workshop.">
+    <title>AI Next Gen Selection Arena 2026</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Floating Canvas particles styling */
-        #particle-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
+        /* Base page styling matching mockup light bone theme */
+        body {
+            background-color: #D8D7CE !important;
+            color: #222831 !important;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: var(--font-sans);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
-        
-        /* Timeline Nodes */
-        .timeline-container {
+
+        body::before, body::after {
+            display: none !important;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            box-sizing: border-box;
             position: relative;
-            max-width: 800px;
-            margin: 4rem auto;
-            padding: 2rem;
+            z-index: 10;
         }
-        
-        .timeline-line {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 50%;
-            width: 2px;
-            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple), transparent);
-            transform: translateX(-50%);
-        }
-        
-        .timeline-step {
+
+        /* Floating Luxury Header Navbar */
+        .navbar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 3rem;
-            position: relative;
-            width: 100%;
+            padding: 24px 40px;
+            border-bottom: 1px solid rgba(34, 40, 49, 0.12);
+            background: rgba(216, 215, 206, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 999;
         }
-        
-        .timeline-step:nth-child(even) {
-            flex-direction: row-reverse;
+
+        .nav-logo-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #222831;
         }
-        
-        .timeline-node {
-            width: 16px;
-            height: 16px;
-            background: var(--bg-color);
-            border: 2px solid var(--accent-cyan);
+
+        .nav-logo-icon {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #222831;
             border-radius: 50%;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .nav-logo-dot {
+            width: 6px;
+            height: 6px;
+            background: #222831;
+            border-radius: 50%;
+        }
+
+        .nav-logo-text {
+            font-family: var(--font-sans);
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links-center {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link-item {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(34, 40, 49, 0.7);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link-item:hover {
+            color: #222831;
+        }
+
+        .nav-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-black-pill {
+            background: #222831;
+            color: #D8D7CE !important;
+            border-radius: 9999px;
+            padding: 10px 22px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(34, 40, 49, 0.15);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-black-pill:hover {
+            background: #283B48;
+            transform: translateY(-1px);
+        }
+
+        .menu-hamburger-btn {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .hamburger-bar {
+            width: 18px;
+            height: 2px;
+            background: #222831;
+        }
+
+        /* Hero Split Grid Layout */
+        .hero-layout-grid {
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 64px;
+            padding: 80px 0 100px 0;
+            position: relative;
+        }
+
+        /* Left Hero column details */
+        .hero-details-col {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             z-index: 10;
-            box-shadow: 0 0 10px var(--accent-cyan);
         }
-        
-        .timeline-step:nth-child(even) .timeline-node {
-            border-color: var(--accent-purple);
-            box-shadow: 0 0 10px var(--accent-purple);
-        }
-        
-        .timeline-card {
-            width: 45%;
-            padding: 1.5rem;
-        }
-        
-        .timeline-num {
-            font-family: var(--font-futuristic);
+
+        .explore-tag-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
             font-size: 0.85rem;
-            color: var(--accent-cyan);
-            margin-bottom: 0.5rem;
-            display: block;
+            font-weight: 500;
+            color: rgba(34, 40, 49, 0.8);
+            margin-bottom: 32px;
         }
-        
-        .timeline-step:nth-child(even) .timeline-num {
-            color: var(--accent-purple);
+
+        .explore-tag-icon {
+            width: 20px;
+            height: 20px;
+            border: 1px solid rgba(34, 40, 49, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
         }
-        
-        .timeline-title {
-            font-family: var(--font-futuristic);
-            font-size: 1.05rem;
-            margin-bottom: 0.5rem;
+
+        .hero-title-main {
+            font-family: var(--font-sans);
+            font-size: 4.8rem;
+            font-weight: 700;
+            color: #222831;
+            line-height: 0.95;
+            letter-spacing: -2px;
+            margin: 0 0 36px 0;
+            max-width: 520px;
         }
-        
-        .timeline-desc {
+
+        .actions-buttons-row {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 80px;
+        }
+
+        .btn-try-free {
+            background: #222831;
+            color: #D8D7CE;
+            border: none;
+            border-radius: 9999px;
+            padding: 16px 36px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 6px 18px rgba(34, 40, 49, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        .btn-try-free:hover {
+            background: #283B48;
+            transform: translateY(-2px);
+        }
+
+        .btn-see-demo {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #222831;
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-see-demo:hover {
+            opacity: 0.75;
+        }
+
+        .play-circle-icon {
+            width: 24px;
+            height: 24px;
+            border: 1px solid #222831;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        /* Bottom stats block matching mockup cards */
+        .bottom-card-stat {
+            background: rgba(40, 59, 72, 0.15);
+            border-radius: 20px;
+            padding: 24px 32px;
+            width: fit-content;
+            min-width: 280px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            position: relative;
+        }
+
+        .stat-card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            color: #222831;
+        }
+
+        .stat-card-lbl {
+            font-size: 0.8rem;
+            color: rgba(34, 40, 49, 0.7);
+            margin: 4px 0 16px 0;
+        }
+
+        .stat-card-visual {
+            background: #ffffff;
+            border-radius: 12px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+
+        .visual-indicators {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .visual-dot {
+            width: 6px;
+            height: 6px;
+            background: #222831;
+            border-radius: 50%;
+        }
+
+        .visual-wave-svg {
+            width: 100px;
+            height: 20px;
+            stroke: #222831;
+            stroke-width: 1.5;
+            fill: none;
+        }
+
+        /* Right Hero column visuals and overlap shapes */
+        .hero-visuals-col {
+            position: relative;
+            z-index: 10;
+        }
+
+        .take-expenses-card {
+            background: rgba(40, 59, 72, 0.15);
+            border-radius: 20px;
+            padding: 24px;
+            width: 160px;
+            position: absolute;
+            top: 20px;
+            left: -40px;
+            z-index: 12;
+        }
+
+        .block-patterns {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            margin-bottom: 24px;
+            width: 60px;
+        }
+
+        .block-p {
+            width: 12px;
+            height: 12px;
+            background: #222831;
+        }
+
+        .capsule-portrait-frame {
+            width: 280px;
+            height: 380px;
+            border-radius: 40px;
+            overflow: hidden;
+            background: #283B48;
+            margin: 20px auto 0 auto;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 20px 40px rgba(34, 40, 49, 0.15);
+        }
+
+        .portrait-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Large circular down-arrow action badge in Turquoise */
+        .accent-arrow-badge {
+            width: 80px;
+            height: 80px;
+            background: #00A6C0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -20px;
+            right: 80px;
+            z-index: 15;
+            box-shadow: 0 8px 24px rgba(0, 166, 192, 0.35);
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .accent-arrow-badge:hover {
+            transform: scale(1.08) rotate(15deg);
+        }
+
+        .downloads-tag-block {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            text-align: right;
+            z-index: 12;
+        }
+
+        .downloads-count {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #222831;
+            line-height: 1;
+        }
+
+        .downloads-lbl {
+            font-size: 0.75rem;
+            color: rgba(34, 40, 49, 0.6);
+            border-top: 1px solid rgba(34,40,49,0.2);
+            padding-top: 4px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        /* Custom Curved Wireframe Connecting Lines */
+        .wireframe-connector-1 {
+            position: absolute;
+            top: 100px;
+            left: 100px;
+            width: 320px;
+            height: 380px;
+            border-bottom: 1.5px solid rgba(34, 40, 49, 0.2);
+            border-left: 1.5px solid rgba(34, 40, 49, 0.2);
+            border-bottom-left-radius: 40px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .wireframe-connector-circle {
+            position: absolute;
+            bottom: -7px;
+            right: 120px;
+            width: 14px;
+            height: 14px;
+            border: 1.5px solid rgba(34, 40, 49, 0.3);
+            background: #D8D7CE;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5rem;
+        }
+
+        /* Features Footer Row */
+        .features-footer-section {
+            border-top: 1px solid rgba(34, 40, 49, 0.12);
+            padding: 48px 0;
+        }
+
+        .features-footer-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .feature-item-col {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .feature-item-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feature-item-icon-wrapper {
+            width: 36px;
+            height: 36px;
+            border: 1px solid rgba(34, 40, 49, 0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: #222831;
+        }
+
+        .feature-item-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #222831;
+            margin: 0;
+        }
+
+        .feature-item-desc {
             font-size: 0.85rem;
-            color: var(--text-secondary);
-            line-height: 1.5;
+            color: rgba(34, 40, 49, 0.7);
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        /* Responsiveness adjustments */
+        @media (max-width: 992px) {
+            .hero-layout-grid {
+                grid-template-columns: 1fr;
+                gap: 80px;
+                padding: 40px 0;
+            }
+            .hero-title-main {
+                font-size: 3.6rem;
+            }
+            .wireframe-connector-1 {
+                display: none;
+            }
+            .take-expenses-card {
+                left: 10px;
+            }
         }
 
         @media (max-width: 768px) {
-            .timeline-line {
-                left: 20px;
+            .nav-links-center {
+                display: none;
             }
-            .timeline-step {
-                flex-direction: row !important;
-                margin-left: 40px;
-                width: calc(100% - 40px);
+            .navbar-header {
+                padding: 16px 24px;
             }
-            .timeline-node {
-                left: -20px;
-                transform: translateX(-50%);
+            .container {
+                padding: 0 24px;
             }
-            .timeline-card {
-                width: 100%;
+            .features-footer-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Animated AI Background particles -->
-    <canvas id="particle-canvas"></canvas>
-    <div class="grid-bg"></div>
-
-    <div class="container">
-        <!-- HEADER -->
-        <header>
-            <div class="logo">
-                <div class="logo-icon"></div>
-                <span class="logo-text">AI NEXT GEN 2026</span>
+    <!-- Floating Luxury Header Navbar -->
+    <header class="navbar-header">
+        <a href="/" class="nav-logo-group">
+            <div class="nav-logo-icon">
+                <div class="nav-logo-dot"></div>
             </div>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <a href="/login" class="btn-futuristic btn-secondary" style="padding: 0.4rem 1.2rem; font-size: 0.8rem; letter-spacing: 1px;">Sign In</a>
-                <a href="/signup" class="btn-futuristic" style="padding: 0.4rem 1.2rem; font-size: 0.8rem; letter-spacing: 1px;">Apply Now</a>
-            </div>
-        </header>
+            <span class="nav-logo-text">arena</span>
+        </a>
+        
+        <nav class="nav-links-center">
+            <a href="/" class="nav-link-item">Platform</a>
+            <a href="#features" class="nav-link-item" onclick="alert('RAG systems, cognitive exams, live tracking logs active.')">Features</a>
+            <a href="#process" class="nav-link-item" onclick="alert('Registration -> Mock Assessment -> Selection Decision.')">How it works</a>
+        </nav>
 
-        <!-- HERO SECTION -->
-        <div class="landing-hero" style="padding: 4rem 1rem 3rem 1rem;">
-            <span class="pre-title">Exclusive Research Challenge</span>
-            <h1 class="hero-title" style="font-size: 4rem; max-width: 900px; margin: 0 auto 1.5rem auto;">Only the Future Innovators Will Be Selected.</h1>
-            <p class="hero-description" style="max-width: 700px; font-size: 1.15rem; color: #cbd5e1;">
-                Not everyone can attend. Only selected students will receive an invitation to the 2-day elite AI research workshop. 
-                Prove your logical limits, prompt capabilities, and critical thinking to qualify.
-            </p>
-
-            <div class="hero-stats" style="margin-bottom: 3rem;">
-                <div class="glass-panel stat-card">
-                    <div class="stat-value">30</div>
-                    <div class="stat-label">Total Seats</div>
-                </div>
-                <div class="glass-panel stat-card">
-                    <div class="stat-value" id="days-countdown">02d:00h:00s</div>
-                    <div class="stat-label">Time Remaining</div>
-                </div>
-                <div class="glass-panel stat-card">
-                    <div class="stat-value">7.2%</div>
-                    <div class="stat-label">Selection Rate</div>
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 1.5rem; justify-content: center;">
-                <a href="/signup" class="btn-futuristic" style="font-size: 0.95rem; padding: 1rem 2.5rem;">Apply Now ➔</a>
-                <a href="#about" class="btn-futuristic btn-secondary" style="font-size: 0.95rem; padding: 1rem 2.5rem;">Learn More</a>
+        <div class="nav-actions-right">
+            <a href="/login" class="btn-black-pill" style="background: transparent; color: #222831 !important; border: 1px solid rgba(34, 40, 49, 0.2); box-shadow: none;">Login</a>
+            <a href="/signup" class="btn-black-pill">Get Started</a>
+            <div class="menu-hamburger-btn" onclick="alert('Menu items are fully accessible via navigation links.')">
+                <div class="hamburger-bar"></div>
+                <div class="hamburger-bar"></div>
             </div>
         </div>
+    </header>
 
-        <!-- ABOUT SECTION -->
-        <div id="about" class="topics-section" style="padding: 4rem 0;">
-            <h2 class="section-title">Welcome to AI NEXT GEN 2026</h2>
-            <p style="text-align: center; max-width: 650px; margin: -1.5rem auto 3rem auto; color: var(--text-secondary); line-height: 1.6;">
-                This exclusive 2-day research workshop introduces elite college students to bleeding-edge frameworks in generative AI, agent orchestration, and RAG architectures.
-            </p>
-            <div class="topics-grid">
-                <div class="glass-panel topic-card">
-                    <div class="topic-icon">🤖</div>
-                    <h3 class="topic-title">AI Agents Orchestration</h3>
-                    <p class="topic-desc">Build multi-agent autonomous hierarchies using planning systems and critique loops.</p>
-                </div>
-                <div class="glass-panel topic-card">
-                    <div class="topic-icon">🧬</div>
-                    <h3 class="topic-title">Retrieval-Augmented Systems (RAG)</h3>
-                    <p class="topic-desc">Build semantic indexes, embeddings, and context injections utilizing vector databases.</p>
-                </div>
-                <div class="glass-panel topic-card">
-                    <div class="topic-icon">💻</div>
-                    <h3 class="topic-title">Prompt Engineering</h3>
-                    <p class="topic-desc">Design structured prompts, system instructions templates, and formatting parameters.</p>
-                </div>
-                <div class="glass-panel topic-card">
-                    <div class="topic-icon">📡</div>
-                    <h3 class="topic-title">Modern AI Tools</h3>
-                    <p class="topic-desc">Master workflow compilers (Cursor, LangChain, vLLM) driving AI infrastructure.</p>
-                </div>
+    <!-- Main Content Area -->
+    <main class="container">
+        
+        <!-- Hero Split Grid -->
+        <section class="hero-layout-grid">
+            <!-- Curved connecting wireframe lines -->
+            <div class="wireframe-connector-1">
+                <div class="wireframe-connector-circle">↓</div>
             </div>
-        </div>
 
-        <!-- WHY SHOULD YOU APPLY -->
-        <div class="criteria-section" style="padding: 4rem 0;">
-            <h2 class="section-title">Why Should You Apply?</h2>
-            <div class="criteria-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-                <div class="glass-panel criteria-card" style="text-align: left; padding: 2rem;">
-                    <div style="font-size: 2rem; margin-bottom: 1rem;">🚀</div>
-                    <h3 class="criteria-name">Build AI Projects</h3>
-                    <p class="topic-desc">Develop production-grade generative templates, agent codes, and RAG indexes.</p>
-                </div>
-                <div class="glass-panel criteria-card" style="text-align: left; padding: 2rem;">
-                    <div style="font-size: 2rem; margin-bottom: 1rem;">👥</div>
-                    <h3 class="criteria-name">Network with Experts</h3>
-                    <p class="topic-desc">Collaborate with senior research scientists and industry prompt engineers.</p>
-                </div>
-                <div class="glass-panel criteria-card" style="text-align: left; padding: 2rem;">
-                    <div style="font-size: 2rem; margin-bottom: 1rem;">🏆</div>
-                    <h3 class="criteria-name">Participate in Challenges</h3>
-                    <p class="topic-desc">Test your logical thinking in live code hackathons and problem scenarios.</p>
-                </div>
-                <div class="glass-panel criteria-card" style="text-align: left; padding: 2rem;">
-                    <div style="font-size: 2rem; margin-bottom: 1rem;">🎓</div>
-                    <h3 class="criteria-name">Get Certified</h3>
-                    <p class="topic-desc">Receive research certification from the selection lab committee.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- SELECTION PROCESS TIMELINE -->
-        <div class="topics-section" style="padding: 4rem 0;">
-            <h2 class="section-title">Selection Process</h2>
-            <div class="timeline-container">
-                <div class="timeline-line"></div>
-                
-                <div class="timeline-step">
-                    <div class="timeline-node"></div>
-                    <div class="glass-panel timeline-card">
-                        <span class="timeline-num">STEP 01</span>
-                        <h4 class="timeline-title">Register Account</h4>
-                        <p class="timeline-desc">Create your login credentials using your academic coordinates.</p>
-                    </div>
+            <!-- Left Details Column -->
+            <div class="hero-details-col">
+                <div class="explore-tag-row">
+                    <div class="explore-tag-icon">→</div>
+                    <span>Explore our selection cohort challenges</span>
                 </div>
                 
-                <div class="timeline-step">
-                    <div class="timeline-node"></div>
-                    <div class="glass-panel timeline-card">
-                        <span class="timeline-num">STEP 02</span>
-                        <h4 class="timeline-title">Complete Your Profile</h4>
-                        <p class="timeline-desc">Input academic details and portfolio links (GitHub, LinkedIn).</p>
-                    </div>
-                </div>
+                <h1 class="hero-title-main">AI Selection Platform</h1>
                 
-                <div class="timeline-step">
-                    <div class="timeline-node"></div>
-                    <div class="glass-panel timeline-card">
-                        <span class="timeline-num">STEP 03</span>
-                        <h4 class="timeline-title">Unlock Challenges</h4>
-                        <p class="timeline-desc">Complete security checkups (Camera, Mic, GPS) to load the missions.</p>
-                    </div>
-                </div>
-                
-                <div class="timeline-step">
-                    <div class="timeline-node"></div>
-                    <div class="glass-panel timeline-card">
-                        <span class="timeline-num">STEP 04</span>
-                        <h4 class="timeline-title">Complete AI Missions</h4>
-                        <p class="timeline-desc">Solve logical series, multi-agent strategizing, and prompt design.</p>
-                    </div>
-                </div>
-                
-                <div class="timeline-step">
-                    <div class="timeline-node"></div>
-                    <div class="glass-panel timeline-card">
-                        <span class="timeline-num">STEP 05</span>
-                        <h4 class="timeline-title">AI Evaluation</h4>
-                        <p class="timeline-desc">System records behavioral logs and answers to assign weighted scores.</p>
-                    </div>
+                <div class="actions-buttons-row">
+                    <a href="/signup" class="btn-try-free">Register for free</a>
+                    <a href="/login" class="btn-see-demo">
+                        <div class="play-circle-icon">▶</div>
+                        <span>Try Sandbox</span>
+                    </a>
                 </div>
 
-                <div class="timeline-step">
-                    <div class="timeline-node"></div>
-                    <div class="glass-panel timeline-card">
-                        <span class="timeline-num">STEP 06</span>
-                        <h4 class="timeline-title">Shortlisting</h4>
-                        <p class="timeline-desc">System checks scores against the top-30 candidate thresholds.</p>
-                    </div>
-                </div>
-
-                <div class="timeline-step">
-                    <div class="timeline-node"></div>
-                    <div class="glass-panel timeline-card">
-                        <span class="timeline-num">STEP 07</span>
-                        <h4 class="timeline-title">Receive Invitation</h4>
-                        <p class="timeline-desc">Shortlisted candidates receive selection emails and credentials.</p>
+                <!-- Bottom Stats Card -->
+                <div class="bottom-card-stat">
+                    <h3 class="stat-card-title">30 Shortlists</h3>
+                    <p class="stat-card-lbl">Guaranteed workshop roster intake slots</p>
+                    
+                    <div class="stat-card-visual">
+                        <div class="visual-indicators">
+                            <div class="visual-dot"></div>
+                            <div class="visual-dot" style="opacity: 0.5;"></div>
+                        </div>
+                        <svg class="visual-wave-svg" viewBox="0 0 100 20">
+                            <path d="M0,10 Q15,0 30,10 T60,10 T90,10" />
+                        </svg>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- LEADERBOARD PREVIEW -->
-        <div class="glass-panel leaderboard-panel" style="margin-bottom: 4rem;">
-            <h2 class="section-title" style="margin-bottom: 1.5rem; text-align: left;">Highscore Board Preview</h2>
-            <table class="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th class="leaderboard-rank">Rank</th>
-                        <th>Candidate</th>
-                        <th>College</th>
-                        <th class="leaderboard-score">Final Score</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body">
-                    <!-- Populated dynamically -->
-                </tbody>
-            </table>
-        </div>
-    </div>
+            <!-- Right Visuals Column -->
+            <div class="hero-visuals-col">
+                <!-- Overlapping Left Card -->
+                <div class="take-expenses-card">
+                    <div class="block-patterns">
+                        <div class="block-p" style="background: rgba(34, 40, 49, 0.4);"></div>
+                        <div class="block-p"></div>
+                        <div class="block-p"></div>
+                        <div class="block-p" style="background: rgba(34, 40, 49, 0.6);"></div>
+                    </div>
+                    <span style="font-size: 0.8rem; font-weight: 600; line-height: 1.3; color: #222831; display: block;">Take your challenge under control</span>
+                </div>
 
-    <!-- Background Particle Canvas Logic -->
+                <!-- Diagonal Arrow Badge in Turquoise Accent -->
+                <div class="accent-arrow-badge" onclick="window.location.href='/signup'">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#222831" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="7" y1="7" x2="17" y2="17" />
+                        <polyline points="17 7 17 17 7 17" />
+                    </svg>
+                </div>
+
+                <!-- Portrait Avatar Capsule -->
+                <div class="capsule-portrait-frame">
+                    <img class="portrait-img" src="/static/img/main.jpg" alt="College Campus Building">
+                </div>
+
+                <!-- Overlapping Stats tag -->
+                <div class="downloads-tag-block">
+                    <div class="downloads-count">7 levels</div>
+                    <span class="downloads-lbl">Security Missions</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Footer Columns -->
+        <section class="features-footer-section">
+            <div class="features-footer-grid">
+                <div class="feature-item-col">
+                    <div class="feature-item-header">
+                        <div class="feature-item-icon-wrapper">🧩</div>
+                        <h4 class="feature-item-title">Logic Detective</h4>
+                    </div>
+                    <p class="feature-item-desc">Solve abstract AI reasoning puzzles, math equations, and prompt constraints in real-time.</p>
+                </div>
+
+                <div class="feature-item-col">
+                    <div class="feature-item-header">
+                        <div class="feature-item-icon-wrapper">🔒</div>
+                        <h4 class="feature-item-title">Sec-Ops Guard</h4>
+                    </div>
+                    <p class="feature-item-desc">Ensure complete testing honesty using live camera analysis overlays and focus telemetry logs.</p>
+                </div>
+
+                <div class="feature-item-col">
+                    <div class="feature-item-header">
+                        <div class="feature-item-icon-wrapper">📊</div>
+                        <h4 class="feature-item-title">Roster Control</h4>
+                    </div>
+                    <p class="feature-item-desc">Auto-shortlist candidate ranks dynamically. Export CSV rosters and generate admission tickets instantly.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
     <script>
-        const canvas = document.getElementById('particle-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.speedX = Math.random() * 0.4 - 0.2;
-                this.speedY = Math.random() * 0.4 - 0.2;
-                this.alpha = Math.random() * 0.5 + 0.1;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
-                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
-            }
-            draw() {
-                ctx.fillStyle = `rgba(0, 240, 255, ${this.alpha})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        function initParticles() {
-            for (let i = 0; i < 60; i++) {
-                particles.push(new Particle());
-            }
-        }
-        initParticles();
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        // Hero Ticker logic
-        let totalMinutes = 120;
-        let secondsLeft = totalMinutes * 60;
-        const countdownElement = document.getElementById('days-countdown');
-        setInterval(() => {
-            if (secondsLeft <= 0) {
-                countdownElement.textContent = "00h:00m:00s";
-                return;
-            }
-            secondsLeft--;
-            const h = Math.floor(secondsLeft / 3600);
-            const m = Math.floor((secondsLeft % 3600) / 60);
-            const s = secondsLeft % 60;
-            countdownElement.textContent = `${h.toString().padStart(2, '0')}h:${m.toString().padStart(2, '0')}m:${s.toString().padStart(2, '0')}s`;
-        }, 1000);
-
-        // Fetch Leaderboard
-        async function loadLeaderboard() {
-            const tbody = document.getElementById('leaderboard-body');
-            try {
-                const response = await fetch('/api/leaderboard');
-                const data = await response.json();
-                if (data && data.length > 0) {
-                    tbody.innerHTML = '';
-                    data.forEach((candidate, idx) => {
-                        const rank = idx + 1;
-                        let rankClass = `rank-${rank}`;
-                        if (rank > 3) rankClass = 'rank-other';
-                        tbody.innerHTML += `
-                            <tr>
-                                <td class="leaderboard-rank ${rankClass}">${rank}</td>
-                                <td>${candidate.name}</td>
-                                <td>${candidate.college}</td>
-                                <td class="leaderboard-score">${candidate.score_final.toFixed(1)}</td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Leaderboard is offline.</td></tr>`;
-                }
-            } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Leaderboard is syncing.</td></tr>`;
-            }
-        }
-        loadLeaderboard();
+        // Make sure local target countdown logic is cleared cleanly since we are not using countdowns on the mockup landing page!
+        localStorage.removeItem('countdown_target_time');
     </script>
 </body>
 </html>

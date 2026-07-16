@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - AI NEXT GEN 2026</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            background-color: #D8D7CE !important;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        body::before, body::after {
+            display: none !important;
+        }
+
+        /* Tablet Layout Wrapper */
+        .tablet-wrapper {
+            display: grid;
+            grid-template-columns: 80px 1fr 340px;
+            min-height: 100vh;
+            background: #D8D7CE;
+            box-sizing: border-box;
+        }
+
+        /* Left Navigation Sidebar */
+        .left-sidebar {
+            background: rgba(216, 215, 206, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-right: 1px solid rgba(34, 40, 49, 0.12);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-sizing: border-box;
+            z-index: 20;
+        }
+
+        .sidebar-logo {
+            text-align: center;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .menu-item {
+            font-size: 1.25rem;
+            text-decoration: none;
+            color: rgba(34, 40, 49, 0.7);
+            padding: 10px;
+            border-radius: 14px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-item:hover {
+            color: #00A6C0;
+            background: rgba(34, 40, 49, 0.04);
+        }
+
+        .menu-item.active {
+            color: #D8D7CE;
+            background: #222831;
+            box-shadow: 0 0 20px rgba(34, 40, 49, 0.15);
+        }
+
+        /* Main Page Content area */
+        .main-dashboard-content {
+            padding: 40px;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 36px;
+        }
+
+        .search-bar {
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(34, 40, 49, 0.12);
+            border-radius: 9999px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .support-tag {
+            background: rgba(34, 40, 49, 0.08);
+            color: #222831;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            margin-right: 16px;
+        }
+
+        .header-candidate-id {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: rgba(34, 40, 49, 0.7);
+            font-weight: 600;
+        }
+
+        .serif-title {
+            font-family: var(--font-serif);
+            font-size: 2.2rem;
+            font-weight: 500;
+            color: #222831;
+            margin: 0 0 28px 0;
+        }
+
+        /* Profile Card Form Styling */
+        .profile-card {
+            background: rgba(40, 59, 72, 0.12);
+            border-radius: 28px;
+            border: 1px solid rgba(34, 40, 49, 0.12);
+            padding: 36px;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(34, 40, 49, 0.03);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(34, 40, 49, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding-left: 12px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .input-group input:disabled {
+            background: rgba(255, 255, 255, 0.25);
+            color: rgba(34, 40, 49, 0.5);
+            cursor: not-allowed;
+            border-color: rgba(34, 40, 49, 0.08);
+        }
+
+        .input-group select {
+            padding-right: 28px;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23222831' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 18px center;
+            background-size: 14px;
+        }
+
+        .input-group select option {
+            background: #ffffff;
+            color: #222831;
+        }
+
+        /* Right Sidebar Panel */
+        .right-sidebar {
+            background: rgba(216, 215, 206, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-left: 1px solid rgba(34, 40, 49, 0.12);
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-sizing: border-box;
+            z-index: 20;
+        }
+
+        .webcam-camera-frame {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed rgba(34, 40, 49, 0.25);
+            border-radius: 50%;
+            margin: 0 auto 16px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .camera-circle {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.35);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            color: rgba(34, 40, 49, 0.6);
+        }
+
+        .webcam-indicator-dot {
+            position: absolute;
+            bottom: 6px;
+            right: 12px;
+            background: var(--accent-green);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2.5px solid #D8D7CE;
+            box-shadow: 0 0 8px var(--accent-green);
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-color-pending { background-color: var(--accent-yellow); box-shadow: 0 0 8px var(--accent-yellow); }
+        .status-color-selected { background-color: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
+        .status-color-rejected { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
+        .status-color-disqualified { background-color: #dc2626; box-shadow: 0 0 10px #dc2626; }
+
+        .final-score-dial-card {
+            background: #222831 !important;
+            color: #D8D7CE !important;
+            border-radius: 24px;
+            padding: 24px 20px;
+            text-align: center;
+            margin-top: auto;
+            box-shadow: 0 10px 30px rgba(34, 40, 49, 0.15);
+        }
+
+        .final-score-dial-card .dial-value {
+            color: #D8D7CE !important;
+        }
+
+        .final-score-dial-card div {
+            color: rgba(216, 215, 206, 0.75) !important;
+        }
+
+        @media (max-width: 1100px) {
+            .tablet-wrapper {
+                grid-template-columns: 80px 1fr;
+            }
+            .right-sidebar {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tablet-wrapper {
+                grid-template-columns: 1fr;
+            }
+            .left-sidebar {
+                display: none;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tablet-wrapper">
+        <!-- Sidebar Navigation menu -->
+        <div class="left-sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon"></div>
+            </div>
+            <div class="sidebar-menu">
+                <a href="/" class="menu-item" title="Home">🏠</a>
+                <a href="/dashboard" class="menu-item" title="Dashboard">📊</a>
+                <a href="/profile" class="menu-item active" title="My Profile">👤</a>
+                <a href="/challenge" class="menu-item" title="Assessment Arena">⚔️</a>
+                <a href="/admin" class="menu-item" title="Admin Control">⚙️</a>
+            </div>
+            <div class="sidebar-footer">
+                <button id="btn-user-logout" title="Log Out" style="background: none; border: none; font-size: 1.35rem; cursor: pointer; opacity: 0.7; color: rgba(216, 215, 206, 0.6);">🚪</button>
+            </div>
+        </div>
+
+        <!-- Main Body details editing -->
+        <div class="main-dashboard-content">
+            <div class="main-header">
+                <div class="search-bar">
+                    <span style="color: rgba(216, 215, 206, 0.5); font-size: 0.9rem;">🔍</span>
+                    <input type="text" placeholder="Search profiles..." style="border: none; background: transparent; outline: none; font-size: 0.85rem; width: 180px; color: #D8D7CE;" disabled>
+                </div>
+                <div class="header-right">
+                    <span class="support-tag">Online support</span>
+                    <span class="header-candidate-id" id="top-candidate-id">CANDIDATE ID: AINEXT2026-0000</span>
+                </div>
+            </div>
+
+            <h1 class="serif-title">Account Profile</h1>
+
+            <div class="glass-panel profile-card">
+                <form id="profile-edit-form">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="name">Full Name</label>
+                            <input type="text" id="name" required placeholder="Full Name">
+                        </div>
+                        <div class="input-group">
+                            <label for="email">Academic Email</label>
+                            <input type="email" id="email" disabled placeholder="Academic Email">
+                        </div>
+                        <div class="input-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" required placeholder="Phone Number">
+                        </div>
+                        <div class="input-group">
+                            <label for="college">College / University</label>
+                            <input type="text" id="college" required placeholder="College / University">
+                        </div>
+                        <div class="input-group">
+                            <label for="department">Department</label>
+                            <input type="text" id="department" required placeholder="Department">
+                        </div>
+                        <div class="input-group">
+                            <label for="year">Year of Study</label>
+                            <select id="year" required>
+                                <option value="" disabled>Select Year</option>
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="linkedin">LinkedIn Profile URL</label>
+                            <input type="url" id="linkedin" placeholder="LinkedIn Profile (Optional)">
+                        </div>
+                        <div class="input-group">
+                            <label for="github">GitHub Profile URL</label>
+                            <input type="url" id="github" placeholder="GitHub Profile (Optional)">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-futuristic" style="width: 100%;">Save Changes</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Side info sidebar -->
+        <div class="right-sidebar">
+            <div class="webcam-monitor-panel" style="text-align: center;">
+                <div class="webcam-camera-frame">
+                    <div class="camera-circle">👤</div>
+                    <span class="webcam-indicator-dot" id="right-camera-dot"></span>
+                </div>
+                <h4 style="font-size: 0.85rem; font-weight: 600; color: #D8D7CE; margin: 0;">Identity feed</h4>
+                <p style="font-size: 0.7rem; color: rgba(216, 215, 206, 0.5); margin: 4px 0 0 0;">Viewport tracking active</p>
+            </div>
+
+            <div class="glass-panel" style="padding: 20px;">
+                <div class="status-container" style="margin: 0;">
+                    <span class="status-dot status-color-pending" id="status-light"></span>
+                    <span style="font-size: 0.8rem; font-weight: 600; color: #D8D7CE;">SELECTION: <span id="status-text" style="color: var(--accent-yellow);">PENDING</span></span>
+                </div>
+            </div>
+
+            <!-- Score dial panel -->
+            <div class="glass-panel final-score-dial-card">
+                <div class="dial-value" id="score-final-dial">0.0</div>
+                <div style="font-size: 0.75rem; color: rgba(34, 40, 49, 0.7); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; font-weight: 600;">Final Score %</div>
+                <div style="margin-top: 14px; font-size: 0.7rem; color: rgba(34, 40, 49, 0.6); border-top: 1px solid rgba(34,40,49,0.1); padding-top: 10px; font-weight: 600;">
+                    Expand your possibilities
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let activeCandidate = null;
+
+        // Load Session Profile details
+        async function initProfile() {
+            try {
+                const response = await fetch('/api/session');
+                const data = await response.json();
+                
+                if (response.ok && data.logged_in) {
+                    activeCandidate = data.candidate;
+                    populateProfileFields();
+                } else {
+                    window.location.href = '/login';
+                }
+            } catch (e) {
+                loadLocalSession();
+            }
+        }
+        initProfile();
+
+        function loadLocalSession() {
+            const email = localStorage.getItem('active_session_email');
+            if (!email) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const raw = localStorage.getItem('candidates');
+            const list = raw ? JSON.parse(raw) : [];
+            activeCandidate = list.find(c => c.email.toLowerCase() === email.toLowerCase());
+
+            if (!activeCandidate) {
+                window.location.href = '/login';
+                return;
+            }
+
+            populateProfileFields();
+        }
+
+        function populateProfileFields() {
+            document.getElementById('top-candidate-id').textContent = `CANDIDATE ID: ${activeCandidate.candidate_id}`;
+            document.getElementById('name').value = activeCandidate.name || '';
+            document.getElementById('email').value = activeCandidate.email || '';
+            document.getElementById('phone').value = activeCandidate.phone || '';
+            document.getElementById('college').value = activeCandidate.college || '';
+            document.getElementById('department').value = activeCandidate.department || '';
+            document.getElementById('year').value = activeCandidate.year || '';
+            document.getElementById('linkedin').value = activeCandidate.linkedin || '';
+            document.getElementById('github').value = activeCandidate.github || '';
+
+            // Set final score circular dial
+            const dialScore = document.getElementById('score-final-dial');
+            if (dialScore) {
+                dialScore.textContent = (activeCandidate.score_final || 0.0).toFixed(1);
+            }
+
+            // Selection statuses color
+            const statusLight = document.getElementById('status-light');
+            const statusText = document.getElementById('status-text');
+            
+            let statusClass = 'status-color-pending';
+            let statusString = 'PENDING';
+            
+            if (activeCandidate.selected === 1) {
+                statusClass = 'status-color-selected';
+                statusString = 'SELECTED';
+            } else if (activeCandidate.selected === 2) {
+                statusClass = 'status-color-rejected';
+                statusString = 'ARCHIVED';
+            } else if (activeCandidate.selected === 3) {
+                statusClass = 'status-color-disqualified';
+                statusString = 'DISQUALIFIED';
+            }
+
+            if (statusLight) statusLight.className = `status-dot ${statusClass}`;
+            if (statusText) {
+                statusText.textContent = statusString;
+                statusText.style.color = activeCandidate.selected === 1 ? 'var(--accent-green)' : (activeCandidate.selected === 3 || activeCandidate.selected === 2 ? 'var(--accent-red)' : 'var(--accent-yellow)');
+            }
+
+            // Webcam active dots color
+            const cameraDot = document.getElementById('right-camera-dot');
+            if (cameraDot) {
+                if (activeCandidate.webcam_status === 'Active') {
+                    cameraDot.style.backgroundColor = 'var(--accent-green)';
+                    cameraDot.style.boxShadow = '0 0 8px var(--accent-green)';
+                } else {
+                    cameraDot.style.backgroundColor = 'var(--accent-red)';
+                    cameraDot.style.boxShadow = '0 0 8px var(--accent-red)';
+                }
+            }
+        }
+
+        // Handle Logout
+        document.getElementById('btn-user-logout').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/logout', { method: 'POST' });
+                if (response.ok) {
+                    window.location.href = '/login';
+                }
+            } catch(err) {
+                localStorage.removeItem('active_session_email');
+                localStorage.removeItem('active_session_candidate_id');
+                window.location.href = '/login';
+            }
+        });
+
+        // Save Profile Updates Form Submission
+        document.getElementById('profile-edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const updateData = {
+                name: document.getElementById('name').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                college: document.getElementById('college').value.trim(),
+                department: document.getElementById('department').value.trim(),
+                year: parseInt(document.getElementById('year').value),
+                linkedin: document.getElementById('linkedin').value.trim(),
+                github: document.getElementById('github').value.trim()
+            };
+
+            try {
+                const response = await fetch('/api/profile/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    alert("Profile details updated successfully!");
+                    if (activeCandidate) {
+                        Object.assign(activeCandidate, updateData);
+                    }
+                } else {
+                    alert(result.error || "Failed to update profile details");
+                }
+            } catch (err) {
+                // Local Storage Sandbox Fallback Update
+                const raw = localStorage.getItem('candidates');
+                let list = raw ? JSON.parse(raw) : [];
+                let idx = list.findIndex(c => c.email.toLowerCase() === activeCandidate.email.toLowerCase());
+                
+                if (idx !== -1) {
+                    Object.assign(list[idx], updateData);
+                    localStorage.setItem('candidates', JSON.stringify(list));
+                    alert("Server offline. Profile updated locally in sandbox database.");
+                    Object.assign(activeCandidate, updateData);
+                } else {
+                    alert("Failed to locate candidate credentials locally.");
+                }
+            }
+        });
+    </script>
+</body>
+</html>

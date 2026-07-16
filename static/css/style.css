@@ -1,31 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
 
 :root {
-    --bg-color: #030305;
-    --card-bg: rgba(10, 10, 18, 0.6);
-    --card-border: rgba(255, 255, 255, 0.07);
-    --card-border-glow: rgba(0, 240, 255, 0.2);
+    --bg-color: #D8D7CE;
+    --card-bg: rgba(40, 59, 72, 0.12);
+    --card-border: rgba(34, 40, 49, 0.12);
+    --card-border-glow: rgba(0, 166, 192, 0.3);
     
-    --primary-glow: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-    --secondary-glow: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-    
-    --accent-cyan: #00f0ff;
-    --accent-indigo: #6366f1;
-    --accent-purple: #a855f7;
-    --accent-magenta: #ec4899;
+    --accent-cyan: #00A6C0;
+    --accent-indigo: #00A6C0;
+    --accent-purple: #00A6C0;
+    --accent-magenta: #00A6C0;
     --accent-red: #ef4444;
-    --accent-yellow: #eab308;
+    --accent-yellow: #f59e0b;
     --accent-green: #10b981;
     
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-primary: #222831;
+    --text-secondary: rgba(34, 40, 49, 0.7);
+    --text-muted: rgba(34, 40, 49, 0.55);
     
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --font-futuristic: 'Orbitron', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
+    --font-serif: 'Lora', Georgia, serif;
     
-    --glass-blur: blur(20px);
+    --glass-blur: blur(25px);
 }
 
 * {
@@ -45,7 +43,7 @@
     background: var(--bg-color);
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(99, 102, 241, 0.3);
+    background: rgba(34, 40, 49, 0.15);
     border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -61,44 +59,35 @@ body {
     position: relative;
 }
 
-/* Background glows */
+/* Floating Mesh Backgrounds matching luxury light bone theme */
 body::before {
     content: '';
-    position: absolute;
+    position: fixed;
     top: -20%;
-    left: -10%;
-    width: 60%;
-    height: 60%;
-    background: var(--primary-glow);
+    right: -10%;
+    width: 65vw;
+    height: 65vw;
+    background: radial-gradient(circle, rgba(0, 166, 192, 0.05) 0%, rgba(0, 166, 192, 0) 70%);
     z-index: -1;
     pointer-events: none;
+    filter: blur(80px);
 }
 
 body::after {
     content: '';
-    position: absolute;
-    bottom: -10%;
-    right: -10%;
-    width: 60%;
-    height: 60%;
-    background: var(--secondary-glow);
+    position: fixed;
+    bottom: -20%;
+    left: -10%;
+    width: 55vw;
+    height: 55vw;
+    background: radial-gradient(circle, rgba(0, 166, 192, 0.03) 0%, rgba(0, 166, 192, 0) 70%);
     z-index: -1;
     pointer-events: none;
+    filter: blur(80px);
 }
 
-/* Top grid pattern */
 .grid-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
-    background-size: 50px 50px;
-    z-index: -2;
-    pointer-events: none;
+    display: none !important;
 }
 
 /* Containers */
@@ -116,33 +105,33 @@ body::after {
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--card-border);
-    border-radius: 16px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    border-radius: 24px;
+    box-shadow: 0 4px 20px rgba(34, 40, 49, 0.03);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-panel:hover {
     border-color: var(--card-border-glow);
-    box-shadow: 0 20px 40px rgba(0, 240, 255, 0.08);
+    box-shadow: 0 6px 24px rgba(34, 40, 49, 0.06);
 }
 
-/* Buttons */
+/* Buttons modernized to solid black pill buttons matching handhold */
 .btn-futuristic {
-    background: linear-gradient(135deg, var(--accent-indigo), var(--accent-purple));
-    color: white;
+    background: #222831;
+    color: #D8D7CE;
     border: none;
-    border-radius: 8px;
+    border-radius: 16px;
     padding: 0.85rem 2rem;
-    font-family: var(--font-futuristic);
-    font-weight: 700;
-    letter-spacing: 2px;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: 0.5px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    font-size: 0.9rem;
+    box-shadow: 0 4px 14px rgba(34, 40, 49, 0.15);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: none;
+    font-size: 0.95rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -150,40 +139,30 @@ body::after {
 }
 
 .btn-futuristic::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: all 0.5s ease;
-}
-
-.btn-futuristic:hover::before {
-    left: 100%;
+    display: none;
 }
 
 .btn-futuristic:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
+    background: #283B48;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(34, 40, 49, 0.22);
 }
 
 .btn-futuristic:active {
-    transform: translateY(1px);
+    transform: translateY(0);
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--text-primary);
-    border: 1px solid var(--card-border);
-    box-shadow: none;
+    background: transparent !important;
+    color: #222831 !important;
+    border: 1px solid rgba(34, 40, 49, 0.2) !important;
+    box-shadow: none !important;
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: var(--text-secondary);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+    background: rgba(34, 40, 49, 0.04) !important;
+    border-color: #222831 !important;
+    color: #222831 !important;
 }
 
 /* Navigation Header */
@@ -204,10 +183,22 @@ header {
 .logo-icon {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-indigo));
-    border-radius: 8px;
+    border: 2px dashed rgba(34, 40, 49, 0.7);
+    border-radius: 50%;
     position: relative;
-    animation: rotateLogo 8s infinite linear;
+    animation: rotateLogo 12s infinite linear;
+    box-shadow: 0 0 10px rgba(34, 40, 49, 0.03);
+}
+
+.logo-icon::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
+    border: 1.5px dashed rgba(34, 40, 49, 0.4);
+    border-radius: 50%;
 }
 
 .logo-text {
@@ -215,9 +206,8 @@ header {
     font-weight: 900;
     font-size: 1.2rem;
     letter-spacing: 3px;
-    background: linear-gradient(90deg, #fff, var(--text-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
+    text-shadow: none;
 }
 
 .selection-ratio {
@@ -248,35 +238,32 @@ header {
 }
 
 .pre-title {
-    font-family: var(--font-futuristic);
-    color: var(--accent-cyan);
-    font-size: 1rem;
-    letter-spacing: 6px;
+    font-family: var(--font-sans);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 1px;
     text-transform: uppercase;
     margin-bottom: 1rem;
     display: block;
 }
 
 h1.hero-title {
-    font-family: var(--font-futuristic);
-    font-size: 3.5rem;
-    font-weight: 900;
+    font-family: var(--font-serif);
+    font-size: 4rem;
+    font-weight: 500;
     letter-spacing: -1px;
-    line-height: 1.1;
+    line-height: 1.15;
     margin-bottom: 1.5rem;
-    background: linear-gradient(180deg, #ffffff 30%, #64748b 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
 }
 
 .tagline {
-    font-family: var(--font-futuristic);
-    color: var(--accent-red);
-    font-size: 1.8rem;
-    letter-spacing: 4px;
-    text-transform: uppercase;
+    font-family: var(--font-sans);
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    font-weight: 400;
     margin-bottom: 2rem;
-    text-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
 }
 
 .hero-description {
@@ -321,12 +308,14 @@ h1.hero-title {
 }
 
 .section-title {
-    font-family: var(--font-futuristic);
+    font-family: var(--font-serif);
     text-align: center;
-    font-size: 1.8rem;
-    letter-spacing: 3px;
+    font-size: 2.2rem;
+    letter-spacing: -0.5px;
     margin-bottom: 3rem;
-    text-transform: uppercase;
+    text-transform: none;
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
 .topics-grid {
@@ -456,21 +445,25 @@ label {
 }
 
 input, select, textarea {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--card-border);
-    padding: 0.85rem 1rem;
-    border-radius: 8px;
-    color: white;
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(34, 40, 49, 0.15);
+    padding: 0.85rem 1.5rem;
+    border-radius: 16px;
+    color: var(--text-primary);
     font-family: var(--font-sans);
     font-size: 0.95rem;
-    transition: all 0.3s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
 }
 
 input:focus, select:focus, textarea:focus {
-    outline: none;
+    background: rgba(255, 255, 255, 0.7);
     border-color: var(--accent-cyan);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
-    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 15px rgba(0, 166, 192, 0.12);
+}
+
+textarea {
+    border-radius: 16px;
 }
 
 .form-actions {
@@ -482,15 +475,15 @@ input:focus, select:focus, textarea:focus {
 
 /* Warnings & Messages */
 .warning-box {
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    background: rgba(239, 68, 68, 0.08);
-    border-radius: 12px;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    background: rgba(220, 38, 38, 0.04);
+    border-radius: 16px;
     padding: 1.5rem;
     margin-bottom: 2rem;
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    color: #fca5a5;
+    color: #991b1b;
     font-size: 0.95rem;
     line-height: 1.6;
 }
@@ -502,7 +495,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .warning-title {
-    font-family: var(--font-futuristic);
+    font-family: var(--font-sans);
     color: var(--accent-red);
     font-weight: 700;
     margin-bottom: 0.25rem;

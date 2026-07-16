@@ -70,6 +70,12 @@ def dashboard_page():
         return redirect(url_for('login_page'))
     return render_template('dashboard.html')
 
+@app.route('/profile')
+def profile_page():
+    if 'user_email' not in session:
+        return redirect(url_for('login_page'))
+    return render_template('profile.html')
+
 @app.route('/challenge')
 def challenge_page():
     if 'user_email' not in session:
@@ -225,6 +231,39 @@ def get_session():
         'logged_in': True,
         'candidate': c_data
     })
+
+@app.route('/api/profile/update', methods=['POST'])
+def update_profile():
+    if 'user_email' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    data = request.json or {}
+    name = data.get('name', '').strip()
+    phone = data.get('phone', '').strip()
+    college = data.get('college', '').strip()
+    department = data.get('department', '').strip()
+    year = data.get('year')
+    linkedin = data.get('linkedin', '').strip()
+    github = data.get('github', '').strip()
+
+    if not name or not phone or not college or not department or year is None:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    db = load_db()
+    candidate = next((c for c in db['candidates'] if c.get('email') == session['user_email']), None)
+    if not candidate:
+        return jsonify({'error': 'Candidate not found'}), 404
+
+    candidate['name'] = name
+    candidate['phone'] = phone
+    candidate['college'] = college
+    candidate['department'] = department
+    candidate['year'] = int(year)
+    candidate['linkedin'] = linkedin
+    candidate['github'] = github
+
+    save_db(db)
+    return jsonify({'success': True, 'message': 'Profile updated successfully'})
 
 @app.route('/api/challenge/start', methods=['POST'])
 def start_challenge():

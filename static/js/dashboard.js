@@ -249,21 +249,21 @@ function drawRadarChart() {
             labels: ['Logic', 'Creativity', 'AI Literacy', 'Problem Solving', 'Time Management'],
             datasets: [{
                 data: radarData,
-                backgroundColor: 'rgba(0, 240, 255, 0.15)',
-                borderColor: '#00f0ff',
-                pointBackgroundColor: '#6366f1',
-                pointBorderColor: '#fff',
+                backgroundColor: 'rgba(0, 166, 192, 0.15)',
+                borderColor: '#00A6C0',
+                pointBackgroundColor: '#00A6C0',
+                pointBorderColor: '#D8D7CE',
                 borderWidth: 2
             }]
         },
         options: {
             scales: {
                 r: {
-                    angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                    angleLines: { color: 'rgba(34, 40, 49, 0.08)' },
+                    grid: { color: 'rgba(34, 40, 49, 0.08)' },
                     pointLabels: {
-                        color: '#94a3b8',
-                        font: { family: 'Orbitron', size: 9 }
+                        color: '#222831',
+                        font: { family: 'Inter', size: 9 }
                     },
                     ticks: { display: false, maxTicksLimit: 5 },
                     min: 0,

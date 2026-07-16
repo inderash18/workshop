@@ -6,6 +6,17 @@
     <title>Assessment Arena - AI NEXT GEN 2026</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
+        body {
+            background-color: #D8D7CE !important;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        body::before, body::after {
+            display: none !important;
+        }
+
         .arena-grid {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -21,41 +32,46 @@
         }
 
         .mission-item {
-            padding: 1rem;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.01);
-            border: 1px solid var(--card-border);
+            padding: 1.1rem;
+            border-radius: 16px;
+            background: rgba(40, 59, 72, 0.12);
+            border: 1px solid rgba(34, 40, 49, 0.12);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 0.8rem;
+            color: rgba(34, 40, 49, 0.8);
         }
 
         .mission-item.active {
-            border-color: var(--accent-cyan);
-            background: rgba(0, 240, 255, 0.04);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+            border-color: #00A6C0;
+            background: rgba(0, 166, 192, 0.08);
+            box-shadow: 0 0 20px rgba(0, 166, 192, 0.15);
+            color: #222831;
+            font-weight: 600;
         }
 
         .mission-item.completed {
-            border-color: var(--accent-green);
-            background: rgba(16, 185, 129, 0.04);
+            border-color: rgba(22, 163, 74, 0.3);
+            background: rgba(22, 163, 74, 0.05);
+            color: rgba(34, 40, 49, 0.9);
         }
 
         .mission-item.locked {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
+            background: rgba(34, 40, 49, 0.05);
         }
 
         .mission-item-title {
             font-family: var(--font-futuristic);
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             font-weight: 700;
         }
 
         .mission-status-icon {
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         /* Floating Video */
@@ -65,12 +81,12 @@
             left: 20px;
             width: 150px;
             height: 110px;
-            border-radius: 8px;
-            border: 1px solid var(--accent-cyan);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            border-radius: 16px;
+            border: 1.5px solid #00A6C0;
+            box-shadow: 0 0 20px rgba(0, 166, 192, 0.25);
             z-index: 999;
             object-fit: cover;
-            background: black;
+            background: #283B48;
             pointer-events: none;
             display: block;
         }
@@ -86,7 +102,7 @@
             z-index: 9999;
             font-family: var(--font-mono);
             font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.015);
+            color: rgba(216, 215, 206, 0.012);
             display: block;
             user-select: none;
             white-space: nowrap;
@@ -117,10 +133,10 @@
             margin: 1.5rem 0;
         }
         .shape-card-grid {
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             padding: 1.5rem;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.01);
+            border-radius: 16px;
+            background: rgba(40, 59, 72, 0.45);
             cursor: pointer;
             display: flex;
             justify-content: center;
@@ -128,12 +144,56 @@
             transition: all 0.2s ease;
         }
         .shape-card-grid:hover {
-            border-color: var(--accent-indigo);
-            background: rgba(99, 102, 241, 0.05);
+            border-color: #00A6C0;
+            background: rgba(0, 166, 192, 0.05);
         }
         .shape-card-grid.selected {
-            border-color: var(--accent-cyan);
-            background: rgba(0, 240, 255, 0.08);
+            border-color: #00A6C0;
+            background: rgba(0, 166, 192, 0.12);
+            box-shadow: 0 0 15px rgba(0, 166, 192, 0.15);
+        }
+
+        .progress-bar-container {
+            height: 6px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #00A6C0;
+            box-shadow: 0 0 10px rgba(0, 166, 192, 0.5);
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .timer-box {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: #00A6C0;
+        }
+
+        .xp-counter {
+            font-family: var(--font-futuristic);
+            font-weight: 700;
+            color: #00A6C0;
+            letter-spacing: 0.5px;
+        }
+
+        .level-indicator {
+            font-family: var(--font-futuristic);
+            font-size: 0.75rem;
+            color: rgba(216, 215, 206, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .level-name {
+            font-family: var(--font-serif);
+            font-size: 1.35rem;
+            color: #D8D7CE;
+            font-weight: 500;
         }
 
         @media (max-width: 800px) {
@@ -147,7 +207,7 @@
             }
             .mission-item {
                 flex-shrink: 0;
-                min-width: 150px;
+                min-width: 180px;
             }
         }
     </style>
@@ -162,12 +222,16 @@
 
     <div class="container" id="main-content-wrapper">
         <!-- HEADER -->
-        <header>
-            <div class="logo">
-                <div class="logo-icon"></div>
-                <span class="logo-text">AI NEXT GEN CHALLENGE</span>
+        <header style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 24px;">
+                <div class="logo" style="margin-right: 8px;">
+                    <div class="logo-icon"></div>
+                    <span class="logo-text">AI NEXT GEN CHALLENGE</span>
+                </div>
+                <a href="/dashboard" style="color: rgba(34, 40, 49, 0.7); font-size: 0.85rem; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#00A6C0'" onmouseout="this.style.color='rgba(34, 40, 49, 0.7)'">Dashboard</a>
+                <a href="/profile" style="color: rgba(34, 40, 49, 0.7); font-size: 0.85rem; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#00A6C0'" onmouseout="this.style.color='rgba(34, 40, 49, 0.7)'">Profile</a>
             </div>
-            <div class="selection-ratio" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: var(--accent-red); font-family: var(--font-futuristic); font-size: 0.8rem;" id="violation-display">
+            <div class="selection-ratio" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.2); color: var(--accent-red); font-family: var(--font-futuristic); font-size: 0.8rem;" id="violation-display">
                 Violations: 0/3
             </div>
         </header>
@@ -178,45 +242,45 @@
             <!-- Side Missions progression board -->
             <div class="missions-sidebar">
                 <div class="mission-item locked" id="m-item-1">
-                    <span class="mission-item-title">MISSION 01: LOGIC DETECTIVE</span>
+                    <span class="mission-item-title">M-01: AI LOGIC DETECTIVE</span>
                     <span class="mission-status-icon" id="m-status-1">🔒</span>
                 </div>
                 <div class="mission-item locked" id="m-item-2">
-                    <span class="mission-item-title">MISSION 02: FUTURE THINKER</span>
+                    <span class="mission-item-title">M-02: FUTURE THINKER</span>
                     <span class="mission-status-icon" id="m-status-2">🔒</span>
                 </div>
                 <div class="mission-item locked" id="m-item-3">
-                    <span class="mission-item-title">MISSION 03: AI ARCHITECT</span>
+                    <span class="mission-item-title">M-03: PROMPT MASTER</span>
                     <span class="mission-status-icon" id="m-status-3">🔒</span>
                 </div>
                 <div class="mission-item locked" id="m-item-4">
-                    <span class="mission-item-title">MISSION 04: PROMPT ENGINEER</span>
+                    <span class="mission-item-title">M-04: THE INNOVATION LAB</span>
                     <span class="mission-status-icon" id="m-status-4">🔒</span>
                 </div>
                 <div class="mission-item locked" id="m-item-5">
-                    <span class="mission-item-title">MISSION 05: RAG ANALYST</span>
+                    <span class="mission-item-title">M-05: AI ARCHITECT</span>
                     <span class="mission-status-icon" id="m-status-5">🔒</span>
                 </div>
                 <div class="mission-item locked" id="m-item-6">
-                    <span class="mission-item-title">MISSION 06: BALANCE MASTER</span>
+                    <span class="mission-item-title">M-06: BALANCE MASTER</span>
                     <span class="mission-status-icon" id="m-status-6">🔒</span>
                 </div>
                 <div class="mission-item locked" id="m-item-7">
-                    <span class="mission-item-title">MISSION 07: FUTURE BUILDER</span>
+                    <span class="mission-item-title">M-07: FUTURE BUILDER</span>
                     <span class="mission-status-icon" id="m-status-7">🔒</span>
                 </div>
             </div>
 
             <!-- Interactive Questions Pane -->
-            <div class="glass-panel challenge-container" style="margin: 0;">
-                <div class="challenge-header" style="border-bottom: 1px solid var(--card-border); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div class="glass-panel challenge-container" style="margin: 0; padding: 32px;">
+                <div class="challenge-header" style="border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
                     <div class="challenge-level-info">
                         <span class="level-indicator" id="challenge-level-indicator">MISSION 01 OF 07</span>
-                        <span class="level-name" id="challenge-level-name">AI Logic Detective</span>
+                        <div class="level-name" id="challenge-level-name">AI Logic Detective</div>
                     </div>
-                    <div class="challenge-stats">
+                    <div style="display: flex; align-items: center;">
                         <div class="xp-counter">XP: <span id="challenge-xp">0</span></div>
-                        <div class="timer-box" style="margin-left: 1.5rem;">
+                        <div class="timer-box" style="margin-left: 1.5rem; display: flex; align-items: center; gap: 6px;">
                             <span>⏱</span> <span id="challenge-timer">00:00</span>
                         </div>
                     </div>
@@ -227,17 +291,17 @@
                     <div class="progress-bar-fill" id="challenge-progress-fill"></div>
                 </div>
 
-                <div class="secret-level-banner" id="secret-level-indicator" style="display: none;">
+                <div class="secret-level-banner" id="secret-level-indicator" style="display: none; background: rgba(220,38,38,0.1); border: 1.5px solid rgba(220,38,38,0.3); border-radius: 12px; padding: 12px; text-align: center; color: var(--accent-red); font-family: var(--font-mono); font-size: 0.8rem; margin-bottom: 20px; font-weight: bold; letter-spacing: 0.5px;">
                     ⚠ SECRET VECTOR: BUDGET ₹1000 // NO GPU LIMIT // MAX 150 WORDS ⚠
                 </div>
 
                 <div class="challenge-body">
-                    <div id="question-render-area">
+                    <div id="question-render-area" style="color: rgba(216, 215, 206, 0.95); font-size: 0.95rem; line-height: 1.6;">
                         <!-- Javascript insertions -->
                     </div>
 
-                    <div class="form-actions">
-                        <span id="word-counter-display" style="display:none; font-family: var(--font-mono); color: var(--text-secondary); align-self: center;">
+                    <div class="form-actions" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1.5rem; align-items: center;">
+                        <span id="word-counter-display" style="display:none; font-family: var(--font-mono); color: rgba(216, 215, 206, 0.5); font-size: 0.8rem;">
                             Words: <span id="word-count-num">0</span>/150
                         </span>
                         <button type="button" class="btn-futuristic" id="btn-next-level">

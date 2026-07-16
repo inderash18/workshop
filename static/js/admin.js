@@ -211,6 +211,7 @@ async function loadCandidates() {
     populateCollegeFilterOptions();
     updateStats();
     renderCandidates();
+    renderAdminCharts();
 }
 loadCandidates();
 
@@ -245,6 +246,22 @@ function updateStats() {
     statAvg.textContent = avg.toFixed(1);
     statHigh.textContent = high.toFixed(1);
     statShortlisted.textContent = `${shortlistedCount} / 30`;
+
+    // Modern layout elements updates
+    const rightDial = document.getElementById('right-shortlist-dial');
+    if (rightDial) rightDial.textContent = `${shortlistedCount} / 30`;
+
+    const webcamCount = candidatesList.filter(c => c.webcam_status === 'Active').length;
+    const webcamEl = document.getElementById('feed-webcam-active');
+    if (webcamEl) webcamEl.textContent = webcamCount;
+
+    const totalViolations = candidatesList.reduce((sum, c) => sum + (c.violation_count || 0), 0);
+    const violationsEl = document.getElementById('feed-violations-count');
+    if (violationsEl) violationsEl.textContent = totalViolations;
+
+    const completionsCount = candidatesList.filter(c => c.completed).length;
+    const completionsEl = document.getElementById('feed-completions');
+    if (completionsEl) completionsEl.textContent = completionsCount;
 }
 
 function renderCandidates() {
@@ -382,6 +399,7 @@ function updateSelectionState(candidateId, nextStatus) {
     }
     updateStats();
     renderCandidates();
+    renderAdminCharts();
 }
 
 function fallbackLocalToggle(candidateId, nextStatus) {
@@ -424,6 +442,7 @@ function fallbackLocalAutoShortlist() {
     alert("Top performing candidates shortlisted locally.");
     updateStats();
     renderCandidates();
+    renderAdminCharts();
 }
 
 // Render candidate details view modal
@@ -594,4 +613,138 @@ function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, 
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
     );
+}
+
+let scoreChartInstance = null;
+let collegeChartInstance = null;
+let statusChartInstance = null;
+
+function renderAdminCharts() {
+    if (!candidatesList || candidatesList.length === 0) return;
+
+    // 1. Scores distribution
+    const scoreRanges = ['0-20', '21-40', '41-60', '61-80', '81-100'];
+    const scoreCounts = [0, 0, 0, 0, 0];
+    
+    candidatesList.forEach(c => {
+        const s = c.score_final;
+        if (s <= 20) scoreCounts[0]++;
+        else if (s <= 40) scoreCounts[1]++;
+        else if (s <= 60) scoreCounts[2]++;
+        else if (s <= 80) scoreCounts[3]++;
+        else scoreCounts[4]++;
+    });
+
+    const scoreCanvas = document.getElementById('scoreDistChart');
+    if (scoreCanvas) {
+        const scoreCtx = scoreCanvas.getContext('2d');
+        if (scoreChartInstance) scoreChartInstance.destroy();
+        scoreChartInstance = new Chart(scoreCtx, {
+            type: 'bar',
+            data: {
+                labels: scoreRanges,
+                datasets: [{
+                    label: 'Candidates Count',
+                    data: scoreCounts,
+                    backgroundColor: 'rgba(0, 166, 192, 0.75)',
+                    borderColor: '#00A6C0',
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#222831' } },
+                    y: { grid: { color: 'rgba(34, 40, 49, 0.08)' }, ticks: { color: '#222831', stepSize: 1 } }
+                }
+            }
+        });
+    }
+
+    // 2. Colleges breakdown
+    const colleges = candidatesList.map(c => c.college || 'Unknown');
+    const collegeCounts = {};
+    colleges.forEach(col => {
+        collegeCounts[col] = (collegeCounts[col] || 0) + 1;
+    });
+    const collegeLabels = Object.keys(collegeCounts);
+    const collegeData = Object.values(collegeCounts);
+
+    const colCanvas = document.getElementById('collegeChart');
+    if (colCanvas) {
+        const colCtx = colCanvas.getContext('2d');
+        if (collegeChartInstance) collegeChartInstance.destroy();
+        collegeChartInstance = new Chart(colCtx, {
+            type: 'bar',
+            data: {
+                labels: collegeLabels,
+                datasets: [{
+                    data: collegeData,
+                    backgroundColor: 'rgba(0, 166, 192, 0.75)',
+                    borderColor: '#00A6C0',
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: 'rgba(34, 40, 49, 0.08)' }, ticks: { color: '#222831', stepSize: 1 } },
+                    y: { grid: { display: false }, ticks: { color: '#222831' } }
+                }
+            }
+        });
+    }
+
+    // 3. Status breakdown
+    let selected = 0;
+    let pending = 0;
+    let archived = 0;
+    let disqualified = 0;
+
+    candidatesList.forEach(c => {
+        if (c.selected === 1) selected++;
+        else if (c.selected === 2) archived++;
+        else if (c.selected === 3) disqualified++;
+        else pending++;
+    });
+
+    const statusCanvas = document.getElementById('statusChart');
+    if (statusCanvas) {
+        const statusCtx = statusCanvas.getContext('2d');
+        if (statusChartInstance) statusChartInstance.destroy();
+        statusChartInstance = new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Selected', 'Archived', 'Disqualified', 'Pending'],
+                datasets: [{
+                    data: [selected, archived, disqualified, pending],
+                    backgroundColor: [
+                        'rgba(0, 166, 192, 0.75)',
+                        'rgba(40, 59, 72, 0.75)',
+                        'rgba(34, 40, 49, 0.85)',
+                        'rgba(34, 40, 49, 0.25)'
+                    ],
+                    borderColor: ['#00A6C0', 'rgba(34, 40, 49, 0.12)', '#D8D7CE', 'rgba(34, 40, 49, 0.3)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { color: '#222831', font: { family: 'Inter', size: 10 } }
+                    }
+                }
+            }
+        });
+    }
 }
