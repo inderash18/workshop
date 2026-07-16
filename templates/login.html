@@ -6,18 +6,21 @@
     <title>Sign In - AI NEXT GEN 2026</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
-        /* ===== ENHANCED CSS ===== */
+        /* ===== PALETTE: Black Russian / Alucard Night / Palatinate Blue / Grey Placidity / Baby Grey ===== */
         :root {
-            --primary-bg: #D8D7CE;
-            --dark-bg: #222831;
-            --accent-cyan: #00A6C0;
+            --primary-bg: #DCDEE2;
+            --dark-bg: #000029;
+            --mid-bg: #000051;
+            --accent-blue: #173DED;
+            --accent-cyan: #173DED;
             --accent-green: #16A34A;
             --accent-red: #DC2626;
             --accent-yellow: #F59E0B;
-            --accent-purple: #7b2ffc;
+            --accent-purple: #173DED;
+            --border-color: #BABABA;
             --font-serif: 'Georgia', serif;
-            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
             --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -50,8 +53,8 @@
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(ellipse at 20% 50%, rgba(0, 166, 192, 0.05) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 50%, rgba(123, 47, 252, 0.05) 0%, transparent 60%);
+                radial-gradient(ellipse at 20% 50%, rgba(23, 61, 237, 0.07) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(0, 0, 81, 0.05) 0%, transparent 60%);
             z-index: 0;
         }
 
@@ -67,7 +70,7 @@
         .bg-orb.orb-1 {
             width: 300px;
             height: 300px;
-            background: var(--accent-cyan);
+            background: #173DED;
             top: -100px;
             right: -100px;
             animation-delay: 0s;
@@ -76,7 +79,7 @@
         .bg-orb.orb-2 {
             width: 400px;
             height: 400px;
-            background: var(--accent-purple);
+            background: #000051;
             bottom: -150px;
             left: -150px;
             animation-delay: -7s;
@@ -133,7 +136,7 @@
             width: 70px;
             height: 70px;
             border-radius: 50%;
-            border: 2px solid rgba(0, 166, 192, 0.1);
+            border: 2px solid rgba(23, 61, 237, 0.2);
             animation: spin 20s linear infinite;
         }
 
@@ -558,21 +561,16 @@
     <div class="login-container">
         <div class="glass-panel login-card">
             <!-- Logo -->
-            <div class="logo-wrapper">
-                <div class="logo-ring"></div>
-                <svg class="logo-svg" width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="4" stroke-dasharray="14 10" />
-                    <circle cx="50" cy="50" r="28" stroke="currentColor" stroke-width="4" stroke-dasharray="8 8" opacity="0.6" />
-                    <circle cx="50" cy="50" r="14" stroke="currentColor" stroke-width="4" stroke-dasharray="4 4" opacity="0.4" />
-                    <circle cx="50" cy="50" r="5" fill="currentColor" opacity="0.8" />
-                </svg>
+            <div class="logo-wrapper" style="display: flex; align-items: center; gap: 10px; margin-bottom: 24px; justify-content: center; width: 100%;">
+                <div style="width: 36px; height: 36px; background: #E74C3C; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #FFFFFF; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.25); flex-shrink: 0;">✦</div>
+                <span style="font-family: var(--font-sans); font-size: 1.6rem; font-weight: 800; color: var(--dark-bg); letter-spacing: -0.5px;">yedge</span>
             </div>
 
             <!-- Title -->
-            <h2 class="login-title">
-                Welcome <span class="highlight">Back</span>
+            <h2 class="login-title" style="color: var(--dark-bg); font-weight: 700; margin-bottom: 8px;">
+                Step In. Stand Out. Get Placed.
             </h2>
-            <p class="login-subtitle">Sign in to continue your AI journey</p>
+            <p class="login-subtitle" style="margin-bottom: 24px;">Sign in to your student workspace</p>
 
             <!-- Form -->
             <form id="login-form" novalidate>

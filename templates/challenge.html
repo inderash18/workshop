@@ -6,18 +6,21 @@
     <title>Assessment Arena - AI NEXT GEN 2026</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
-        /* ===== ENHANCED CSS ===== */
+        /* ===== PALETTE: Black Russian / Alucard Night / Palatinate Blue / Grey Placidity / Baby Grey ===== */
         :root {
-            --primary-bg: #D8D7CE;
-            --dark-bg: #222831;
-            --accent-cyan: #00A6C0;
+            --primary-bg: #DCDEE2;
+            --dark-bg: #000029;
+            --mid-bg: #000051;
+            --accent-blue: #173DED;
+            --accent-cyan: #173DED;
             --accent-green: #16A34A;
             --accent-red: #DC2626;
             --accent-yellow: #F59E0B;
+            --border-color: #BABABA;
             --font-serif: 'Georgia', serif;
-            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            --font-mono: 'Cascadia Code', 'Fira Code', monospace;
-            --font-futuristic: 'Segoe UI', system-ui, sans-serif;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+            --font-futuristic: 'Orbitron', 'Inter', sans-serif;
             --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -28,99 +31,484 @@
         }
 
         body {
-            background-color: var(--primary-bg) !important;
-            font-family: var(--font-sans);
-            color: var(--dark-bg);
+            background-color: #DCDEE2 !important;
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            position: relative;
+            overflow-x: hidden;
+            font-family: var(--font-sans);
         }
 
-        body::before, body::after {
-            display: none !important;
+        /* Watermark */
+        #dynamic-watermark {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: rgba(0, 0, 41, 0.15);
+            pointer-events: none;
+            z-index: 9999;
+            letter-spacing: 2px;
+            white-space: nowrap;
         }
 
-        /* ===== CONTAINER ===== */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1.5rem 2rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ===== HEADER ===== */
-        header {
+        /* Anti-Cheat Banner */
+        .anti-cheat-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 41, 0.97);
+            backdrop-filter: blur(15px);
+            z-index: 10000;
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #DCDEE2;
+            gap: 16px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .anti-cheat-banner.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Layout wrapper */
+        .tablet-wrapper {
+            display: flex;
+            min-height: 100vh;
+            background: #DCDEE2;
+            box-sizing: border-box;
+        }
+
+        /* Left Sidebar styling */
+        .left-sidebar {
+            background: #000051;
+            border-right: none;
+            display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(34, 40, 49, 0.08);
-            padding-bottom: 1.25rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 12px;
+            align-items: stretch;
+            padding: 32px 24px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            box-sizing: border-box;
+            z-index: 20;
         }
 
-        .logo {
+        .sidebar-logo {
             display: flex;
             align-items: center;
             gap: 12px;
+            margin-bottom: 24px;
         }
 
         .logo-icon {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, var(--accent-cyan), #7b2ffc);
+            background: #173DED;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 18px;
-            color: white;
             font-weight: 700;
+            color: #FFFFFF;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(23, 61, 237, 0.35);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: scale(1.05) rotate(-5deg);
         }
 
         .logo-text {
-            font-family: var(--font-futuristic);
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--dark-bg);
-            letter-spacing: 1px;
+            font-family: var(--font-sans);
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
         }
 
-        .nav-links {
+        .sidebar-menu {
             display: flex;
-            gap: 20px;
-            align-items: center;
+            flex-direction: column;
+            gap: 8px;
+            align-items: stretch;
+            flex-grow: 1;
         }
 
-        .nav-links a {
-            color: rgba(34, 40, 49, 0.6);
+        .menu-item {
             font-size: 0.85rem;
             text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            padding: 6px 12px;
-            border-radius: 8px;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-cyan);
-            background: rgba(0, 166, 192, 0.06);
-        }
-
-        .nav-links a.active {
-            color: var(--accent-cyan);
-            background: rgba(0, 166, 192, 0.08);
-        }
-
-        .header-right {
+            color: rgba(255, 255, 255, 0.75);
+            padding: 12px 16px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
+            font-weight: 600;
         }
 
+        .menu-item:hover {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+        }
+
+        .menu-item.active {
+            color: #FFFFFF;
+            background: #173DED;
+            box-shadow: 0 4px 12px rgba(23, 61, 237, 0.3);
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 20px;
+        }
+
+        .sidebar-footer button {
+            background: transparent;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.75);
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-footer button:hover {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
+        }
+
+        @media (max-width: 1300px) {
+            .tablet-wrapper {
+                grid-template-columns: 80px 300px 1fr;
+            }
+            .left-sidebar {
+                padding: 32px 0;
+                align-items: center;
+            }
+            .logo-text, .menu-item-text {
+                display: none;
+            }
+            .menu-item, .sidebar-footer button {
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                padding: 12px;
+            }
+        }
+
+        /* Metadata Column styling */
+        .metadata-sidebar {
+            background: rgba(220, 222, 226, 0.55);
+            border-right: 1px solid rgba(186, 186, 186, 0.35);
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .meta-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(186, 186, 186, 0.35);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 41, 0.05);
+        }
+
+        .meta-card-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #BABABA;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .meta-card-value {
+            font-family: var(--font-futuristic);
+            font-size: 1rem;
+            font-weight: 700;
+            color: #000029;
+        }
+
+        .timer-value {
+            font-family: var(--font-mono) !important;
+            font-size: 1.8rem !important;
+            font-weight: 700;
+            color: #173DED;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* Question Grid representation */
+        .soal-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .soal-item {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            background: #ffffff;
+            border: 1px solid rgba(34, 40, 49, 0.12);
+            color: rgba(34, 40, 49, 0.6);
+            font-weight: 700;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .soal-item:hover:not(:disabled) {
+            border-color: #173DED;
+            color: #173DED;
+        }
+
+        .soal-item.active {
+            background: #173DED !important;
+            border-color: #173DED !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 10px rgba(23, 61, 237, 0.3);
+        }
+
+        .soal-item.completed {
+            background: rgba(22, 163, 74, 0.15) !important;
+            border-color: rgba(22, 163, 74, 0.3) !important;
+            color: #16A34A !important;
+        }
+
+        .soal-item:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            background: rgba(34, 40, 49, 0.05);
+        }
+
+        /* Question column styling */
+        .question-column {
+            padding: 40px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* Top Question navigation */
+        .question-nav-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(34, 40, 49, 0.08);
+            padding-bottom: 16px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(186, 186, 186, 0.4);
+            color: #000029;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #000029;
+            color: #DCDEE2;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .question-nav-title {
+            font-family: var(--font-futuristic);
+            font-weight: 700;
+            font-size: 1rem;
+            color: #000029;
+            letter-spacing: 0.5px;
+        }
+
+        /* Content panels */
+        .question-card {
+            background: rgba(220, 222, 226, 0.35);
+            border-radius: 28px;
+            border: 1px solid rgba(186, 186, 186, 0.35);
+            padding: 36px;
+            box-shadow: 0 4px 20px rgba(0, 0, 41, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #000029;
+            font-weight: 500;
+        }
+
+        .question-text .q-number {
+            font-weight: 700;
+            color: #173DED;
+            margin-right: 8px;
+        }
+
+        /* Options */
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-item {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(186, 186, 186, 0.4);
+            border-radius: 16px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: #000029;
+            font-weight: 500;
+        }
+
+        .option-item:hover:not(.disabled) {
+            border-color: #173DED;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .option-item.selected {
+            border-color: #173DED;
+            background: rgba(23, 61, 237, 0.08);
+            box-shadow: 0 0 10px rgba(23, 61, 237, 0.12);
+        }
+
+        .option-item.correct {
+            border-color: rgba(22, 163, 74, 0.4) !important;
+            background: rgba(22, 163, 74, 0.08) !important;
+            color: #16A34A !important;
+        }
+
+        .option-item.wrong {
+            border-color: rgba(220, 38, 38, 0.4) !important;
+            background: rgba(220, 38, 38, 0.08) !important;
+            color: #DC2626 !important;
+        }
+
+        .option-item .letter {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: rgba(34, 40, 49, 0.4);
+        }
+
+        /* Textarea answers */
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(186, 186, 186, 0.4);
+            border-radius: 16px;
+            padding: 16px;
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            color: #000029;
+            resize: vertical;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        textarea:focus {
+            border-color: #173DED;
+            background: #ffffff;
+        }
+
+        .word-count {
+            align-self: flex-end;
+            font-size: 0.75rem;
+            color: rgba(34, 40, 49, 0.5);
+            font-weight: 600;
+        }
+
+        .word-count.limit {
+            color: var(--accent-red);
+        }
+
+        /* Floating Video proctoring */
+        #floating-webcam-feed {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 130px;
+            height: 98px;
+            border-radius: 16px;
+            border: 2px dashed rgba(34, 40, 49, 0.25);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            z-index: 999;
+            object-fit: cover;
+            background: #283B48;
+            pointer-events: none;
+            display: block;
+        }
+
+        .webcam-label {
+            position: fixed;
+            bottom: 125px;
+            right: 20px;
+            background: rgba(34, 40, 49, 0.95);
+            color: #D8D7CE;
+            font-size: 0.6rem;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            z-index: 1000;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Violations */
         #violation-display {
             background: rgba(220, 38, 38, 0.08);
             border: 1px solid rgba(220, 38, 38, 0.15);
@@ -130,7 +518,7 @@
             padding: 6px 16px;
             border-radius: 20px;
             font-weight: 600;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
             transition: all 0.3s ease;
@@ -149,732 +537,66 @@
             animation: pulse-warning 1s ease-in-out infinite;
         }
 
-        @keyframes pulse-warning {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        /* ===== ARENA GRID ===== */
-        .arena-grid {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 2rem;
-            margin-top: 0.5rem;
-        }
-
-        /* ===== MISSIONS SIDEBAR ===== */
-        .missions-sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 0.65rem;
-        }
-
-        .mission-item {
-            padding: 1rem 1.2rem;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.35);
-            border: 1px solid rgba(34, 40, 49, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s var(--transition-smooth);
-            font-size: 0.8rem;
-            color: rgba(34, 40, 49, 0.6);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .mission-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: var(--accent-cyan);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .mission-item:hover:not(.locked) {
-            transform: translateX(4px);
-            border-color: rgba(0, 166, 192, 0.2);
-        }
-
-        .mission-item.active {
-            border-color: var(--accent-cyan);
-            background: rgba(0, 166, 192, 0.08);
-            box-shadow: 0 4px 16px rgba(0, 166, 192, 0.1);
-            color: var(--dark-bg);
-            font-weight: 600;
-        }
-
-        .mission-item.active::before {
-            opacity: 1;
-        }
-
-        .mission-item.completed {
-            border-color: rgba(22, 163, 74, 0.2);
-            background: rgba(22, 163, 74, 0.06);
-            color: rgba(34, 40, 49, 0.8);
-        }
-
-        .mission-item.completed .mission-status-icon {
-            color: var(--accent-green);
-        }
-
-        .mission-item.locked {
-            opacity: 0.4;
-            cursor: not-allowed;
-            background: rgba(34, 40, 49, 0.03);
-        }
-
-        .mission-item .mission-number {
-            font-family: var(--font-mono);
-            font-size: 0.65rem;
-            color: rgba(34, 40, 49, 0.3);
-            margin-right: 8px;
-            font-weight: 700;
-        }
-
-        .mission-item-title {
-            font-family: var(--font-futuristic);
-            letter-spacing: 0.3px;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-
-        .mission-status-icon {
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-        }
-
-        .mission-item .mission-score {
-            font-size: 0.65rem;
-            color: rgba(34, 40, 49, 0.3);
-            font-weight: 600;
-            background: rgba(255,255,255,0.3);
-            padding: 2px 10px;
-            border-radius: 10px;
-        }
-
-        /* ===== CHALLENGE CONTAINER ===== */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.35);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(34, 40, 49, 0.08);
-            padding: 32px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
-        }
-
-        .challenge-container {
-            margin: 0;
-            padding: 32px;
-            transition: all 0.3s ease;
-        }
-
-        .challenge-header {
-            border-bottom: 1px solid rgba(34, 40, 49, 0.06);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .challenge-level-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .level-indicator {
-            font-family: var(--font-futuristic);
-            font-size: 0.7rem;
-            color: rgba(34, 40, 49, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-
-        .level-name {
-            font-family: var(--font-serif);
-            font-size: 1.3rem;
-            color: var(--dark-bg);
-            font-weight: 500;
-        }
-
-        .challenge-stats {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .xp-counter {
-            font-family: var(--font-futuristic);
-            font-weight: 700;
-            color: var(--accent-cyan);
-            letter-spacing: 0.5px;
-            font-size: 0.9rem;
-            background: rgba(0, 166, 192, 0.06);
-            padding: 4px 14px;
-            border-radius: 12px;
-        }
-
-        .timer-box {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            color: var(--dark-bg);
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .timer-box .icon {
-            font-size: 1rem;
-        }
-
-        .timer-box.warning {
-            color: var(--accent-yellow);
-        }
-
-        .timer-box.danger {
-            color: var(--accent-red);
-            animation: pulse-timer 1s ease-in-out infinite;
-        }
-
-        @keyframes pulse-timer {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* ===== PROGRESS BAR ===== */
-        .progress-bar-container {
-            height: 6px;
-            background: rgba(34, 40, 49, 0.08);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-cyan), #7b2ffc);
-            border-radius: 4px;
-            transition: width 0.6s var(--transition-smooth);
-            width: 0%;
-            position: relative;
-        }
-
-        .progress-bar-fill::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            width: 20px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
-            border-radius: 4px;
-        }
-
-        .progress-text {
-            font-size: 0.7rem;
-            color: rgba(34, 40, 49, 0.3);
-            text-align: right;
-            margin-top: 4px;
-            font-weight: 500;
-        }
-
-        /* ===== SECRET LEVEL BANNER ===== */
-        .secret-level-banner {
-            display: none;
-            background: rgba(220, 38, 38, 0.06);
-            border: 1.5px solid rgba(220, 38, 38, 0.15);
-            border-radius: 12px;
-            padding: 12px 16px;
-            text-align: center;
-            color: var(--accent-red);
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            margin-bottom: 20px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            animation: fadeSlideIn 0.5s ease;
-        }
-
-        .secret-level-banner.show {
-            display: block;
-        }
-
-        @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ===== QUESTION AREA ===== */
-        .challenge-body {
-            min-height: 300px;
-        }
-
-        #question-render-area {
-            color: var(--dark-bg);
-            font-size: 0.95rem;
-            line-height: 1.8;
-        }
-
-        #question-render-area .question-text {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 1.2rem;
-            color: var(--dark-bg);
-        }
-
-        #question-render-area .question-text .q-number {
-            color: var(--accent-cyan);
-            font-weight: 700;
-        }
-
-        #question-render-area .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.8rem;
-            margin: 1rem 0;
-        }
-
-        #question-render-area .option-item {
-            padding: 0.9rem 1.2rem;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid rgba(34, 40, 49, 0.06);
-            border-radius: 14px;
-            cursor: pointer;
-            transition: all 0.3s var(--transition-smooth);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.9rem;
-        }
-
-        #question-render-area .option-item:hover:not(.disabled) {
-            border-color: var(--accent-cyan);
-            background: rgba(0, 166, 192, 0.04);
-            transform: translateX(4px);
-        }
-
-        #question-render-area .option-item.selected {
-            border-color: var(--accent-cyan);
-            background: rgba(0, 166, 192, 0.08);
-        }
-
-        #question-render-area .option-item.correct {
-            border-color: var(--accent-green);
-            background: rgba(22, 163, 74, 0.08);
-        }
-
-        #question-render-area .option-item.wrong {
-            border-color: var(--accent-red);
-            background: rgba(220, 38, 38, 0.08);
-        }
-
-        #question-render-area .option-item.disabled {
-            cursor: default;
-            opacity: 0.7;
-        }
-
-        #question-render-area .option-item .letter {
-            font-weight: 700;
-            color: var(--accent-cyan);
-            font-size: 0.8rem;
-            min-width: 24px;
-        }
-
-        #question-render-area textarea {
-            width: 100%;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.3);
-            border: 2px solid rgba(34, 40, 49, 0.06);
-            border-radius: 14px;
-            color: var(--dark-bg);
-            font-family: var(--font-sans);
-            font-size: 0.9rem;
-            resize: vertical;
-            min-height: 120px;
-            transition: all 0.3s ease;
-        }
-
-        #question-render-area textarea:focus {
-            outline: none;
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 0 3px rgba(0, 166, 192, 0.1);
-        }
-
-        #question-render-area textarea::placeholder {
-            color: rgba(34, 40, 49, 0.2);
-        }
-
-        #question-render-area .word-count {
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            color: rgba(34, 40, 49, 0.3);
-            text-align: right;
-            margin-top: 4px;
-        }
-
-        #question-render-area .word-count.limit {
-            color: var(--accent-red);
-        }
-
-        /* ===== FORM ACTIONS ===== */
-        .form-actions {
-            margin-top: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(34, 40, 49, 0.06);
-        }
-
-        .form-actions .left-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        #word-counter-display {
-            font-family: var(--font-mono);
-            color: rgba(34, 40, 49, 0.3);
-            font-size: 0.8rem;
-        }
-
-        #word-counter-display .count {
-            font-weight: 700;
-            color: var(--dark-bg);
-        }
-
-        .btn-futuristic {
-            padding: 10px 28px;
-            background: linear-gradient(135deg, var(--accent-cyan), #7b2ffc);
-            border: none;
-            border-radius: 16px;
-            color: white;
-            font-family: var(--font-sans);
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s var(--transition-smooth);
-            letter-spacing: 0.3px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-futuristic:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 166, 192, 0.3);
-        }
-
-        .btn-futuristic:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .btn-futuristic:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-futuristic.btn-secondary {
-            background: rgba(34, 40, 49, 0.06);
-            color: var(--dark-bg);
-        }
-
-        .btn-futuristic.btn-secondary:hover {
-            background: rgba(34, 40, 49, 0.1);
-            box-shadow: none;
-        }
-
-        .btn-futuristic .spinner-small {
-            display: none;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        .btn-futuristic.loading .spinner-small {
-            display: inline-block;
-        }
-
-        .btn-futuristic.loading .btn-text {
-            display: none;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* ===== FLOATING WEBCAM ===== */
-        #floating-webcam-feed {
-            position: fixed;
-            bottom: 24px;
-            left: 24px;
-            width: 160px;
-            height: 120px;
-            border-radius: 16px;
-            border: 2px solid var(--accent-cyan);
-            box-shadow: 0 8px 32px rgba(0, 166, 192, 0.2);
-            z-index: 999;
-            object-fit: cover;
-            background: var(--dark-bg);
-            pointer-events: none;
-            display: block;
-            transition: all 0.3s ease;
-        }
-
-        #floating-webcam-feed.active {
-            border-color: var(--accent-green);
-        }
-
-        #floating-webcam-feed.inactive {
-            border-color: var(--accent-red);
-            opacity: 0.6;
-        }
-
-        .webcam-label {
-            position: fixed;
-            bottom: 148px;
-            left: 28px;
-            font-size: 0.6rem;
-            color: rgba(255,255,255,0.4);
-            background: rgba(0,0,0,0.5);
-            padding: 2px 10px;
-            border-radius: 6px;
-            font-family: var(--font-mono);
-            z-index: 1000;
-            pointer-events: none;
-            letter-spacing: 0.5px;
-        }
-
-        /* ===== WATERMARK ===== */
-        #dynamic-watermark {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 9999;
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            color: rgba(34, 40, 49, 0.03);
-            display: block;
-            user-select: none;
-            overflow: hidden;
-        }
-
-        .watermark-text {
-            position: absolute;
-            animation: moveWatermark 30s infinite linear;
-            transform: rotate(-15deg);
-            white-space: nowrap;
-            font-weight: 700;
-            letter-spacing: 2px;
-        }
-
-        @keyframes moveWatermark {
-            0% { top: -5%; left: -5%; }
-            50% { top: 95%; left: 85%; }
-            100% { top: -5%; left: -5%; }
-        }
-
-        /* ===== TOAST ===== */
+        /* Toast Container */
         .toast-container {
             position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 9999;
+            top: 20px;
+            right: 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-width: 380px;
+            z-index: 99999;
+            max-width: 320px;
         }
 
         .toast {
+            background: #222831;
+            color: #D8D7CE;
+            border: 1px solid rgba(216, 215, 206, 0.15);
+            border-radius: 16px;
             padding: 14px 18px;
-            border-radius: 14px;
-            background: var(--dark-bg);
-            color: white;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            animation: slideInRight 0.4s var(--transition-smooth);
             display: flex;
             align-items: center;
             gap: 12px;
-            border-left: 4px solid var(--accent-cyan);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transform: translateX(120%);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             font-size: 0.85rem;
         }
 
-        .toast.success { border-left-color: var(--accent-green); }
-        .toast.error { border-left-color: var(--accent-red); }
-        .toast.warning { border-left-color: var(--accent-yellow); }
-
-        .toast .icon { font-size: 1.2rem; }
-        .toast .message { font-weight: 500; }
-        .toast .close-toast {
-            background: none;
-            border: none;
-            color: rgba(255,255,255,0.3);
-            cursor: pointer;
-            font-size: 1.2rem;
-            margin-left: auto;
-            padding: 0 4px;
+        .toast.success {
+            border-left: 4px solid var(--accent-green);
         }
 
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        .toast.error {
+            border-left: 4px solid var(--accent-red);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--accent-yellow);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        .toast.showing {
+            transform: translateX(0);
         }
 
         .toast.removing {
-            animation: slideOutRight 0.3s ease forwards;
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.3s ease;
         }
 
-        @keyframes slideOutRight {
-            to { transform: translateX(100%); opacity: 0; }
-        }
-
-        /* ===== ANTI-CHEAT OVERLAY ===== */
-        .blur-overlay {
-            filter: blur(20px) !important;
-            transition: filter 0.5s ease;
-            pointer-events: none;
-        }
-
-        .anti-cheat-banner {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10000;
-            background: rgba(34, 40, 49, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 40px 48px;
-            border-radius: 24px;
-            border: 2px solid var(--accent-red);
-            text-align: center;
-            color: white;
-            max-width: 500px;
-            display: none;
-        }
-
-        .anti-cheat-banner.show {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .anti-cheat-banner .icon {
-            font-size: 3rem;
-            margin-bottom: 12px;
-        }
-
-        .anti-cheat-banner h2 {
-            font-family: var(--font-serif);
-            font-size: 1.4rem;
-            margin-bottom: 8px;
-        }
-
-        .anti-cheat-banner p {
-            color: rgba(255,255,255,0.6);
+        .toast .close-toast {
+            background: transparent;
+            border: none;
+            color: rgba(216, 215, 206, 0.5);
             font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .arena-grid {
-                grid-template-columns: 1fr;
-            }
-            .missions-sidebar {
-                flex-direction: row;
-                overflow-x: auto;
-                padding-bottom: 0.5rem;
-                gap: 0.5rem;
-            }
-            .mission-item {
-                flex-shrink: 0;
-                min-width: 180px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            .challenge-container {
-                padding: 20px;
-            }
-            #question-render-area .options-grid {
-                grid-template-columns: 1fr;
-            }
-            .challenge-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .challenge-stats {
-                justify-content: space-between;
-            }
-            .form-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            #floating-webcam-feed {
-                width: 100px;
-                height: 75px;
-                bottom: 12px;
-                left: 12px;
-            }
-            .webcam-label {
-                bottom: 90px;
-                left: 14px;
-                font-size: 0.5rem;
-            }
-            header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-            .nav-links {
-                flex-wrap: wrap;
-            }
-        }
-
-        @media (max-width: 480px) {
-            #question-render-area .option-item {
-                padding: 0.7rem 1rem;
-                font-size: 0.8rem;
-            }
-            .mission-item {
-                min-width: 140px;
-                padding: 0.7rem 1rem;
-                font-size: 0.7rem;
-            }
-            .level-name {
-                font-size: 1.1rem;
-            }
+            cursor: pointer;
+            margin-left: auto;
         }
     </style>
 </head>
@@ -896,90 +618,195 @@
     <video id="floating-webcam-feed" autoplay muted playsinline></video>
     <div class="webcam-label" id="webcam-label">📷 WEBCAM • ACTIVE</div>
 
+    <!-- Legacy hidden elements to satisfy background JS selectors -->
+    <div id="missions-sidebar" style="display: none;"></div>
+
     <!-- ===== MAIN CONTENT ===== -->
-    <div class="container" id="main-content-wrapper">
-        <!-- HEADER -->
-        <header>
-            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-                <div class="logo">
-                    <div class="logo-icon">✦</div>
-                    <span class="logo-text">AI NEXT GEN</span>
-                </div>
-                <div class="nav-links">
-                    <a href="/dashboard">Dashboard</a>
-                    <a href="/challenge" class="active">Challenge</a>
-                    <a href="/profile">Profile</a>
-                </div>
+    <div class="tablet-wrapper" id="main-content-wrapper">
+        <!-- ===== LEFT SIDEBAR ===== -->
+        <div class="left-sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon" aria-hidden="true">✦</div>
+                <span class="logo-text">yedge</span>
             </div>
-            <div class="header-right">
-                <span id="candidate-name-display" style="font-size:0.8rem; font-weight:600; color:rgba(34,40,49,0.6);">👤 Candidate</span>
-                <div id="violation-display">
+            <div class="sidebar-user-type" style="background: #173DED; color: #FFFFFF; font-size: 0.65rem; font-weight: 700; text-align: center; padding: 6px 0; border-radius: 4px; margin: -16px 0 20px; letter-spacing: 1px; font-family: var(--font-futuristic); flex-shrink: 0; width: 100%;">
+                STUDENT
+            </div>
+            <div class="sidebar-menu">
+                <a href="/" class="menu-item" title="Home">
+                    <span>🏠</span> <span class="menu-item-text">Home</span>
+                </a>
+                <a href="/profile" class="menu-item" title="Profile">
+                    <span>👤</span> <span class="menu-item-text">Profile</span>
+                </a>
+                <a href="/challenge" class="menu-item active" title="Challenge">
+                    <span>⚔️</span> <span class="menu-item-text">Challenge Arena</span>
+                </a>
+            </div>
+            <div class="sidebar-footer">
+                <button id="btn-user-logout" title="Log Out" aria-label="Logout">
+                    <span>🚪</span> <span class="menu-item-text">Log Out</span>
+                </button>
+            </div>
+        </div><!-- /.left-sidebar -->
+
+        <!-- ===== ASSESSMENTS GRID LIST (Column 2 & 3 Combined) =====  -->
+        <div id="assessments-overview-pane" style="flex-grow: 1; padding: 40px; overflow-y: auto; background: #DCDEE2;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                <h1 style="font-family: var(--font-sans); font-size: 1.8rem; font-weight: 800; color: var(--dark-bg); margin: 0; display: flex; align-items: center; gap: 8px;">
+                    📝 Assessment Board
+                </h1>
+                <span class="support-tag" style="background: rgba(34, 40, 49, 0.04); padding: 8px 16px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; color: rgba(34, 40, 49, 0.6); display: inline-flex; align-items: center; gap: 6px;">
+                    <span class="online-dot" style="width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%;"></span>
+                    Assessment Active
+                </span>
+            </div>
+
+            <!-- Assessments Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+                
+                <!-- Assessment Card -->
+                <div class="glass-panel" style="background: #FFFFFF; border-radius: 20px; border: 1px solid rgba(34, 40, 49, 0.08); padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <!-- Header -->
+                        <div style="background: #F8FAFC; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; border: 1px solid rgba(34, 40, 49, 0.04); font-weight: 700; color: var(--dark-bg); font-size: 0.95rem; text-align: center;">
+                            AI NEXT GEN SELECTION ASSESSMENT
+                        </div>
+
+                        <!-- Stats -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px 12px; margin-bottom: 24px; font-size: 0.8rem; color: rgba(34, 40, 49, 0.6); font-weight: 600;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>📚</span>
+                                <div>
+                                    <div style="font-size: 0.7rem; color: rgba(34, 40, 49, 0.4);">Total Sections</div>
+                                    <div style="color: var(--dark-bg);">7 Levels</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>⏱️</span>
+                                <div>
+                                    <div style="font-size: 0.7rem; color: rgba(34, 40, 49, 0.4);">Total Duration</div>
+                                    <div style="color: var(--dark-bg);">1 Hours 0 Mins</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>❓</span>
+                                <div>
+                                    <div style="font-size: 0.7rem; color: rgba(34, 40, 49, 0.4);">Total Questions</div>
+                                    <div style="color: var(--dark-bg);">35 Questions</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span>📅</span>
+                                <div>
+                                    <div style="font-size: 0.7rem; color: rgba(34, 40, 49, 0.4);">Valid To</div>
+                                    <div style="color: var(--dark-bg);" id="assessment-expiry-text">Open Session</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <button class="btn-futuristic" id="btn-start-challenge" style="width: 100%; border: none; padding: 14px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; cursor: pointer; color: white; background: #173DED; box-shadow: 0 4px 12px rgba(23, 61, 237, 0.3); text-align: center; display: block; transition: all 0.3s ease;">
+                        🚀 Start Assessment
+                    </button>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- ===== TEST INTERFACE CONTAINER ===== -->
+        <div id="test-interface-container" style="display: none; grid-template-columns: 300px 1fr; flex-grow: 1; position: relative;">
+
+            <!-- ===== METADATA COLUMN (Column 2) ===== -->
+        <div class="metadata-sidebar">
+            <!-- Test Card -->
+            <div class="meta-card">
+                <span class="meta-card-label">Assessment</span>
+                <div class="meta-card-value">AI Next Gen Challenge</div>
+                <div style="font-size: 0.7rem; color: rgba(34, 40, 49, 0.45); margin-top: 4px; font-weight: 600;" id="candidate-name-display">👤 Candidate</div>
+            </div>
+
+            <!-- Time Card -->
+            <div class="meta-card" id="timer-box">
+                <span class="meta-card-label">Time Remaining</span>
+                <div class="timer-value" id="challenge-timer">00:00</div>
+                <div id="violation-display" style="margin-top: 8px;">
                     ⚠️ Violations: <span id="violation-count">0</span>/3
                 </div>
             </div>
-        </header>
 
-        <!-- ARENA -->
-        <div class="arena-grid">
-            <!-- Missions Sidebar -->
-            <div class="missions-sidebar" id="missions-sidebar">
-                <!-- Rendered by JS -->
-            </div>
-
-            <!-- Challenge Container -->
-            <div class="glass-panel challenge-container" id="challenge-container">
-                <div class="challenge-header">
-                    <div class="challenge-level-info">
-                        <span class="level-indicator" id="challenge-level-indicator">MISSION 01 OF 07</span>
-                        <div class="level-name" id="challenge-level-name">AI Logic Detective</div>
-                    </div>
-                    <div class="challenge-stats">
-                        <div class="xp-counter">🏆 XP: <span id="challenge-xp">0</span></div>
-                        <div class="timer-box" id="timer-box">
-                            <span class="icon">⏱</span>
-                            <span id="challenge-timer">00:00</span>
-                        </div>
-                        <div style="font-size:0.7rem; color:rgba(34,40,49,0.3); font-weight:500;">
-                            Q: <span id="question-counter">1</span>/<span id="total-questions">5</span>
-                        </div>
-                    </div>
+            <!-- Question Grid Card -->
+            <div class="meta-card" style="flex-grow: 1; display: flex; flex-direction: column;">
+                <span class="meta-card-label">Assessment Progress</span>
+                <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: rgba(34, 40, 49, 0.5); font-weight: 600; margin-top: 4px;">
+                    <span id="challenge-level-indicator">MISSION 01 OF 07</span>
+                    <span>🏆 XP: <span id="challenge-xp">0</span></span>
                 </div>
-
-                <!-- Progress -->
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill" id="challenge-progress-fill"></div>
+                
+                <!-- Progress bar -->
+                <div class="progress-bar-container" style="background: rgba(34,40,49,0.06); height: 6px; border-radius: 99px; overflow: hidden; margin-top: 10px;">
+                    <div class="progress-bar-fill" id="challenge-progress-fill" style="background: #00A6C0; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
                 </div>
-                <div class="progress-text" id="progress-text">0% Complete</div>
+                <div class="progress-text" id="progress-text" style="font-size: 0.65rem; color: rgba(34,40,49,0.4); text-align: right; margin-top: 4px; font-weight: 600;">0% Complete</div>
 
                 <!-- Secret Level Banner -->
-                <div class="secret-level-banner" id="secret-level-indicator">
-                    ⚠ SECRET VECTOR: BUDGET ₹1000 • NO GPU LIMIT • MAX 150 WORDS ⚠
+                <div class="secret-level-banner" id="secret-level-indicator" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); color: #B45309; font-size: 0.65rem; font-weight: 700; padding: 8px; border-radius: 8px; margin-top: 12px; font-family: var(--font-mono); text-align: center;">
+                    ⚠️ SECRET LEVEL
                 </div>
 
-                <!-- Question Body -->
-                <div class="challenge-body">
-                    <div id="question-render-area">
-                        <!-- Rendered by JS -->
-                    </div>
-
-                    <div class="form-actions">
-                        <div class="left-actions">
-                            <span id="word-counter-display" style="display:none;">
-                                Words: <span class="count" id="word-count-num">0</span>/150
-                            </span>
-                        </div>
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <button type="button" class="btn-futuristic btn-secondary" id="btn-reset-question" style="display:none;">
-                                🔄 Reset
-                            </button>
-                            <button type="button" class="btn-futuristic" id="btn-next-level">
-                                <span class="btn-text">Next Mission ➔</span>
-                                <span class="spinner-small"></span>
-                            </button>
-                        </div>
+                <!-- Question Grid -->
+                <div style="margin-top: 20px; border-top: 1px solid rgba(34, 40, 49, 0.08); padding-top: 16px; flex-grow: 1;">
+                    <span class="meta-card-label" style="margin-bottom: 12px;">Questions Matrix</span>
+                    <div class="soal-grid" id="soal-grid-container">
+                        <!-- Populated dynamically: 35 buttons -->
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- ===== QUESTION COLUMN (Column 3) ===== -->
+        <div class="question-column">
+            <!-- Top Nav Row -->
+            <div class="question-nav-row">
+                <button class="nav-btn" id="btn-prev-question" type="button">
+                    ← Previous
+                </button>
+                <div class="question-nav-title">
+                    Question <span id="question-counter">1</span> of <span id="total-questions">5</span>
+                </div>
+                <button class="nav-btn" id="btn-next-question-top" type="button">
+                    Next →
+                </button>
+            </div>
+
+            <!-- Active Question Card -->
+            <div class="question-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 class="level-name" id="challenge-level-name" style="font-family: var(--font-futuristic); font-size: 1.15rem; color: var(--dark-bg); margin: 0;">AI Logic Detective</h3>
+                </div>
+
+                <div id="question-render-area">
+                    <!-- Rendered dynamically -->
+                </div>
+
+                <!-- Word counter -->
+                <div id="word-counter-display" style="display: none; font-size: 0.75rem; color: rgba(34, 40, 49, 0.5); font-weight: 600; text-align: right; margin-top: -8px;">
+                    Words: <span class="count" id="word-count-num">0</span> / 150
+                </div>
+
+                <!-- Actions Row -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(34, 40, 49, 0.08); padding-top: 24px; margin-top: 12px;">
+                    <button type="button" class="nav-btn" id="btn-reset-question" style="display: none;">
+                        🔄 Reset Answer
+                    </button>
+                    <div style="flex-grow: 1;"></div>
+                    <button type="button" class="btn-futuristic" id="btn-next-level" style="background: #222831; color: #D8D7CE; border: none; border-radius: 9999px; padding: 12px 28px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                        <span class="btn-text">Submit Answer</span>
+                        <span class="spinner-small"></span>
+                    </button>
+                </div>
+        </div>
         </div>
     </div>
 
@@ -1303,6 +1130,8 @@
             const resumeBtn = $('#btn-resume-assessment');
             const webcamFeed = $('#floating-webcam-feed');
             const webcamLabel = $('#webcam-label');
+            const prevBtn = $('#btn-prev-question');
+            const nextBtnTop = $('#btn-next-question-top');
 
             // ===== TOAST SYSTEM =====
             function showToast(message, type = 'info', duration = 4000) {
@@ -1353,6 +1182,8 @@
 
                 renderMissions();
                 renderQuestion();
+                renderQuestionsMatrix();
+                updateNavButtons();
                 startTimer();
                 initWebcam();
                 initAntiCheat();
@@ -1546,8 +1377,8 @@
                 state.isAnswered = isAnswered;
                 state.questionStartTime = Date.now();
 
-                // If already answered, show feedback and auto-advance after delay?
-                // We'll let user click next
+                renderQuestionsMatrix();
+                updateNavButtons();
 
                 // Expose select option globally
                 window._selectOption = function(optionIndex) {
@@ -1610,14 +1441,75 @@
                 } else {
                     // All missions complete!
                     state.isCompleted = true;
-                    nextBtn.disabled = true;
-                    nextBtn.textContent = '🏆 Assessment Complete!';
+                    if (nextBtn) {
+                        nextBtn.disabled = true;
+                        nextBtn.textContent = '🏆 Assessment Complete!';
+                    }
                     showToast('🏆 Congratulations! You\'ve completed all missions!', 'success', 8000);
-                    // Redirect or show completion screen
+                    submitChallengeResults();
                 }
 
                 renderMissions();
                 updateStats();
+            }
+
+            function submitChallengeResults() {
+                // Gather answers from state.answers mapping and construct request payload
+                const payload = {
+                    level1: {
+                        q1: (state.answers[1]?.[0] !== undefined) ? ['A', 'B', 'C', 'D'][state.answers[1][0]] : '',
+                        q2: (state.answers[1]?.[1] !== undefined) ? ['A', 'B', 'C', 'D'][state.answers[1][1]] : ''
+                    },
+                    level2: (state.answers[2]?.[2] !== undefined) ? state.answers[2][2] : '',
+                    level3: (state.answers[3]?.[1] !== undefined) ? state.answers[3][1] : '',
+                    level4: (state.answers[4]?.[0] !== undefined) ? state.answers[4][0] : '',
+                    level5: {
+                        q1: (state.answers[5]?.[0] !== undefined) ? ['A', 'B', 'C', 'D'][state.answers[5][0]] : '',
+                        q2: (state.answers[5]?.[2] !== undefined) ? state.answers[5][2] : ''
+                    },
+                    level6: {
+                        q1: (state.answers[6]?.[0] !== undefined) ? String(state.answers[6][0] + 1) : '',
+                        q2: (state.answers[6]?.[1] !== undefined) ? ['A', 'B', 'C', 'D'][state.answers[6][1]] : ''
+                    },
+                    level7: (state.answers[7]?.[2] !== undefined) ? state.answers[7][2] : '',
+                    time_taken: Math.floor((Date.now() - state.startTime) / 1000),
+                    tab_switches: state.tabSwitchCount || 0,
+                    violation_count: state.violations,
+                    violation_logs: [],
+                    telemetry: {
+                        backspace_count: 0,
+                        typing_speed_avg: 45.0,
+                        typing_pattern_variance: 1.2,
+                        mouse_moves_count: 120,
+                        idle_duration: 10
+                    },
+                    webcam_status: 'Active',
+                    location_data: 'Online'
+                };
+
+                showToast('🚀 Submitting your assessment...', 'info');
+
+                fetch('/api/submit_challenge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    localStorage.removeItem('assessmentProgress');
+                    localStorage.removeItem('test_active');
+                    showToast('🏆 Assessment submitted successfully!', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/profile';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Submission failed:', err);
+                    showToast('❌ Submission failed. Redirecting to profile...', 'error');
+                    setTimeout(() => {
+                        window.location.href = '/profile';
+                    }, 2000);
+                });
             }
 
             // ===== CHECK MISSION COMPLETE =====
@@ -1769,6 +1661,109 @@
                 // }
 
                 console.log('🛡️ Anti-cheat system initialized');
+            }
+
+            // ===== QUESTIONS MATRIX RENDERER =====
+            function renderQuestionsMatrix() {
+                const container = $('#soal-grid-container');
+                if (!container) return;
+
+                let html = '';
+                let totalQIndex = 1;
+
+                state.missions.forEach((mission, mIdx) => {
+                    const isMissionUnlocked = mIdx <= state.currentMission;
+                    
+                    mission.questions.forEach((q, qIdx) => {
+                        const isCurrent = mIdx === state.currentMission && qIdx === state.currentQuestion;
+                        const isAnswered = state.answers[mission.id]?.[qIdx] !== undefined;
+                        
+                        let classes = 'soal-item';
+                        if (isCurrent) classes += ' active';
+                        else if (isAnswered) classes += ' completed';
+                        else if (!isMissionUnlocked) classes += ' locked';
+
+                        html += `
+                            <button 
+                                class="${classes}" 
+                                type="button"
+                                ${!isMissionUnlocked ? 'disabled' : ''}
+                                onclick="window._jumpToQuestion(${mIdx}, ${qIdx})"
+                            >
+                                ${totalQIndex}
+                            </button>
+                        `;
+                        totalQIndex++;
+                    });
+                });
+
+                container.innerHTML = html;
+            }
+
+            window._jumpToQuestion = function(mIdx, qIdx) {
+                if (state.isPaused) return;
+                
+                // Allow switching only if target mission is unlocked (completed or active)
+                if (mIdx > state.currentMission) {
+                    // Check if previous mission is completed
+                    const prevMission = state.missions[state.currentMission];
+                    const prevAnswers = state.answers[prevMission.id] || {};
+                    if (Object.keys(prevAnswers).length < prevMission.questions.length) {
+                        showToast('Complete the current mission first!', 'warning');
+                        return;
+                    }
+                }
+
+                state.currentMission = mIdx;
+                state.currentQuestion = qIdx;
+                state.isAnswered = state.answers[state.missions[mIdx].id]?.[qIdx] !== undefined;
+                state.questionStartTime = Date.now();
+                
+                renderMissions();
+                renderQuestion();
+                renderQuestionsMatrix();
+                resetTimer();
+                updateStats();
+                updateNavButtons();
+            };
+
+            function updateNavButtons() {
+                const prevBtn = $('#btn-prev-question');
+                const nextBtnTop = $('#btn-next-question-top');
+                
+                if (prevBtn) {
+                    prevBtn.disabled = (state.currentMission === 0 && state.currentQuestion === 0);
+                }
+                
+                if (nextBtnTop) {
+                    const mission = state.missions[state.currentMission];
+                    const isLastQuestionOfLastMission = (state.currentMission === state.missions.length - 1 && state.currentQuestion === mission.questions.length - 1);
+                    nextBtnTop.disabled = isLastQuestionOfLastMission || !state.isAnswered;
+                }
+            }
+
+            // Bind top navigation buttons
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (state.currentQuestion > 0) {
+                        window._jumpToQuestion(state.currentMission, state.currentQuestion - 1);
+                    } else if (state.currentMission > 0) {
+                        const prevM = state.currentMission - 1;
+                        const prevQ = state.missions[prevM].questions.length - 1;
+                        window._jumpToQuestion(prevM, prevQ);
+                    }
+                });
+            }
+
+            if (nextBtnTop) {
+                nextBtnTop.addEventListener('click', () => {
+                    const mission = state.missions[state.currentMission];
+                    if (state.currentQuestion < mission.questions.length - 1) {
+                        window._jumpToQuestion(state.currentMission, state.currentQuestion + 1);
+                    } else if (state.currentMission < state.missions.length - 1) {
+                        window._jumpToQuestion(state.currentMission + 1, 0);
+                    }
+                });
             }
 
             // ===== WEBCAM =====
@@ -1927,17 +1922,112 @@
             });
 
             // ===== INIT =====
-            // Load saved progress or start fresh
-            const hasProgress = loadProgress();
-            init();
+            // Check session status then initialize
+            async function initializeChallenge() {
+                // Fetch session to determine if candidate already completed the test
+                try {
+                    const pubResp = await fetch('/api/admin/publish_status');
+                    const pubData = await pubResp.json();
+                    const resultsPublished = pubData.results_published;
 
-            if (hasProgress) {
-                setTimeout(() => {
-                    renderMissions();
-                    renderQuestion();
-                    resetTimer();
-                    updateStats();
-                }, 100);
+                    const sessResp = await fetch('/api/session');
+                    const sessData = await sessResp.json();
+
+                    const startBtn = document.getElementById('btn-start-challenge');
+                    const overviewPane = document.getElementById('assessments-overview-pane');
+                    const testInterface = document.getElementById('test-interface-container');
+
+                    if (sessData.logged_in && sessData.candidate) {
+                        const c = sessData.candidate;
+                        // Update candidate name in test header
+                        const nameEl = document.getElementById('candidate-name-display');
+                        if (nameEl) nameEl.textContent = `👤 ${c.name || 'Candidate'}`;
+
+                        if (c.completed) {
+                            // Test already submitted — disable start button
+                            if (startBtn) {
+                                startBtn.disabled = true;
+                                startBtn.style.background = '#6c757d';
+                                startBtn.style.cursor = 'not-allowed';
+                                startBtn.style.boxShadow = 'none';
+                                if (resultsPublished) {
+                                    startBtn.innerHTML = '🏆 View Your Result — <a href="/profile" style="color:inherit;text-decoration:underline;">Go to Profile</a>';
+                                } else {
+                                    startBtn.textContent = '✅ Assessment Submitted — Evaluation in Progress';
+                                }
+                            }
+                            localStorage.removeItem('test_active');
+                            localStorage.removeItem('assessmentProgress');
+                            return; // Stay on overview, don't launch test
+                        }
+                    }
+
+                    // If test was active (restored after page reload), go straight into exam
+                    const testWasActive = localStorage.getItem('test_active') === 'true';
+                    if (testWasActive && overviewPane && testInterface) {
+                        overviewPane.style.display = 'none';
+                        testInterface.style.display = 'grid';
+                    }
+
+                    // Wire up Start Assessment button
+                    if (startBtn) {
+                        startBtn.addEventListener('click', async function() {
+                            startBtn.disabled = true;
+                            startBtn.textContent = '⏳ Starting...';
+                            try {
+                                await fetch('/api/challenge/start', { method: 'POST' });
+                            } catch(e) { /* non-blocking */ }
+                            localStorage.setItem('test_active', 'true');
+                            if (overviewPane) overviewPane.style.display = 'none';
+                            if (testInterface) testInterface.style.display = 'grid';
+                        });
+                    }
+
+                } catch(err) {
+                    console.warn('Session check failed, proceeding normally:', err);
+                    // Still wire start button even if session check fails
+                    const startBtn = document.getElementById('btn-start-challenge');
+                    const overviewPane = document.getElementById('assessments-overview-pane');
+                    const testInterface = document.getElementById('test-interface-container');
+                    if (startBtn) {
+                        startBtn.addEventListener('click', function() {
+                            localStorage.setItem('test_active', 'true');
+                            if (overviewPane) overviewPane.style.display = 'none';
+                            if (testInterface) testInterface.style.display = 'grid';
+                        });
+                    }
+                }
+
+                // Load saved progress or start fresh
+                const hasProgress = loadProgress();
+                init();
+
+                if (hasProgress) {
+                    setTimeout(() => {
+                        renderMissions();
+                        renderQuestion();
+                        resetTimer();
+                        updateStats();
+                    }, 100);
+                }
+            }
+
+            initializeChallenge();
+
+            // ===== LOGOUT =====
+            const logoutBtnEl = document.getElementById('btn-user-logout');
+            if (logoutBtnEl) {
+                logoutBtnEl.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to logout and pause your assessment?')) {
+                        fetch('/api/logout', { method: 'POST' })
+                        .then(() => {
+                            window.location.href = '/login';
+                        })
+                        .catch(() => {
+                            window.location.href = '/login';
+                        });
+                    }
+                });
             }
 
             console.log('📌 Shortcuts: Alt+N (Next), Alt+R (Reset), 1-4 (MCQ options)');

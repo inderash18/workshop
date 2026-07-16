@@ -6,18 +6,21 @@
     <title>Edit Profile - AI NEXT GEN 2026</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
-        /* ===== ENHANCED CSS ===== */
+        /* ===== PALETTE: Black Russian / Alucard Night / Palatinate Blue / Grey Placidity / Baby Grey ===== */
         :root {
-            --primary-bg: #D8D7CE;
-            --dark-bg: #222831;
-            --accent-cyan: #00A6C0;
+            --primary-bg: #DCDEE2;
+            --dark-bg: #000029;
+            --mid-bg: #000051;
+            --accent-blue: #173DED;
+            --accent-cyan: #173DED;
             --accent-green: #16A34A;
             --accent-red: #DC2626;
             --accent-yellow: #F59E0B;
-            --accent-purple: #7b2ffc;
+            --accent-purple: #173DED;
+            --border-color: #BABABA;
             --font-serif: 'Georgia', serif;
-            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
             --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -43,23 +46,21 @@
         /* ===== LAYOUT ===== */
         .tablet-wrapper {
             display: grid;
-            grid-template-columns: 80px 1fr 340px;
+            grid-template-columns: 240px 1fr;
             min-height: 100vh;
             background: var(--primary-bg);
             transition: grid-template-columns 0.3s ease;
         }
 
-        /* ===== LEFT SIDEBAR ===== */
+        /* ===== LEFT SIDEBAR - YardStick / yedge Style ===== */
         .left-sidebar {
-            background: rgba(216, 215, 206, 0.92);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(34, 40, 49, 0.1);
+            background: #000051;
+            border-right: none;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            align-items: center;
-            padding: 32px 0;
+            align-items: stretch;
+            padding: 32px 24px;
             position: sticky;
             top: 0;
             height: 100vh;
@@ -68,23 +69,25 @@
         }
 
         .sidebar-logo {
-            text-align: center;
-            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            background: #173DED;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            color: white;
-            margin: 0 auto;
-            box-shadow: 0 4px 16px rgba(0, 166, 192, 0.3);
+            color: #FFFFFF;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(23, 61, 237, 0.35);
             transition: transform 0.3s ease;
         }
 
@@ -92,92 +95,72 @@
             transform: scale(1.05) rotate(-5deg);
         }
 
+        .logo-text {
+            font-family: var(--font-sans);
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
+        }
+
         .sidebar-menu {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            align-items: center;
+            gap: 8px;
+            align-items: stretch;
+            flex-grow: 1;
         }
 
         .menu-item {
-            font-size: 1.3rem;
+            font-size: 0.85rem;
             text-decoration: none;
-            color: rgba(34, 40, 49, 0.5);
-            padding: 12px;
-            border-radius: 14px;
-            transition: all 0.3s var(--transition-smooth);
-            position: relative;
-            width: 50px;
-            height: 50px;
+            color: rgba(255, 255, 255, 0.75);
+            padding: 12px 16px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            justify-content: center;
-        }
-
-        .menu-item::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 14px;
-            background: var(--accent-cyan);
-            opacity: 0;
-            transform: scale(0.8);
-            transition: all 0.3s var(--transition-smooth);
+            gap: 12px;
+            font-weight: 600;
         }
 
         .menu-item:hover {
-            color: var(--dark-bg);
-            transform: translateX(2px);
-        }
-
-        .menu-item:hover::before {
-            opacity: 0.08;
-            transform: scale(1);
-        }
-
-        .menu-item.active {
-            color: white;
-            background: var(--dark-bg);
-            box-shadow: 0 8px 24px rgba(34, 40, 49, 0.2);
-        }
-
-        .menu-item .tooltip {
-            position: absolute;
-            left: 70px;
-            background: var(--dark-bg);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .menu-item:hover .tooltip {
-            opacity: 1;
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
             transform: translateX(4px);
         }
 
+        .menu-item.active {
+            color: #FFFFFF;
+            background: #173DED;
+            box-shadow: 0 4px 12px rgba(23, 61, 237, 0.3);
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 20px;
+        }
+
         .sidebar-footer button {
-            background: none;
+            background: transparent;
             border: none;
-            font-size: 1.3rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.75);
             cursor: pointer;
-            color: rgba(34, 40, 49, 0.4);
-            transition: all 0.3s ease;
-            padding: 12px;
-            border-radius: 12px;
-            width: 50px;
-            height: 50px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .sidebar-footer button:hover {
-            color: var(--accent-red);
-            background: rgba(220, 38, 38, 0.08);
-            transform: scale(1.05);
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
         }
 
         /* ===== MAIN CONTENT ===== */
@@ -196,7 +179,7 @@
         }
 
         .main-dashboard-content::-webkit-scrollbar-thumb {
-            background: rgba(34, 40, 49, 0.2);
+            background: rgba(23, 61, 237, 0.2);
             border-radius: 10px;
         }
 
@@ -798,12 +781,41 @@
         }
 
         /* ===== RESPONSIVE ===== */
+        @media (max-width: 1300px) {
+            .tablet-wrapper {
+                grid-template-columns: 80px 1fr;
+            }
+            .left-sidebar {
+                padding: 32px 0;
+                align-items: center;
+            }
+            .logo-text, .menu-item-text {
+                display: none;
+            }
+            .menu-item, .sidebar-footer button {
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                padding: 12px;
+            }
+        }
+
         @media (max-width: 1100px) {
             .tablet-wrapper {
                 grid-template-columns: 80px 1fr;
             }
-            .right-sidebar {
+            .left-sidebar {
+                padding: 32px 0;
+                align-items: center;
+            }
+            .logo-text, .menu-item-text {
                 display: none;
+            }
+            .menu-item, .sidebar-footer button {
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                padding: 12px;
             }
         }
 
@@ -870,42 +882,33 @@
         <div class="left-sidebar">
             <div class="sidebar-logo">
                 <div class="logo-icon" aria-hidden="true">✦</div>
+                <span class="logo-text">yedge</span>
+            </div>
+            <div class="sidebar-user-type" style="background: #E74C3C; color: #FFFFFF; font-size: 0.65rem; font-weight: 700; text-align: center; padding: 6px 0; border-radius: 4px; margin: -16px 0 20px; letter-spacing: 1px; font-family: var(--font-futuristic); flex-shrink: 0; width: 100%;">
+                STUDENT
             </div>
             <div class="sidebar-menu">
                 <a href="/" class="menu-item" title="Home">
-                    🏠
-                    <span class="tooltip">Home</span>
-                </a>
-                <a href="/dashboard" class="menu-item" title="Dashboard">
-                    📊
-                    <span class="tooltip">Dashboard</span>
+                    <span>🏠</span> <span class="menu-item-text">Home</span>
                 </a>
                 <a href="/profile" class="menu-item active" title="Profile">
-                    👤
-                    <span class="tooltip">Profile</span>
+                    <span>👤</span> <span class="menu-item-text">Profile</span>
                 </a>
                 <a href="/challenge" class="menu-item" title="Challenge">
-                    ⚔️
-                    <span class="tooltip">Challenge</span>
-                </a>
-                <a href="/admin" class="menu-item" title="Admin">
-                    ⚙️
-                    <span class="tooltip">Admin</span>
+                    <span>⚔️</span> <span class="menu-item-text">Challenge Arena</span>
                 </a>
             </div>
             <div class="sidebar-footer">
-                <button id="btn-user-logout" title="Log Out" aria-label="Logout">🚪</button>
+                <button id="btn-user-logout" title="Log Out" aria-label="Logout">
+                    <span>🚪</span> <span class="menu-item-text">Log Out</span>
+                </button>
             </div>
         </div>
 
         <!-- ===== MAIN CONTENT ===== -->
         <div class="main-dashboard-content">
             <!-- Header -->
-            <div class="main-header">
-                <div class="search-bar">
-                    <span style="color: rgba(34, 40, 49, 0.3);">🔍</span>
-                    <input type="text" placeholder="Search profiles..." disabled>
-                </div>
+            <div class="main-header" style="justify-content: flex-end;">
                 <div class="header-right">
                     <span class="support-tag">
                         <span class="online-dot"></span>
@@ -917,11 +920,48 @@
                 </div>
             </div>
 
-            <!-- Title -->
-            <h1 class="serif-title">
-                👤 Account Profile
-                <span class="sub">Manage your personal information</span>
-            </h1>
+            <!-- Profile Summary Card (yedge Style) -->
+            <div class="glass-panel" style="background: #FFFFFF; border-radius: 20px; padding: 24px; border: 1px solid rgba(34, 40, 49, 0.08); display: flex; align-items: center; gap: 24px; margin-bottom: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+                <div class="profile-avatar-circle" style="width: 72px; height: 72px; border-radius: 50%; background: #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 700; color: #475569; flex-shrink: 0;" id="profile-avatar-letter">
+                    C
+                </div>
+                <div style="flex-grow: 1;">
+                    <h2 style="font-family: var(--font-sans); font-size: 1.6rem; font-weight: 700; color: var(--dark-bg); margin: 0;" id="summary-name">Candidate Name</h2>
+                    <div style="font-size: 0.85rem; color: rgba(34,40,49,0.5); font-weight: 500; margin-top: 2px;" id="summary-email">candidate@college.edu</div>
+                    <div style="width: 100%; height: 1px; background: rgba(34,40,49,0.06); margin: 16px 0;"></div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.75rem; color: rgba(34,40,49,0.6); font-weight: 600;" id="summary-metadata">
+                        <span>Register ID: <strong style="color: var(--dark-bg);" id="meta-phone">—</strong></span>
+                        <span style="color: rgba(34,40,49,0.25);">|</span>
+                        <span>Degree: <strong style="color: var(--dark-bg);" id="meta-dept">—</strong></span>
+                        <span style="color: rgba(34,40,49,0.25);">|</span>
+                        <span>Batch: <strong style="color: var(--dark-bg);" id="meta-year">—</strong></span>
+                        <span style="color: rgba(34,40,49,0.25);">|</span>
+                        <span>College: <strong style="color: var(--dark-bg);" id="meta-college">—</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invitation Box (Hidden by default) -->
+            <div class="invitation-box" id="selected-invitation" style="display: none; margin-bottom: 28px; background: rgba(22, 163, 74, 0.05); border: 1px solid rgba(22, 163, 74, 0.2); border-radius: 20px; padding: 24px; color: var(--dark-bg);">
+                <h3 style="font-family: var(--font-serif); font-size: 1.3rem; color: var(--accent-green); margin-bottom: 8px;">🎉 INVITATION PROTOCOL DETECTED</h3>
+                <div class="subtitle" style="font-size: 0.85rem; color: rgba(34, 40, 49, 0.6); font-weight: 500; margin-bottom: 16px;">You have been selected for the AI Next Gen Research Workshop 2026!</div>
+                <div class="invite-content" style="background: rgba(255,255,255,0.4); padding: 16px; border-radius: 12px; border: 1px solid rgba(34,40,49,0.06); font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; white-space: pre-wrap; margin-bottom: 16px;">
+                    <pre id="invitation-text-content" style="font-family: inherit; font-size: inherit; white-space: pre-wrap; margin: 0;"></pre>
+                </div>
+                <div class="actions" style="display: flex; gap: 12px;">
+                    <button class="btn-futuristic btn-success" style="background: var(--accent-green); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="window.print()">🖨️ Print Invite</button>
+                    <button class="btn-futuristic btn-secondary" id="btn-share-invite" style="border: 1px solid rgba(34,40,49,0.12); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; background: transparent;">📤 Share / Copy</button>
+                </div>
+            </div>
+
+            <!-- Rejection Notice (Hidden by default) -->
+            <div class="activity-chart-card" id="rejected-notice" style="display: none; padding: 32px; background: rgba(220, 38, 38, 0.05); text-align: center; border-radius: 20px; border: 1px solid rgba(220, 38, 38, 0.12); margin-bottom: 28px;">
+                <span style="font-size: 2rem;">😔</span>
+                <h3 style="font-family: var(--font-serif); font-size: 1.2rem; margin-top: 12px; color: var(--dark-bg); font-weight: 500;">Application Status</h3>
+                <p style="font-size: 0.85rem; color: rgba(34, 40, 49, 0.6); max-width: 500px; margin: 8px auto 0; line-height: 1.5; font-weight: 500;">
+                    Thank you for participating in the AI Next Gen assessment. Due to limited capacity (30 seats), you have not been selected for this cohort. We appreciate your efforts and wish you the best in your future endeavors.
+                </p>
+            </div>
 
             <!-- Profile Card -->
             <div class="glass-panel profile-card">
@@ -1012,37 +1052,6 @@
                         <button type="button" class="btn-futuristic btn-secondary" id="reset-btn">↺ Reset</button>
                     </div>
                 </form>
-            </div>
-        </div>
-
-        <!-- ===== RIGHT SIDEBAR ===== -->
-        <div class="right-sidebar">
-            <!-- Webcam -->
-            <div class="webcam-monitor-panel">
-                <div class="webcam-camera-frame">
-                    <div class="camera-circle" id="camera-circle">👤</div>
-                    <span class="webcam-indicator-dot active" id="right-camera-dot"></span>
-                </div>
-                <h4>📷 Identity Feed</h4>
-                <div class="sub" id="webcam-status-text">Viewport tracking active</div>
-            </div>
-
-            <!-- Status -->
-            <div class="status-panel">
-                <div class="status-container">
-                    <span class="status-dot status-color-pending" id="status-light"></span>
-                    <span class="status-text">
-                        Selection: <span class="highlight" id="status-text">PENDING</span>
-                    </span>
-                </div>
-            </div>
-
-            <!-- Score Dial -->
-            <div class="final-score-dial-card">
-                <div class="dial-value" id="score-final-dial">0.0</div>
-                <div class="dial-label">Final Score</div>
-                <div class="rank-badge" id="rank-badge">🏅 Not Ranked</div>
-                <div class="dial-sub">Complete your profile to unlock 🚀</div>
             </div>
         </div>
     </div>
@@ -1155,15 +1164,22 @@
                 }
             });
 
+            let resultsPublished = false;
+
             // ===== LOAD PROFILE =====
             async function loadProfile() {
                 try {
+                    // Fetch results publish status
+                    const pubResponse = await fetch('/api/admin/publish_status');
+                    const pubData = await pubResponse.json();
+                    resultsPublished = pubData.results_published;
+
                     const response = await fetch('/api/session');
                     const data = await response.json();
 
                     if (response.ok && data.logged_in) {
                         activeCandidate = data.candidate;
-                        populateProfile(activeCandidate);
+                        populateProfile(activeCandidate, resultsPublished);
                     } else {
                         loadLocalSession();
                     }
@@ -1188,15 +1204,37 @@
                     return;
                 }
 
-                populateProfile(activeCandidate);
+                populateProfile(activeCandidate, resultsPublished);
             }
 
-            function populateProfile(candidate) {
+            function populateProfile(candidate, resultsPublished) {
                 // Store original data for reset
                 originalData = { ...candidate };
 
                 // Header
                 document.getElementById('top-candidate-id').textContent = `🆔 ${candidate.candidate_id || 'AINEXT2026-0000'}`;
+
+                // Populate Summary Card (yedge style)
+                const avatar = document.getElementById('profile-avatar-letter');
+                if (avatar && candidate.name) {
+                    avatar.textContent = candidate.name.trim().charAt(0).toUpperCase();
+                }
+                const summaryName = document.getElementById('summary-name');
+                if (summaryName) summaryName.textContent = candidate.name || 'Candidate Name';
+                const summaryEmail = document.getElementById('summary-email');
+                if (summaryEmail) summaryEmail.textContent = candidate.email || 'candidate@college.edu';
+                
+                const metaPhone = document.getElementById('meta-phone');
+                if (metaPhone) metaPhone.textContent = candidate.phone || '—';
+                const metaDept = document.getElementById('meta-dept');
+                if (metaDept) metaDept.textContent = candidate.department || '—';
+                const metaYear = document.getElementById('meta-year');
+                if (metaYear) {
+                    const admissionYear = candidate.year ? (2026 - (4 - parseInt(candidate.year))) : '2026';
+                    metaYear.textContent = admissionYear;
+                }
+                const metaCollege = document.getElementById('meta-college');
+                if (metaCollege) metaCollege.textContent = candidate.college || '—';
 
                 // Form fields
                 document.getElementById('name').value = candidate.name || '';
@@ -1215,10 +1253,70 @@
                     bioCounter.textContent = `${count} / 500 characters`;
                 }
 
+                // Show Invitation or Rejection Notices if results are published and test is completed
+                const selectedInvitationBox = document.getElementById('selected-invitation');
+                const rejectedNoticeBox = document.getElementById('rejected-notice');
+                
+                if (candidate.completed && resultsPublished) {
+                    if (candidate.selected === 1) {
+                        if (selectedInvitationBox) selectedInvitationBox.style.display = 'block';
+                        if (rejectedNoticeBox) rejectedNoticeBox.style.display = 'none';
+                        const inviteTextEl = document.getElementById('invitation-text-content');
+                        if (inviteTextEl) {
+                            inviteTextEl.textContent = `
+🎉 OFFICIAL INVITATION - AI NEXT GEN WORKSHOP 2026
+
+Dear ${candidate.name},
+
+Congratulations on being shortlisted!
+
+We are thrilled to invite you to the prestigious AI Next Gen Research Workshop 2026.
+
+📅 Date: August 15-16, 2026
+📍 Location: AI NEXT GEN Research Labs
+👥 Seats: 30 selected candidates
+
+Agenda Highlights:
+• Hands-on LLM Development
+• RAG Database Systems
+• Custom AI Agent Design
+• Semantic Tool Building
+• Networking with Industry Experts
+
+Your Candidate ID: ${candidate.candidate_id || 'AINEXT2026-0000'}
+Selection Score: ${(candidate.score_final || 0).toFixed(1)}/100
+
+Please confirm your attendance by replying within 24 hours.
+
+Welcome to the future of AI!
+
+Best regards,
+Selection Board
+AI NEXT GEN Research Labs`;
+                        }
+                    } else if (candidate.selected === 2) {
+                        if (selectedInvitationBox) selectedInvitationBox.style.display = 'none';
+                        if (rejectedNoticeBox) rejectedNoticeBox.style.display = 'block';
+                    } else {
+                        if (selectedInvitationBox) selectedInvitationBox.style.display = 'none';
+                        if (rejectedNoticeBox) rejectedNoticeBox.style.display = 'none';
+                    }
+                } else {
+                    if (selectedInvitationBox) selectedInvitationBox.style.display = 'none';
+                    if (rejectedNoticeBox) rejectedNoticeBox.style.display = 'none';
+                }
+
+                // If candidate completed the test but results are not published yet, mask the final score and rank
+                const isEvaluation = candidate.completed && !resultsPublished;
+
                 // Score dial
                 const dialScore = document.getElementById('score-final-dial');
+                const dialSub = document.querySelector('.dial-sub');
                 if (dialScore) {
-                    dialScore.textContent = (candidate.score_final || 0).toFixed(1);
+                    dialScore.textContent = isEvaluation ? '🔒' : (candidate.score_final || 0).toFixed(1);
+                }
+                if (dialSub) {
+                    dialSub.textContent = isEvaluation ? 'Results not published yet' : 'Complete your profile to unlock 🚀';
                 }
 
                 // Status
@@ -1230,7 +1328,11 @@
                     2: { class: 'status-color-rejected', text: 'ARCHIVED', color: 'var(--accent-red)' },
                     3: { class: 'status-color-disqualified', text: 'DISQUALIFIED', color: '#6B7280' }
                 };
-                const status = statusMap[candidate.selected] || statusMap[0];
+                
+                const status = isEvaluation ? 
+                    { class: 'status-color-pending', text: 'EVALUATION IN PROGRESS', color: 'var(--accent-yellow)' } : 
+                    (statusMap[candidate.selected] || statusMap[0]);
+                
                 statusLight.className = `status-dot ${status.class}`;
                 statusText.textContent = status.text;
                 statusText.style.color = status.color;
@@ -1262,7 +1364,11 @@
                 // Rank badge
                 const rankBadge = document.getElementById('rank-badge');
                 const score = candidate.score_final || 0;
-                if (score >= 85) {
+                if (isEvaluation) {
+                    rankBadge.textContent = '🏅 Pending Evaluation';
+                    rankBadge.style.background = 'rgba(107,114,128,0.1)';
+                    rankBadge.style.color = '#6B7280';
+                } else if (score >= 85) {
                     rankBadge.textContent = '🏅 Platinum Rank';
                     rankBadge.style.background = 'rgba(16,185,129,0.2)';
                     rankBadge.style.color = '#16A34A';
@@ -1397,7 +1503,25 @@
                     localStorage.removeItem('active_session_candidate_id');
                     window.location.href = '/login';
                 }
-            });
+            // ===== SHARE INVITE =====
+            const shareBtn = document.getElementById('btn-share-invite');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', function() {
+                    const content = document.getElementById('invitation-text-content').textContent;
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'AI Next Gen Workshop Invitation',
+                            text: content
+                        }).catch(() => {});
+                    } else {
+                        navigator.clipboard.writeText(content).then(() => {
+                            showToast('📤 Invitation copied to clipboard!', 'success');
+                        }).catch(() => {
+                            showToast('📤 Share failed. Please copy manually.', 'error');
+                        });
+                    }
+                });
+            }
 
             // ===== KEYBOARD SHORTCUTS =====
             document.addEventListener('keydown', (e) => {

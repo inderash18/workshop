@@ -6,18 +6,21 @@
     <title>Sign Up - AI NEXT GEN 2026</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
-        /* ===== ENHANCED CSS ===== */
+        /* ===== PALETTE: Black Russian / Alucard Night / Palatinate Blue / Grey Placidity / Baby Grey ===== */
         :root {
-            --primary-bg: #D8D7CE;
-            --dark-bg: #222831;
-            --accent-cyan: #00A6C0;
+            --primary-bg: #DCDEE2;
+            --dark-bg: #000029;
+            --mid-bg: #000051;
+            --accent-blue: #173DED;
+            --accent-cyan: #173DED;
             --accent-green: #16A34A;
             --accent-red: #DC2626;
             --accent-yellow: #F59E0B;
-            --accent-purple: #7b2ffc;
+            --accent-purple: #173DED;
+            --border-color: #BABABA;
             --font-serif: 'Georgia', serif;
-            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
             --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -641,21 +644,16 @@
     <div class="signup-container">
         <div class="signup-card">
             <!-- Logo -->
-            <div class="logo-wrapper">
-                <div class="logo-ring"></div>
-                <svg class="logo-svg" width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="4" stroke-dasharray="14 10" />
-                    <circle cx="50" cy="50" r="28" stroke="currentColor" stroke-width="4" stroke-dasharray="8 8" opacity="0.6" />
-                    <circle cx="50" cy="50" r="14" stroke="currentColor" stroke-width="4" stroke-dasharray="4 4" opacity="0.4" />
-                    <circle cx="50" cy="50" r="5" fill="currentColor" opacity="0.8" />
-                </svg>
+            <div class="logo-wrapper" style="display: flex; align-items: center; gap: 10px; margin-bottom: 24px; justify-content: center; width: 100%;">
+                <div style="width: 36px; height: 36px; background: #E74C3C; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #FFFFFF; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.25); flex-shrink: 0;">✦</div>
+                <span style="font-family: var(--font-sans); font-size: 1.6rem; font-weight: 800; color: var(--dark-bg); letter-spacing: -0.5px;">yedge</span>
             </div>
 
             <!-- Title -->
-            <h2 class="signup-title">
-                Join <span class="highlight">AI Next Gen</span>
+            <h2 class="signup-title" style="color: var(--dark-bg); font-weight: 700; margin-bottom: 8px;">
+                Skill Up. Stand Out. Succeed.
             </h2>
-            <p class="signup-subtitle">Create your account and start your AI journey</p>
+            <p class="signup-subtitle" style="margin-bottom: 24px;">Create your student account to get started</p>
 
             <!-- Progress Steps -->
             <div class="progress-steps" id="progress-steps">

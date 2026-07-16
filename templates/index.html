@@ -6,18 +6,21 @@
     <title>AI Next Gen Selection Arena 2026</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <style>
-        /* ===== ENHANCED CSS ===== */
+        /* ===== PALETTE: Black Russian / Alucard Night / Palatinate Blue / Grey Placidity / Baby Grey ===== */
         :root {
-            --primary-bg: #D8D7CE;
-            --dark-bg: #222831;
-            --accent-cyan: #00A6C0;
+            --primary-bg: #DCDEE2;
+            --dark-bg: #000029;
+            --mid-bg: #000051;
+            --accent-blue: #173DED;
+            --accent-cyan: #173DED;
             --accent-green: #16A34A;
             --accent-red: #DC2626;
             --accent-yellow: #F59E0B;
-            --accent-purple: #7b2ffc;
+            --accent-purple: #173DED;
+            --border-color: #BABABA;
             --font-serif: 'Georgia', serif;
-            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
             --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -52,8 +55,8 @@
             right: 0;
             bottom: 0;
             background: 
-                radial-gradient(ellipse at 20% 50%, rgba(0, 166, 192, 0.03) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 50%, rgba(123, 47, 252, 0.03) 0%, transparent 60%);
+                radial-gradient(ellipse at 20% 50%, rgba(23, 61, 237, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(0, 0, 81, 0.04) 0%, transparent 60%);
             pointer-events: none;
             z-index: 0;
         }
@@ -73,8 +76,8 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px 40px;
-            border-bottom: 1px solid rgba(34, 40, 49, 0.06);
-            background: rgba(216, 215, 206, 0.92);
+            border-bottom: 1px solid rgba(186, 186, 186, 0.25);
+            background: rgba(220, 222, 226, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             position: sticky;
@@ -103,7 +106,7 @@
         .nav-logo-icon {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            background: linear-gradient(135deg, #173DED, #000051);
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -111,7 +114,7 @@
             font-weight: 700;
             color: white;
             font-size: 16px;
-            box-shadow: 0 4px 12px rgba(0, 166, 192, 0.2);
+            box-shadow: 0 4px 12px rgba(23, 61, 237, 0.3);
         }
 
         .nav-logo-text {

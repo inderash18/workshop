@@ -282,7 +282,7 @@ def login_page():
 def dashboard_page():
     if 'user_email' not in session:
         return redirect(url_for('login_page'))
-    return render_template('dashboard.html')
+    return redirect(url_for('profile_page'))
 
 @app.route('/profile')
 def profile_page():
@@ -475,7 +475,7 @@ def api_login():
     return jsonify({
         'success': True, 
         'candidate_id': candidate['candidate_id'],
-        'redirect': '/dashboard'
+        'redirect': '/profile'
     })
 
 @app.route('/api/logout', methods=['POST'])
@@ -872,6 +872,23 @@ def admin_logout():
     session.pop('admin_logged_in', None)
     session.pop('admin_username', None)
     return jsonify({'success': True})
+
+@app.route('/api/admin/publish_status', methods=['GET'])
+def get_publish_status():
+    """Get current results publishing status"""
+    db = load_db()
+    return jsonify({'results_published': db.get('results_published', False)})
+
+@app.route('/api/admin/toggle_publish', methods=['POST'])
+@admin_required
+def toggle_publish():
+    """Toggle results publishing status"""
+    db = load_db()
+    current = db.get('results_published', False)
+    db['results_published'] = not current
+    save_db(db)
+    audit_log('toggle_publish', session.get('admin_username'), {'published': not current})
+    return jsonify({'success': True, 'results_published': not current})
 
 @app.route('/api/admin/candidates', methods=['GET'])
 @admin_required

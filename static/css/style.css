@@ -15,43 +15,55 @@
    2. CSS VARIABLES (Design Tokens)
    ============================================ */
 :root {
-    /* --- Colors --- */
-    --bg-color: #D8D7CE;
-    --bg-dark: #222831;
-    --bg-light: #F5F5F0;
+    /* --- Colors (Palette: Black Russian / Alucard Night / Palatinate Blue / Grey Placidity / Baby Grey) --- */
+    --bg-color: #DCDEE2;
+    --bg-dark: #000029;
+    --bg-mid: #000051;
+    --bg-light: #DCDEE2;
     
-    --card-bg: rgba(40, 59, 72, 0.08);
-    --card-bg-solid: rgba(255, 255, 255, 0.35);
-    --card-border: rgba(34, 40, 49, 0.08);
-    --card-border-hover: rgba(0, 166, 192, 0.2);
-    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-    --card-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.06);
+    --card-bg: rgba(220, 222, 226, 0.6);
+    --card-bg-solid: rgba(255, 255, 255, 0.85);
+    --card-border: rgba(186, 186, 186, 0.35);
+    --card-border-hover: rgba(23, 61, 237, 0.3);
+    --card-shadow: 0 4px 20px rgba(0, 0, 41, 0.06);
+    --card-shadow-hover: 0 8px 32px rgba(0, 0, 81, 0.12);
     
     /* Accent Colors */
-    --accent-cyan: #00A6C0;
-    --accent-cyan-dark: #008899;
-    --accent-cyan-light: #4DC9E0;
-    --accent-purple: #7b2ffc;
-    --accent-purple-dark: #5a1fb8;
-    --accent-purple-light: #a66eff;
-    --accent-pink: #EC4899;
+    --accent-blue: #173DED;
+    --accent-blue-dark: #1230C0;
+    --accent-blue-light: #4D6FF0;
+    --accent-cyan: #173DED;
+    --accent-cyan-dark: #1230C0;
+    --accent-cyan-light: #4D6FF0;
+    --accent-purple: #173DED;
+    --accent-purple-dark: #1230C0;
+    --accent-purple-light: #4D6FF0;
+    --accent-pink: #173DED;
     --accent-orange: #F59E0B;
     --accent-green: #16A34A;
     --accent-green-dark: #0D8A3E;
     --accent-red: #DC2626;
     --accent-red-dark: #B91C1C;
+    --accent-yellow: #F59E0B;
+    
+    /* Palette tokens */
+    --palette-black-russian: #000029;
+    --palette-alucard-night: #000051;
+    --palette-palatinate-blue: #173DED;
+    --palette-grey-placidity: #DCDEE2;
+    --palette-baby-grey: #BABABA;
     
     /* Text Colors */
-    --text-primary: #222831;
-    --text-secondary: rgba(34, 40, 49, 0.7);
-    --text-muted: rgba(34, 40, 49, 0.4);
-    --text-inverse: #D8D7CE;
+    --text-primary: #000029;
+    --text-secondary: rgba(0, 0, 41, 0.7);
+    --text-muted: #BABABA;
+    --text-inverse: #DCDEE2;
     
     /* Status Colors */
     --status-success: #16A34A;
     --status-warning: #F59E0B;
     --status-error: #DC2626;
-    --status-info: #00A6C0;
+    --status-info: #173DED;
     
     /* --- Typography --- */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -77,12 +89,13 @@
     --radius-full: 9999px;
     
     /* --- Shadows --- */
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
-    --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.12);
-    --shadow-glow-cyan: 0 4px 24px rgba(0, 166, 192, 0.2);
-    --shadow-glow-purple: 0 4px 24px rgba(123, 47, 252, 0.2);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 41, 0.06);
+    --shadow-md: 0 4px 16px rgba(0, 0, 41, 0.09);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 41, 0.12);
+    --shadow-xl: 0 12px 48px rgba(0, 0, 41, 0.18);
+    --shadow-glow-blue: 0 4px 24px rgba(23, 61, 237, 0.25);
+    --shadow-glow-cyan: 0 4px 24px rgba(23, 61, 237, 0.25);
+    --shadow-glow-purple: 0 4px 24px rgba(23, 61, 237, 0.2);
     
     /* --- Transitions --- */
     --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -92,8 +105,8 @@
     
     /* --- Glass Effect --- */
     --glass-blur: blur(20px);
-    --glass-bg: rgba(255, 255, 255, 0.25);
-    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-bg: rgba(220, 222, 226, 0.3);
+    --glass-border: rgba(186, 186, 186, 0.25);
     
     /* --- Z-Index Layers --- */
     --z-base: 1;
@@ -138,18 +151,18 @@
     transition: background var(--transition-fast);
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: var(--accent-cyan);
+*::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-blue);
 }
 
 /* Selection */
 ::selection {
-    background: var(--accent-cyan);
+    background: var(--accent-blue);
     color: white;
 }
 
 ::-moz-selection {
-    background: var(--accent-cyan);
+    background: var(--accent-blue);
     color: white;
 }
 
@@ -182,7 +195,7 @@ body::before {
     right: -10%;
     width: 65vw;
     height: 65vw;
-    background: radial-gradient(circle, rgba(0, 166, 192, 0.06) 0%, rgba(0, 166, 192, 0) 70%);
+    background: radial-gradient(circle, rgba(23, 61, 237, 0.06) 0%, rgba(23, 61, 237, 0) 70%);
     z-index: -1;
     pointer-events: none;
     filter: blur(80px);
@@ -196,7 +209,7 @@ body::after {
     left: -10%;
     width: 55vw;
     height: 55vw;
-    background: radial-gradient(circle, rgba(123, 47, 252, 0.04) 0%, rgba(123, 47, 252, 0) 70%);
+    background: radial-gradient(circle, rgba(0, 0, 81, 0.05) 0%, rgba(0, 0, 81, 0) 70%);
     z-index: -1;
     pointer-events: none;
     filter: blur(80px);

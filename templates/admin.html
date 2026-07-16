@@ -7,16 +7,19 @@
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* ===== ENHANCED CSS ===== */
+        /* ===== PALETTE: Black Russian / Alucard Night / Palatinate Blue / Grey Placidity / Baby Grey ===== */
         :root {
-            --primary-bg: #D8D7CE;
-            --dark-bg: #222831;
-            --accent-cyan: #00A6C0;
+            --primary-bg: #DCDEE2;
+            --dark-bg: #000029;
+            --mid-bg: #000051;
+            --accent-blue: #173DED;
+            --accent-cyan: #173DED;
             --accent-green: #16A34A;
             --accent-red: #DC2626;
+            --border-color: #BABABA;
             --font-serif: 'Georgia', serif;
-            --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            --font-mono: 'Cascadia Code', 'Fira Code', monospace;
+            --font-sans: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
             --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -39,7 +42,7 @@
         /* ===== LAYOUT - Enhanced with better responsiveness ===== */
         .tablet-wrapper {
             display: grid;
-            grid-template-columns: 80px 1fr 340px;
+            grid-template-columns: 240px 1fr;
             min-height: 100vh;
             background: var(--primary-bg);
             gap: 0;
@@ -47,16 +50,15 @@
         }
 
         /* ===== LEFT SIDEBAR - Enhanced ===== */
+        /* ===== LEFT SIDEBAR - YardStick / yedge Style ===== */
         .left-sidebar {
-            background: rgba(216, 215, 206, 0.92);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-right: 1px solid rgba(34, 40, 49, 0.1);
+            background: #000051;
+            border-right: none;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            align-items: center;
-            padding: 32px 0;
+            align-items: stretch;
+            padding: 32px 24px;
             position: sticky;
             top: 0;
             height: 100vh;
@@ -65,23 +67,25 @@
         }
 
         .sidebar-logo {
-            text-align: center;
-            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--accent-cyan), #7b2ffc);
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            background: #173DED;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
-            color: white;
-            margin: 0 auto;
-            box-shadow: 0 4px 16px rgba(0, 166, 192, 0.3);
+            color: #FFFFFF;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(23, 61, 237, 0.35);
             transition: transform 0.3s ease;
         }
 
@@ -89,92 +93,72 @@
             transform: scale(1.05) rotate(-5deg);
         }
 
+        .logo-text {
+            font-family: var(--font-sans);
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -0.5px;
+        }
+
         .sidebar-menu {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            align-items: center;
+            gap: 8px;
+            align-items: stretch;
+            flex-grow: 1;
         }
 
         .menu-item {
-            font-size: 1.3rem;
+            font-size: 0.85rem;
             text-decoration: none;
-            color: rgba(34, 40, 49, 0.5);
-            padding: 12px;
-            border-radius: 14px;
-            transition: all 0.3s var(--transition-smooth);
-            position: relative;
-            width: 50px;
-            height: 50px;
+            color: rgba(255, 255, 255, 0.75);
+            padding: 12px 16px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            justify-content: center;
-        }
-
-        .menu-item::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 14px;
-            background: var(--accent-cyan);
-            opacity: 0;
-            transform: scale(0.8);
-            transition: all 0.3s var(--transition-smooth);
+            gap: 12px;
+            font-weight: 600;
         }
 
         .menu-item:hover {
-            color: var(--dark-bg);
-            transform: translateX(2px);
-        }
-
-        .menu-item:hover::before {
-            opacity: 0.08;
-            transform: scale(1);
-        }
-
-        .menu-item.active {
-            color: white;
-            background: var(--dark-bg);
-            box-shadow: 0 8px 24px rgba(34, 40, 49, 0.2);
-        }
-
-        .menu-item .tooltip {
-            position: absolute;
-            left: 70px;
-            background: var(--dark-bg);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .menu-item:hover .tooltip {
-            opacity: 1;
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
             transform: translateX(4px);
         }
 
+        .menu-item.active {
+            color: #FFFFFF;
+            background: #173DED;
+            box-shadow: 0 4px 12px rgba(23, 61, 237, 0.3);
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            padding-top: 20px;
+        }
+
         .sidebar-footer button {
-            background: none;
+            background: transparent;
             border: none;
-            font-size: 1.3rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.75);
             cursor: pointer;
-            color: rgba(34, 40, 49, 0.4);
-            transition: all 0.3s ease;
-            padding: 12px;
-            border-radius: 12px;
-            width: 50px;
-            height: 50px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .sidebar-footer button:hover {
-            color: var(--accent-red);
-            background: rgba(220, 38, 38, 0.08);
-            transform: scale(1.05);
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(4px);
         }
 
         /* ===== MAIN CONTENT - Enhanced ===== */
@@ -193,7 +177,7 @@
         }
 
         .main-dashboard-content::-webkit-scrollbar-thumb {
-            background: rgba(34, 40, 49, 0.2);
+            background: rgba(23, 61, 237, 0.2);
             border-radius: 10px;
         }
 
@@ -1068,10 +1052,23 @@
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1400px) {
             .tablet-wrapper {
-                grid-template-columns: 80px 1fr 280px;
+                grid-template-columns: 80px 1fr;
             }
             .admin-charts-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            .left-sidebar {
+                padding: 32px 0;
+                align-items: center;
+            }
+            .logo-text, .menu-item-text {
+                display: none;
+            }
+            .menu-item, .sidebar-footer button {
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                padding: 12px;
             }
         }
 
@@ -1079,11 +1076,21 @@
             .tablet-wrapper {
                 grid-template-columns: 80px 1fr;
             }
-            .right-sidebar {
-                display: none;
-            }
             .admin-stats-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            .left-sidebar {
+                padding: 32px 0;
+                align-items: center;
+            }
+            .logo-text, .menu-item-text {
+                display: none;
+            }
+            .menu-item, .sidebar-footer button {
+                justify-content: center;
+                width: 50px;
+                height: 50px;
+                padding: 12px;
             }
         }
 
@@ -1172,31 +1179,23 @@
         <div class="left-sidebar">
             <div class="sidebar-logo">
                 <div class="logo-icon" aria-hidden="true">✦</div>
+                <span class="logo-text">yedge</span>
+            </div>
+            <div class="sidebar-user-type" style="background: #E74C3C; color: #FFFFFF; font-size: 0.65rem; font-weight: 700; text-align: center; padding: 6px 0; border-radius: 4px; margin: -16px 0 20px; letter-spacing: 1px; font-family: var(--font-futuristic); flex-shrink: 0; width: 100%;">
+                ADMIN
             </div>
             <div class="sidebar-menu">
                 <a href="/" class="menu-item" title="Home">
-                    🏠
-                    <span class="tooltip">Home</span>
-                </a>
-                <a href="/dashboard" class="menu-item" title="Dashboard">
-                    📊
-                    <span class="tooltip">Dashboard</span>
-                </a>
-                <a href="/profile" class="menu-item" title="My Profile">
-                    👤
-                    <span class="tooltip">Profile</span>
-                </a>
-                <a href="/challenge" class="menu-item" title="Assessment">
-                    ⚔️
-                    <span class="tooltip">Challenge</span>
+                    <span>🏠</span> <span class="menu-item-text">Home</span>
                 </a>
                 <a href="/admin" class="menu-item active" title="Admin Control">
-                    ⚙️
-                    <span class="tooltip">Admin</span>
+                    <span>⚙️</span> <span class="menu-item-text">Admin Console</span>
                 </a>
             </div>
             <div class="sidebar-footer">
-                <button id="btn-admin-logout" title="Log Out" aria-label="Logout">🚪</button>
+                <button id="btn-admin-logout" title="Log Out" aria-label="Logout">
+                    <span>🚪</span> <span class="menu-item-text">Log Out</span>
+                </button>
             </div>
         </div>
 
@@ -1294,6 +1293,10 @@
                         </select>
                     </div>
                     <div class="admin-actions-btns">
+                        <button class="btn-futuristic" id="btn-toggle-publish" style="background: #00A6C0; color: white; border: none;">
+                            <span class="btn-text">📢 Publish Results</span>
+                            <span class="spinner-small"></span>
+                        </button>
                         <button class="btn-futuristic" id="btn-auto-shortlist">
                             <span class="btn-text">⚡ Auto-Shortlist</span>
                             <span class="spinner-small"></span>
@@ -1334,52 +1337,6 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        <!-- ===== RIGHT SIDEBAR ===== -->
-        <div class="right-sidebar">
-            <!-- Monitor -->
-            <div class="monitor-panel">
-                <div class="concentric-circles">
-                    <div class="inner-ring">
-                        <div class="sys-check-circle">⚙️</div>
-                    </div>
-                    <span class="sys-status-dot"></span>
-                </div>
-                <h4 style="font-size:0.8rem; font-weight:600; color:var(--dark-bg); margin:0;">Sec-Ops Status</h4>
-                <p style="font-size:0.65rem; color:rgba(34,40,49,0.4); margin:4px 0 0;">Monitoring active</p>
-            </div>
-
-            <!-- Telemetry -->
-            <div class="telemetry-panel">
-                <h3>Analytics Feed</h3>
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                    <div class="alerts-feed-row">
-                        <span class="alerts-feed-lbl">📷 Webcam OK</span>
-                        <span class="alerts-feed-val success" id="feed-webcam-active">0</span>
-                    </div>
-                    <div class="alerts-feed-row">
-                        <span class="alerts-feed-lbl">🚨 Security Flags</span>
-                        <span class="alerts-feed-val danger" id="feed-violations-count">0</span>
-                    </div>
-                    <div class="alerts-feed-row">
-                        <span class="alerts-feed-lbl">✅ Completed</span>
-                        <span class="alerts-feed-val" id="feed-completions">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seat Allocation -->
-            <div class="seat-allocation-card">
-                <div class="dial-value" id="right-shortlist-dial">0 / 30</div>
-                <div class="dial-label">Shortlisted Seats</div>
-                <div class="progress-bar">
-                    <div class="fill" id="seat-progress-fill"></div>
-                </div>
-                <div style="margin-top:12px; font-size:0.65rem; color:rgba(216,215,206,0.4);">
-                    Roster allocation limit
-                </div>
             </div>
         </div>
     </div>
@@ -1424,6 +1381,25 @@
                             <a href="#" id="modal-val-linkedin" target="_blank" style="color:var(--accent-cyan); text-decoration:none; margin-right:12px;">LinkedIn</a>
                             <a href="#" id="modal-val-github" target="_blank" style="color:var(--accent-cyan); text-decoration:none;">GitHub</a>
                         </span>
+                    </div>
+                </div>
+
+                <!-- Selection Decision -->
+                <div class="modal-section-title" style="margin-top: 16px;">Selection Decision</div>
+                <div class="profile-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 20px;">
+                    <div class="profile-field">
+                        <span class="label">Decision Status</span>
+                        <select id="modal-select-status" class="admin-select" style="background: rgba(255,255,255,0.7); border: 1px solid rgba(34, 40, 49, 0.12); padding: 8px; border-radius: 8px; width: 100%; margin-top: 4px; font-weight: 600; color: var(--dark-bg);">
+                            <option value="0">⏳ Pending / Waitlisted</option>
+                            <option value="1">✅ Shortlisted</option>
+                            <option value="2">❌ Rejected</option>
+                            <option value="3">🚫 Disqualified</option>
+                        </select>
+                    </div>
+                    <div class="profile-field" style="display: flex; align-items: flex-end;">
+                        <button type="button" class="btn-futuristic" id="btn-save-decision" style="background: #222831; color: #D8D7CE; width: 100%; height: 38px; border: none; border-radius: 8px; font-weight: 600;">
+                            Save Decision
+                        </button>
                     </div>
                 </div>
 
@@ -1624,58 +1600,67 @@ AI NEXT GEN Research Labs
                 });
             };
 
-            // ===== MOCK DATA GENERATOR =====
-            function generateMockData(count = 50) {
-                const colleges = ['MIT', 'Stanford', 'Harvard', 'Oxford', 'Cambridge', 'IIT Delhi', 'ETH Zurich', 'KAIST', 'Tokyo Tech', 'Tsinghua'];
-                const names = ['Alex Johnson', 'Sam Rivera', 'Taylor Kim', 'Jordan Lee', 'Morgan Chen', 'Riley Patel', 'Avery Wu', 'Quinn Zhang', 'Parker Brown', 'Logan Miller'];
-                const statuses = ['pending', 'shortlisted', 'waitlisted', 'rejected'];
-                const years = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate'];
-
-                const data = [];
-                for (let i = 0; i < count; i++) {
-                    const score = Math.round((Math.random() * 40 + 50) * 10) / 10;
-                    const status = score > 80 ? 'shortlisted' : (score > 65 ? 'waitlisted' : (score > 50 ? 'pending' : 'rejected'));
-                    data.push({
-                        id: `AI26-${String(1000 + i).padStart(4, '0')}`,
-                        name: names[i % names.length] + (i > names.length ? ` ${i}` : ''),
-                        college: colleges[i % colleges.length],
-                        year: years[i % years.length],
-                        email: `candidate${i}@${colleges[i % colleges.length].toLowerCase().replace(' ', '')}.edu`,
-                        roll: `${colleges[i % colleges.length].substring(0, 2)}${String(2026 - i % 4)}-${String(100 + i).padStart(3, '0')}`,
-                        linkedin: '#',
-                        github: '#',
-                        score: score,
-                        logicScore: Math.round((Math.random() * 30 + 30) * 10) / 10,
-                        typingSpeed: Math.round(Math.random() * 40 + 40),
-                        variance: Math.round(Math.random() * 80 + 20),
-                        backspaces: Math.round(Math.random() * 15),
-                        idleTime: Math.round(Math.random() * 20),
-                        totalTime: Math.round(Math.random() * 45 + 15),
-                        webcam: Math.random() > 0.15,
-                        violations: Math.random() > 0.7 ? Math.floor(Math.random() * 3) + 1 : 0,
-                        status: status,
-                        answers: [
-                            { q: 'What is a Transformer model?', a: 'A Transformer is a deep learning model that uses self-attention mechanisms to process sequential data.' },
-                            { q: 'Explain RAG in AI', a: 'Retrieval-Augmented Generation combines retrieval systems with generative models for enhanced knowledge.' },
-                            { q: 'What is fine-tuning?', a: 'Fine-tuning adapts a pre-trained model to specific tasks using additional training data.' }
-                        ],
-                        violationLogs: Math.random() > 0.7 ? [
-                            { time: '10:23:15', type: 'Tab Switch', detail: 'Switched to external tab' },
-                            { time: '10:24:02', type: 'Face Detection', detail: 'Multiple faces detected' }
-                        ] : []
-                    });
-                }
-                return data;
-            }
-
-            // ===== INIT DATA =====
+            // ===== DATA SOURCE RETRIEVAL =====
             function initData() {
-                state.applicants = generateMockData(50);
-                state.filteredApplicants = [...state.applicants];
-                populateCollegeFilter();
-                updateUI();
-                updateCharts();
-                showToast('Data loaded successfully!', 'success');
+                state.isLoading = true;
+                if (refreshBtn) refreshBtn.classList.add('loading');
+                
+                fetch('/api/admin/candidates')
+                    .then(res => res.json())
+                    .then(data => {
+                        state.isLoading = false;
+                        if (refreshBtn) refreshBtn.classList.remove('loading');
+                        
+                        state.applicants = data.map(c => {
+                            let violationLogsRaw = [];
+                            try {
+                                violationLogsRaw = typeof c.violation_logs === 'string' ? 
+                                    JSON.parse(c.violation_logs || '[]') : (c.violation_logs || []);
+                            } catch(e) {
+                                violationLogsRaw = [];
+                            }
+                            
+                            return {
+                                id: c.candidate_id,
+                                name: c.name,
+                                college: c.college,
+                                year: c.year + (c.year === 1 ? 'st' : c.year === 2 ? 'nd' : c.year === 3 ? 'rd' : 'th') + ' Year',
+                                email: c.email,
+                                roll: c.phone || '—',
+                                linkedin: c.linkedin || '#',
+                                github: c.github || '#',
+                                score: c.score_final || 0,
+                                logicScore: c.score_logic || 0,
+                                typingSpeed: Math.round(c.typing_speed_avg) || 0,
+                                variance: Math.round(c.typing_pattern_variance) || 0,
+                                backspaces: c.backspace_count || 0,
+                                idleTime: c.idle_duration || 0,
+                                totalTime: Math.round(c.time_taken / 60) || 0,
+                                webcam: c.webcam_status === 'Active',
+                                violations: c.violation_count || 0,
+                                status: c.selected === 1 ? 'shortlisted' : c.selected === 2 ? 'rejected' : c.selected === 3 ? 'disqualified' : 'pending',
+                                answers: [
+                                    { q: 'Cognitive Response (Level 2)', a: c.level2_ans || '—' },
+                                    { q: 'Analytical Framework (Level 4)', a: c.level4_ans || '—' },
+                                    { q: 'Future Vision Plan (Level 7)', a: c.level7_ans || '—' }
+                                ],
+                                violationLogs: violationLogsRaw
+                            };
+                        });
+                        
+                        state.filteredApplicants = [...state.applicants];
+                        populateCollegeFilter();
+                        updateUI();
+                        updateCharts();
+                        checkPublishStatus();
+                        showToast('Database candidates loaded successfully!', 'success');
+                    })
+                    .catch(err => {
+                        state.isLoading = false;
+                        if (refreshBtn) refreshBtn.classList.remove('loading');
+                        console.error('Failed to load database candidates:', err);
+                        showToast('Failed to retrieve candidates from database.', 'error');
+                    });
             }
 
             // ===== POPULATE COLLEGE FILTER =====
@@ -1940,6 +1925,13 @@ AI NEXT GEN Research Labs
                 $('#telemetry-backspaces').textContent = applicant.backspaces || 0;
                 $('#telemetry-idle').textContent = `${applicant.idleTime || 0}s`;
 
+                // Pre-select current selection status
+                const selectStatus = $('#modal-select-status');
+                if (selectStatus) {
+                    const statusMap = { 'pending': 0, 'shortlisted': 1, 'rejected': 2, 'disqualified': 3 };
+                    selectStatus.value = statusMap[applicant.status] !== undefined ? statusMap[applicant.status] : 0;
+                }
+
                 // Violations
                 const logsBody = $('#violation-logs-body');
                 if (applicant.violationLogs && applicant.violationLogs.length > 0) {
@@ -1997,21 +1989,30 @@ AI NEXT GEN Research Labs
                 shortlistBtn.classList.add('loading');
                 shortlistBtn.disabled = true;
 
-                // Simulate API call
-                setTimeout(() => {
-                    const sorted = [...state.applicants].sort((a, b) => b.score - a.score);
-                    const top = sorted.slice(0, 30);
-                    state.applicants.forEach(a => {
-                        const isTop = top.includes(a);
-                        a.status = isTop ? 'shortlisted' : (a.status === 'shortlisted' ? 'waitlisted' : a.status);
-                    });
-
+                fetch('/api/admin/auto_shortlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
                     state.isLoading = false;
                     shortlistBtn.classList.remove('loading');
                     shortlistBtn.disabled = false;
-                    updateUI();
-                    showToast(`✅ Top 30 applicants shortlisted!`, 'success');
-                }, 800);
+                    
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        initData(); // Reload from database
+                    } else {
+                        showToast('Failed to auto-shortlist.', 'error');
+                    }
+                })
+                .catch(err => {
+                    state.isLoading = false;
+                    shortlistBtn.classList.remove('loading');
+                    shortlistBtn.disabled = false;
+                    console.error('Failed to auto-shortlist:', err);
+                    showToast('Failed to auto-shortlist.', 'error');
+                });
             }
 
             // ===== EXPORT CSV =====
@@ -2041,28 +2042,56 @@ AI NEXT GEN Research Labs
             // ===== REFRESH =====
             function refreshData() {
                 if (state.isLoading) return;
-                state.isLoading = true;
-                refreshBtn.classList.add('loading');
-                refreshBtn.disabled = true;
+                initData();
+            }
 
-                setTimeout(() => {
-                    // Re-generate data with random changes
-                    const newData = generateMockData(50);
-                    // Preserve shortlist status
-                    const shortlistedIds = new Set(state.applicants.filter(a => a.status === 'shortlisted').map(a => a.id));
-                    newData.forEach(a => {
-                        if (shortlistedIds.has(a.id)) {
-                            a.status = 'shortlisted';
-                        }
-                    });
-                    state.applicants = newData;
+            // ===== TOGGLE PUBLISH RESULTS =====
+            function togglePublish() {
+                const publishBtn = $('#btn-toggle-publish');
+                if (state.isLoading) return;
+                state.isLoading = true;
+                publishBtn.classList.add('loading');
+                publishBtn.disabled = true;
+
+                fetch('/api/admin/toggle_publish', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(res => res.json())
+                .then(data => {
                     state.isLoading = false;
-                    refreshBtn.classList.remove('loading');
-                    refreshBtn.disabled = false;
-                    updateUI();
-                    updateCharts();
-                    showToast('🔄 Data refreshed!', 'success');
-                }, 600);
+                    publishBtn.classList.remove('loading');
+                    publishBtn.disabled = false;
+                    
+                    if (data.success) {
+                        const isPublished = data.results_published;
+                        publishBtn.innerHTML = `<span class="btn-text">${isPublished ? '📢 Unpublish Results' : '📢 Publish Results'}</span><span class="spinner-small"></span>`;
+                        publishBtn.style.background = isPublished ? 'var(--accent-red)' : '#00A6C0';
+                        showToast(isPublished ? '📢 Results published to students!' : '🔏 Results hidden from students.', 'success');
+                    } else {
+                        showToast('Failed to update publishing status.', 'error');
+                    }
+                })
+                .catch(err => {
+                    state.isLoading = false;
+                    publishBtn.classList.remove('loading');
+                    publishBtn.disabled = false;
+                    console.error('Failed to publish results:', err);
+                    showToast('Failed to update publishing status.', 'error');
+                });
+            }
+
+            function checkPublishStatus() {
+                fetch('/api/admin/publish_status')
+                .then(res => res.json())
+                .then(data => {
+                    const isPublished = data.results_published;
+                    const publishBtn = $('#btn-toggle-publish');
+                    if (publishBtn) {
+                        publishBtn.innerHTML = `<span class="btn-text">${isPublished ? '📢 Unpublish Results' : '📢 Publish Results'}</span><span class="spinner-small"></span>`;
+                        publishBtn.style.background = isPublished ? 'var(--accent-red)' : '#00A6C0';
+                    }
+                });
             }
 
             // ===== MODAL CONTROLS =====
@@ -2096,6 +2125,45 @@ AI NEXT GEN Research Labs
             refreshBtn.addEventListener('click', refreshData);
             shortlistBtn.addEventListener('click', autoShortlist);
             exportBtn.addEventListener('click', exportCSV);
+
+            const togglePublishBtn = $('#btn-toggle-publish');
+            if (togglePublishBtn) {
+                togglePublishBtn.addEventListener('click', togglePublish);
+            }
+
+            const saveDecisionBtn = $('#btn-save-decision');
+            if (saveDecisionBtn) {
+                saveDecisionBtn.addEventListener('click', () => {
+                    const selectStatus = $('#modal-select-status');
+                    const candidateId = $('#modal-val-id').textContent;
+                    const selectedVal = parseInt(selectStatus.value);
+
+                    if (!candidateId || candidateId === '—') return;
+
+                    fetch('/api/admin/toggle_selection', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            candidate_id: candidateId,
+                            selected: selectedVal
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Decision status saved successfully!', 'success');
+                            closeModal('detail-modal');
+                            initData(); // Reload table
+                        } else {
+                            showToast('Failed to save decision status.', 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Failed to save decision:', err);
+                        showToast('Failed to save decision status.', 'error');
+                    });
+                });
+            }
 
             emailBtn.addEventListener('click', () => {
                 const modal = $('#emails-modal');
