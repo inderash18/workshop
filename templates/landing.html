@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}AI Next Gen — The Future Starts Here{% endblock %}
+
+{% block content %}
+<div class="hero grid-bg">
+  <canvas class="particle-canvas" id="particleCanvas"></canvas>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow reveal">
+      <span class="hero-eyebrow-dot"></span>
+      Applications Open — Limited Seats
+    </div>
+
+    <h1 class="hero-title reveal reveal-delay-1">
+      Build the Future with<br>
+      <span class="hero-gradient-text">Artificial Intelligence</span>
+    </h1>
+
+    <p class="hero-subtitle reveal reveal-delay-2">
+      An exclusive 2-day intensive workshop on AI, Machine Learning, RAG Systems,
+      AI Agents, Prompt Engineering, and the tools shaping tomorrow.
+      Only 30 seats. One challenge. Your potential is the entry ticket.
+    </p>
+
+    <div class="hero-actions reveal reveal-delay-3">
+      <a href="/signup" class="btn btn-primary btn-lg">Apply Now</a>
+      <a href="#tracks" class="btn btn-secondary btn-lg">Explore Tracks</a>
+    </div>
+
+    <div class="hero-stats reveal reveal-delay-4">
+      <div class="hero-stat">
+        <div class="hero-stat-number" data-count="30">0</div>
+        <div class="hero-stat-label">Seats</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-number" data-count="7">0</div>
+        <div class="hero-stat-label">Challenge Levels</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-number" data-count="2">0</div>
+        <div class="hero-stat-label">Days of Intensity</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-number" data-count="9">0</div>
+        <div class="hero-stat-label">AI Topics</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="tracks">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">Workshop Tracks</div>
+      <h2 class="section-title">What You'll Master</h2>
+      <p class="section-subtitle">Two days of deep, hands-on learning across the most in-demand areas of modern AI.</p>
+    </div>
+
+    <div class="feature-grid stagger-grid">
+      <div class="glass-card feature-card hover-lift">
+        <div class="feature-icon">&#x1F9E0;</div>
+        <h4 class="feature-title">Artificial Intelligence</h4>
+        <p class="feature-desc">From foundational concepts to cutting-edge architectures powering the next generation of intelligent systems.</p>
+      </div>
+      <div class="glass-card feature-card hover-lift">
+        <div class="feature-icon">&#x1F4CA;</div>
+        <h4 class="feature-title">Machine Learning</h4>
+        <p class="feature-desc">Supervised, unsupervised, and reinforcement learning — hands-on with real datasets and production pipelines.</p>
+      </div>
+      <div class="glass-card feature-card hover-lift">
+        <div class="feature-icon">&#x1F50D;</div>
+        <h4 class="feature-title">RAG Systems</h4>
+        <p class="feature-desc">Retrieval-Augmented Generation — build systems that ground LLM responses in your own data with precision.</p>
+      </div>
+      <div class="glass-card feature-card hover-lift">
+        <div class="feature-icon">&#x1F916;</div>
+        <h4 class="feature-title">AI Agents</h4>
+        <p class="feature-desc">Autonomous agents that reason, plan, and act — orchestrate tools and multi-step workflows.</p>
+      </div>
+      <div class="glass-card feature-card hover-lift">
+        <div class="feature-icon">&#x2728;</div>
+        <h4 class="feature-title">Prompt Engineering</h4>
+        <p class="feature-desc">Master the art and science of crafting prompts that unlock the full potential of any LLM.</p>
+      </div>
+      <div class="glass-card feature-card hover-lift">
+        <div class="feature-icon">&#x1F3A8;</div>
+        <h4 class="feature-title">Generative AI</h4>
+        <p class="feature-desc">Text, image, code, and beyond — understand the models creating the future of content and creativity.</p>
+      </div>
+      <div class="glass-card feature-card hover-lift">
+        <div class="feature-icon">&#x1F4D6;</div>
+        <h4 class="feature-title">Large Language Models</h4>
+        <p class="feature-desc">Transformer architecture, fine-tuning, evaluation, and deployment of LLMs at scale.</p>
+      </div>
+      <div class="glass-card feature-card hover-lift">
+        <div class="feature-icon">&#x1F527;</div>
+        <h4 class="feature-title">Modern AI Tools</h4>
+        <p class="feature-desc">Get hands-on with the tools professionals use — LangChain, Hugging Face, OpenAI APIs, and more.</p>
+      </div>
+      <div class="glass-card feature-card hover-lift">
+        <div class="feature-icon">&#x1F52E;</div>
+        <h4 class="feature-title">Future of AI</h4>
+        <p class="feature-desc">AGI, alignment, AI safety — the ideas and challenges that will define the next decade of technology.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section grid-bg">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-eyebrow">The Challenge</div>
+      <h2 class="section-title">Prove Your Potential</h2>
+      <p class="section-subtitle">A multi-level AI selection challenge designed to find the most brilliant minds. Not an exam — a proving ground.</p>
+    </div>
+
+    <div class="feature-grid" style="grid-template-columns: repeat(2, 1fr);">
+      <div class="glass-card glass-card-lg reveal reveal-delay-1" style="grid-column: span 2;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-8); text-align: center;">
+          <div>
+            <div style="font-size: 2rem; margin-bottom: var(--space-3);">&#x1F9E0;</div>
+            <h5 style="margin-bottom: var(--space-2);">Pattern Intelligence</h5>
+            <p style="font-size: var(--text-sm); color: var(--text-secondary);">Recognize patterns, decode sequences, think visually.</p>
+          </div>
+          <div>
+            <div style="font-size: 2rem; margin-bottom: var(--space-3);">&#x2699;&#xFE0F;</div>
+            <h5 style="margin-bottom: var(--space-2);">Logic Engine</h5>
+            <p style="font-size: var(--text-sm); color: var(--text-secondary);">Deductive reasoning, conditional logic, truth analysis.</p>
+          </div>
+          <div>
+            <div style="font-size: 2rem; margin-bottom: var(--space-3);">&#x1F4A1;</div>
+            <h5 style="margin-bottom: var(--space-2);">AI Thinking</h5>
+            <p style="font-size: var(--text-sm); color: var(--text-secondary);">Ethics, model selection, scenario-based reasoning.</p>
+          </div>
+          <div>
+            <div style="font-size: 2rem; margin-bottom: var(--space-3);">&#x270F;&#xFE0F;</div>
+            <h5 style="margin-bottom: var(--space-2);">Prompt Architect</h5>
+            <p style="font-size: var(--text-sm); color: var(--text-secondary);">Design, evaluate, and refine prompts for maximum output.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: var(--space-12);" class="reveal reveal-delay-2">
+      <a href="/signup" class="btn btn-primary btn-lg">Take the Challenge</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="glass-card glass-card-lg" style="text-align: center; padding: var(--space-16);">
+      <div class="reveal">
+        <h2 style="margin-bottom: var(--space-4);">Ready to Shape the Future?</h2>
+        <p style="font-size: var(--text-lg); color: var(--text-secondary); max-width: 500px; margin: 0 auto var(--space-8);">
+          Only 30 students will be selected. Register now and take the challenge that could change everything.
+        </p>
+        <a href="/signup" class="btn btn-primary btn-lg">Apply for AI Next Gen 2026</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/pages/landing.js"></script>
+{% endblock %}

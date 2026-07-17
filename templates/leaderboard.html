@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard — AI Next Gen{% endblock %}
+
+{% block content %}
+<div class="page" style="padding-top: calc(var(--nav-height) + var(--space-12));">
+  <div class="container">
+    <div class="section-header reveal" style="margin-bottom: var(--space-8);">
+      <div class="section-eyebrow">Leaderboard</div>
+      <h2 class="section-title">Top Performers</h2>
+      <p class="section-subtitle">The most brilliant minds in the AI Next Gen Selection Challenge.</p>
+    </div>
+
+    <div class="glass-card glass-card-lg reveal" id="leaderboardContainer" style="min-height: 200px; display:flex; align-items:center; justify-content:center;">
+      <div class="spinner spinner-lg"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(async function() {
+  const container = document.getElementById('leaderboardContainer');
+
+  try {
+    const entries = await API.get('/api/leaderboard');
+
+    if (!entries || entries.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-tertiary); text-align:center;">No results yet. Be the first to complete the challenge!</p>';
+      return;
+    }
+
+    let html = '<table class="data-table" style="width:100%;">';
+    html += '<thead><tr><th>#</th><th>Name</th><th>College</th><th>Score</th><th>Badges</th></tr></thead><tbody>';
+
+    entries.forEach((e, i) => {
+      const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
+      const rank = i < 3 ? medals[i] : (i + 1);
+      const badges = (e.badges || []).slice(0, 2).map(b => `<span class="badge badge-accent">${b}</span>`).join(' ');
+      html += `<tr>
+        <td style="font-family:var(--font-display); font-weight:600; font-size:var(--text-lg);">${rank}</td>
+        <td style="color:var(--text-primary); font-weight:500;">${e.name || 'Anonymous'}</td>
+        <td>${e.college || '-'}</td>
+        <td style="font-family:var(--font-display); font-weight:600; color:var(--accent-light);">${(e.score_final || 0).toFixed(1)}</td>
+        <td>${badges || '<span style="color:var(--text-muted)">-</span>'}</td>
+      </tr>`;
+    });
+
+    html += '</tbody></table>';
+    container.style.display = 'block';
+    container.innerHTML = html;
+  } catch (err) {
+    container.innerHTML = '<p style="color:var(--red); text-align:center;">Failed to load leaderboard.</p>';
+  }
+})();
+</script>
+{% endblock %}

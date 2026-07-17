@@ -1,715 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - AI Next Gen 2026</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <style>
-        /* ===== ENHANCED STYLES ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+{% extends "base.html" %}
+{% block title %}Admin Login — AI Next Gen{% endblock %}
 
-        body {
-            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #000029 0%, #000051 60%, #0a1a5e 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Animated Background Grid */
-        .grid-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-            z-index: 0;
-        }
-
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        /* Floating particles */
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(23, 61, 237, 0.5);
-            border-radius: 50%;
-            animation: floatParticle linear infinite;
-        }
-
-        @keyframes floatParticle {
-            0% {
-                transform: translateY(100vh) scale(0);
-                opacity: 0;
-            }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% {
-                transform: translateY(-10vh) scale(1);
-                opacity: 0;
-            }
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 420px;
-            padding: 1rem;
-        }
-
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 
-                0 25px 50px -12px rgba(0, 0, 0, 0.8),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            padding: 2.5rem;
-            animation: slideUp 0.6s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-logo {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 2rem;
-        }
-
-        .logo-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #173DED, #000051);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: 700;
-            color: white;
-            box-shadow: 0 8px 32px rgba(23, 61, 237, 0.4);
-            position: relative;
-            animation: pulseGlow 2s ease-in-out infinite;
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 8px 32px rgba(23, 61, 237, 0.4); }
-            50% { box-shadow: 0 8px 48px rgba(23, 61, 237, 0.7); }
-        }
-
-        .logo-icon::after {
-            content: '✦';
-        }
-
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #173DED, #DCDEE2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 2px;
-        }
-
-        .form-title {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.1rem;
-            font-weight: 500;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-bottom: 1.8rem;
-            text-align: center;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.8rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.9rem 1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: white;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        .form-group input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        .form-group input:focus {
-            border-color: rgba(23, 61, 237, 0.6);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 20px rgba(23, 61, 237, 0.2);
-        }
-
-        .form-group input.error {
-            border-color: #ff4757;
-            box-shadow: 0 0 20px rgba(255, 71, 87, 0.2);
-        }
-
-        .password-wrapper {
-            position: relative;
-        }
-
-        .toggle-password {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.4);
-            cursor: pointer;
-            padding: 4px 8px;
-            font-size: 1.1rem;
-            transition: color 0.3s ease;
-        }
-
-        .toggle-password:hover {
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.8rem;
-            font-size: 0.85rem;
-        }
-
-        .form-options label {
-            color: rgba(255, 255, 255, 0.5);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-
-        .form-options input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: #173DED;
-            cursor: pointer;
-        }
-
-        .form-options a {
-            color: rgba(23, 61, 237, 0.8);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .form-options a:hover {
-            color: #173DED;
-        }
-
-        .btn-futuristic {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #173DED, #000051);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-futuristic:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3);
-        }
-
-        .btn-futuristic:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .btn-futuristic:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-futuristic .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto;
-        }
-
-        .btn-futuristic.loading .spinner {
-            display: block;
-        }
-
-        .btn-futuristic.loading .btn-text {
-            display: none;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Error message */
-        .error-message {
-            background: rgba(255, 71, 87, 0.15);
-            border: 1px solid rgba(255, 71, 87, 0.3);
-            border-radius: 12px;
-            padding: 0.8rem 1rem;
-            margin-bottom: 1.5rem;
-            color: #ff6b81;
-            font-size: 0.9rem;
-            display: none;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .error-message.show {
-            display: flex;
-            animation: shake 0.4s ease;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-
-        .error-message .icon {
-            font-size: 1.2rem;
-        }
-
-        /* Success animation */
-        .success-check {
-            display: none;
-            text-align: center;
-            padding: 2rem 0;
-        }
-
-        .success-check.show {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .success-check .checkmark {
-            font-size: 4rem;
-            color: #2ecc71;
-        }
-
-        /* Responsive */
-        @media (max-width: 480px) {
-            .glass-panel {
-                padding: 1.5rem;
-            }
-            .form-options {
-                flex-direction: column;
-                gap: 10px;
-                align-items: flex-start;
-            }
-        }
-
-        /* Accessibility - Focus visible */
-        .form-group input:focus-visible,
-        .btn-futuristic:focus-visible {
-            outline: 2px solid #00d4ff;
-            outline-offset: 2px;
-        }
-    </style>
-</head>
-<body>
-    <!-- Animated Background -->
-    <div class="grid-bg"></div>
-    <div class="particles" id="particles"></div>
-
-    <div class="container">
-        <div class="glass-panel">
-            <div class="login-logo">
-                <div class="logo-icon" aria-hidden="true"></div>
-                <span class="logo-text">AI NEXT GEN</span>
-            </div>
-            
-            <h2 class="form-title">Lab Control Login</h2>
-            
-            <!-- Error Message Container -->
-            <div id="error-message" class="error-message" role="alert">
-                <span class="icon">⚠️</span>
-                <span id="error-text">Invalid credentials</span>
-            </div>
-
-            <form id="login-form" novalidate autocomplete="on">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input 
-                        type="text" 
-                        id="username" 
-                        name="username"
-                        required 
-                        placeholder="Enter admin username"
-                        autocomplete="username"
-                        aria-describedby="username-error"
-                    >
-                    <span id="username-error" style="color: #ff4757; font-size: 0.8rem; display: none;"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <div class="password-wrapper">
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password"
-                            required 
-                            placeholder="Enter password"
-                            autocomplete="current-password"
-                            aria-describedby="password-error"
-                        >
-                        <button 
-                            type="button" 
-                            class="toggle-password" 
-                            aria-label="Toggle password visibility"
-                            id="toggle-password"
-                        >
-                            👁️
-                        </button>
-                    </div>
-                    <span id="password-error" style="color: #ff4757; font-size: 0.8rem; display: none;"></span>
-                </div>
-
-                <div class="form-options">
-                    <label>
-                        <input type="checkbox" id="remember-me" checked>
-                        Remember me
-                    </label>
-                    <a href="#" id="forgot-password">Forgot password?</a>
-                </div>
-                
-                <button type="submit" class="btn-futuristic" id="login-btn">
-                    <span class="btn-text">Authenticate</span>
-                    <span class="spinner" aria-hidden="true"></span>
-                </button>
-            </form>
-
-            <!-- Success placeholder (optional) -->
-            <div id="success-check" class="success-check">
-                <div class="checkmark">✅</div>
-                <p style="color: rgba(255,255,255,0.6); margin-top: 0.5rem;">Authentication successful!</p>
-            </div>
-        </div>
+{% block content %}
+<div class="auth-layout grid-bg">
+  <div class="auth-card glass-card glass-card-glow reveal" style="max-width: 400px;">
+    <div class="auth-header">
+      <div class="auth-logo">
+        <a href="/"><img src="/static/img/logo.jpg" alt="AI Next Gen"></a>
+      </div>
+      <h2 class="auth-title">Admin Panel</h2>
+      <p class="auth-subtitle">Authorized access only.</p>
     </div>
 
-    <script>
-        // ===== ENHANCED JAVASCRIPT =====
+    <form class="auth-form" id="adminLoginForm">
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <input class="form-input" type="text" id="username" placeholder="admin" required autocomplete="username">
+      </div>
 
-        (function() {
-            'use strict';
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-input" type="password" id="password" placeholder="Enter password" required autocomplete="current-password">
+      </div>
 
-            // DOM Elements
-            const form = document.getElementById('login-form');
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const loginBtn = document.getElementById('login-btn');
-            const errorMessage = document.getElementById('error-message');
-            const errorText = document.getElementById('error-text');
-            const togglePasswordBtn = document.getElementById('toggle-password');
-            const rememberMeCheck = document.getElementById('remember-me');
-            const forgotPasswordLink = document.getElementById('forgot-password');
+      <button type="submit" class="btn btn-primary" style="width:100%;" id="loginBtn">
+        <span id="loginBtnText">Sign In</span>
+        <span id="loginBtnSpinner" class="spinner spinner-sm" style="display:none;"></span>
+      </button>
 
-            // ===== 1. Create Particles =====
-            function createParticles() {
-                const container = document.getElementById('particles');
-                for (let i = 0; i < 30; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    particle.style.left = Math.random() * 100 + '%';
-                    particle.style.animationDuration = (15 + Math.random() * 25) + 's';
-                    particle.style.animationDelay = (Math.random() * 20) + 's';
-                    particle.style.width = (2 + Math.random() * 4) + 'px';
-                    particle.style.height = particle.style.width;
-                    container.appendChild(particle);
-                }
-            }
-            createParticles();
+      <div id="loginError" class="form-error" style="text-align:center; display:none;"></div>
+    </form>
 
-            // ===== 2. Toggle Password Visibility =====
-            togglePasswordBtn.addEventListener('click', function() {
-                const type = passwordInput.type === 'password' ? 'text' : 'password';
-                passwordInput.type = type;
-                this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
-                this.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
-            });
+    <div class="auth-footer">
+      <a href="/" style="color:var(--text-tertiary);">&larr; Back to site</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
 
-            // ===== 3. Form Validation =====
-            function validateField(input) {
-                const errorSpan = document.getElementById(input.id + '-error');
-                if (input.value.trim().length === 0) {
-                    errorSpan.textContent = `${input.previousElementSibling.textContent} is required`;
-                    errorSpan.style.display = 'block';
-                    input.classList.add('error');
-                    return false;
-                } else if (input.id === 'username' && input.value.trim().length < 3) {
-                    errorSpan.textContent = 'Username must be at least 3 characters';
-                    errorSpan.style.display = 'block';
-                    input.classList.add('error');
-                    return false;
-                } else if (input.id === 'password' && input.value.length < 6) {
-                    errorSpan.textContent = 'Password must be at least 6 characters';
-                    errorSpan.style.display = 'block';
-                    input.classList.add('error');
-                    return false;
-                } else {
-                    errorSpan.style.display = 'none';
-                    input.classList.remove('error');
-                    return true;
-                }
-            }
+{% block scripts %}
+<script>
+(function() {
+  const form = document.getElementById('adminLoginForm');
+  const btn = document.getElementById('loginBtn');
+  const btnText = document.getElementById('loginBtnText');
+  const btnSpinner = document.getElementById('loginBtnSpinner');
+  const errorEl = document.getElementById('loginError');
 
-            usernameInput.addEventListener('blur', function() { validateField(this); });
-            passwordInput.addEventListener('blur', function() { validateField(this); });
-            usernameInput.addEventListener('input', function() { validateField(this); });
-            passwordInput.addEventListener('input', function() { validateField(this); });
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    errorEl.style.display = 'none';
+    btn.disabled = true;
+    btnText.textContent = 'Signing in...';
+    btnSpinner.style.display = 'inline-block';
 
-            // ===== 4. Remember Me (localStorage) =====
-            function loadRememberedCredentials() {
-                try {
-                    const saved = localStorage.getItem('adminCredentials');
-                    if (saved) {
-                        const data = JSON.parse(saved);
-                        if (data.username && data.remember) {
-                            usernameInput.value = data.username;
-                            rememberMeCheck.checked = true;
-                        }
-                    }
-                } catch (e) {
-                    // Ignore
-                }
-            }
-            loadRememberedCredentials();
+    try {
+      const res = await API.post('/api/admin/login', {
+        username: document.getElementById('username').value.trim(),
+        password: document.getElementById('password').value,
+      });
 
-            function saveCredentials(username, remember) {
-                try {
-                    if (remember && username) {
-                        localStorage.setItem('adminCredentials', JSON.stringify({ 
-                            username, 
-                            remember: true 
-                        }));
-                    } else {
-                        localStorage.removeItem('adminCredentials');
-                    }
-                } catch (e) {
-                    // Ignore
-                }
-            }
-
-            // ===== 5. Show Error Message =====
-            function showError(message) {
-                errorText.textContent = message;
-                errorMessage.classList.add('show');
-                // Auto-hide after 5 seconds
-                clearTimeout(window.errorTimeout);
-                window.errorTimeout = setTimeout(() => {
-                    errorMessage.classList.remove('show');
-                }, 5000);
-            }
-
-            function hideError() {
-                errorMessage.classList.remove('show');
-                clearTimeout(window.errorTimeout);
-            }
-
-            // ===== 6. Form Submit with Rate Limiting =====
-            let lastSubmitTime = 0;
-            const SUBMIT_COOLDOWN = 2000; // 2 seconds
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                hideError();
-
-                // Validate all fields
-                const isUsernameValid = validateField(usernameInput);
-                const isPasswordValid = validateField(passwordInput);
-
-                if (!isUsernameValid || !isPasswordValid) {
-                    showError('Please fix the errors above');
-                    return;
-                }
-
-                // Rate limiting
-                const now = Date.now();
-                if (now - lastSubmitTime < SUBMIT_COOLDOWN) {
-                    showError('Please wait before trying again');
-                    return;
-                }
-
-                const username = usernameInput.value.trim();
-                const password = passwordInput.value;
-                const remember = rememberMeCheck.checked;
-
-                // Save credentials if "Remember me"
-                saveCredentials(username, remember);
-
-                // Show loading state
-                loginBtn.disabled = true;
-                loginBtn.classList.add('loading');
-
-                try {
-                    const response = await fetch('/api/admin/login', {
-                        method: 'POST',
-                        headers: { 
-                            'Content-Type': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({ username, password })
-                    });
-
-                    // Handle response
-                    let result;
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        result = await response.json();
-                    } else {
-                        throw new Error('Invalid server response');
-                    }
-
-                    if (response.ok && result.success) {
-                        // Success - redirect or show success
-                        loginBtn.classList.remove('loading');
-                        loginBtn.textContent = '✅ Success!';
-                        loginBtn.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
-                        
-                        // Redirect after short delay
-                        setTimeout(() => {
-                            window.location.href = result.redirect || '/admin';
-                        }, 800);
-                    } else {
-                        // Failed login - increment attempt counter
-                        const attempts = parseInt(sessionStorage.getItem('loginAttempts') || '0') + 1;
-                        sessionStorage.setItem('loginAttempts', attempts.toString());
-                        
-                        if (attempts >= 5) {
-                            showError('Too many failed attempts. Please try again later.');
-                            loginBtn.disabled = true;
-                            setTimeout(() => {
-                                loginBtn.disabled = false;
-                                sessionStorage.removeItem('loginAttempts');
-                            }, 30000);
-                        } else {
-                            showError(result.error || 'Authentication failed. Please check your credentials.');
-                        }
-                    }
-
-                    lastSubmitTime = Date.now();
-
-                } catch (err) {
-                    console.error('Login error:', err);
-                    showError('Connection error. Please check your network and try again.');
-                } finally {
-                    loginBtn.classList.remove('loading');
-                    loginBtn.disabled = false;
-                    // Reset button text if not successful
-                    if (loginBtn.textContent !== '✅ Success!') {
-                        loginBtn.innerHTML = '<span class="btn-text">Authenticate</span><span class="spinner" aria-hidden="true"></span>';
-                        loginBtn.classList.remove('loading');
-                    }
-                }
-            });
-
-            // ===== 7. Forgot Password =====
-            forgotPasswordLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                const email = prompt('Enter your registered email address to reset password:');
-                if (email && email.includes('@')) {
-                    // Simulate password reset request
-                    showError('Password reset link sent to ' + email);
-                } else if (email) {
-                    showError('Please enter a valid email address');
-                }
-            });
-
-            // ===== 8. Keyboard shortcuts =====
-            document.addEventListener('keydown', (e) => {
-                // Ctrl+Shift+L to focus username
-                if (e.ctrlKey && e.shiftKey && e.key === 'L') {
-                    e.preventDefault();
-                    usernameInput.focus();
-                }
-            });
-
-            // ===== 9. CSRF Protection (if your backend uses it) =====
-            // You can add a hidden CSRF token input and fetch it from the server
-
-            console.log('🔐 Admin Login Enhanced - AI Next Gen 2026');
-            console.log('📌 Shortcut: Ctrl+Shift+L to focus username');
-
-        })();
-    </script>
-</body>
-</html>
+      if (res.success) {
+        window.location.href = '/admin';
+      } else {
+        errorEl.textContent = res.error || 'Login failed';
+        errorEl.style.display = 'block';
+      }
+    } catch (err) {
+      errorEl.textContent = err.message || 'Invalid credentials';
+      errorEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btnText.textContent = 'Sign In';
+      btnSpinner.style.display = 'none';
+    }
+  });
+})();
+</script>
+{% endblock %}
