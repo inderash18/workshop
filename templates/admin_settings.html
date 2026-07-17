@@ -76,7 +76,7 @@
     }
     
     .page-header {
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
     
     .page-header h1 {
@@ -85,14 +85,62 @@
       color: var(--text-primary);
     }
     
-    /* Settings panel cards */
+    /* Tabs Navigation */
+    .tabs-header {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-default);
+      padding-bottom: 0.5rem;
+    }
+    
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+    }
+    
+    .tab-btn.active {
+      color: var(--accent-primary);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    
+    /* Settings panel card */
     .settings-panel {
       background: var(--bg-tertiary);
       border: 1px solid var(--border-default);
       border-radius: 12px;
       box-shadow: var(--shadow-sm);
       padding: 2rem;
-      max-width: 650px;
+      max-width: 800px;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     
     .settings-section {
@@ -111,6 +159,12 @@
       border-bottom: 1px solid var(--border-subtle);
     }
     
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+    
     .settings-group {
       display: flex;
       flex-direction: column;
@@ -122,12 +176,14 @@
       justify-content: space-between;
       align-items: center;
       gap: 2rem;
+      padding: 0.5rem 0;
     }
     
     .setting-label {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
+      max-width: 70%;
     }
     
     .setting-name {
@@ -135,6 +191,7 @@
       font-weight: 600;
       color: var(--text-primary);
     }
+    
     .setting-desc {
       font-size: 0.78rem;
       color: var(--text-secondary);
@@ -182,10 +239,10 @@
       background-color: var(--white);
     }
     
-    /* Number input styling */
-    .num-input {
-      width: 100px;
-      padding: 0.5rem 0.75rem;
+    /* Input elements */
+    .num-input, .text-input, .select-input {
+      width: 180px;
+      padding: 0.55rem 0.75rem;
       border-radius: 6px;
       background: var(--bg-primary);
       border: 1px solid var(--border-default);
@@ -193,10 +250,30 @@
       font-size: 0.88rem;
       outline: none;
       transition: all 0.2s;
-      text-align: center;
     }
-    .num-input:focus {
+    .num-input:focus, .text-input:focus, .select-input:focus {
       border-color: var(--accent-primary);
+    }
+    
+    .weight-total-bar {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .weight-total-bar.valid {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+    .weight-total-bar.invalid {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #ef4444;
     }
     
     .btn-save-settings {
@@ -217,10 +294,15 @@
     .btn-save-settings:hover {
       opacity: 0.9;
     }
+    .btn-save-settings:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
     @media (max-width: 768px) {
       .admin-sidebar { display: none; }
       .admin-main { max-width: 100%; padding: 1.5rem; }
+      .settings-grid { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
@@ -231,8 +313,11 @@
     <aside class="admin-sidebar">
         <nav class="sidebar-nav">
             <a href="/admin" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/analytics" class="sidebar-link"><span class="icon">📈</span> Analytics</a>
             <a href="/admin/tests" class="sidebar-link"><span class="icon">📝</span> Tests</a>
             <a href="/admin/candidates" class="sidebar-link"><span class="icon">👥</span> Candidates</a>
+            <a href="/admin/security" class="sidebar-link"><span class="icon">🔐</span> Security</a>
+            <a href="/admin/questions" class="sidebar-link"><span class="icon">❓</span> Question Bank</a>
             <div class="sidebar-divider"></div>
             <a href="/admin/settings" class="sidebar-link active"><span class="icon">⚙️</span> Settings</a>
             <a href="/admin/logs" class="sidebar-link"><span class="icon">📋</span> Logs</a>
@@ -242,50 +327,397 @@
     <main class="admin-main">
         <!-- Header -->
         <div class="page-header">
-            <h1>Platform Settings</h1>
+            <h1>System Configurations</h1>
+            <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:0.3rem;">
+                Configure workshop settings, AI weightage rules, and real-time anti-cheat parameters dynamically.
+            </p>
         </div>
         
-        <!-- Settings Panel -->
+        <!-- Tabs Header -->
+        <div class="tabs-header">
+            <button class="tab-btn active" id="btn-assessment" onclick="switchTab('assessment')">📝 Assessment</button>
+            <button class="tab-btn" id="btn-security" onclick="switchTab('security')">🔐 Security Policies</button>
+            <button class="tab-btn" id="btn-ai" onclick="switchTab('ai')">🤖 AI Weights</button>
+            <button class="tab-btn" id="btn-shortlisting" onclick="switchTab('shortlisting')">🏆 Selection & Seats</button>
+        </div>
+        
+        <!-- Settings Panel Form -->
         <div class="settings-panel">
             <form onsubmit="return saveSettings(event)">
-                <div class="settings-section">
-                    <h3 class="settings-title">Cohort & Selection</h3>
-                    <div class="settings-group">
-                        
-                        <div class="setting-item">
-                            <div class="setting-label">
-                                <span class="setting-name">Auto-Shortlist Count Limit</span>
-                                <span class="setting-desc">The maximum number of top performing candidates to auto-shortlist.</span>
+                
+                <!-- TAB 1: ASSESSMENT CONFIG -->
+                <div class="tab-content active" id="tab-assessment">
+                    <div class="settings-section">
+                        <h3 class="settings-title">Assessment & Schedule Configurations</h3>
+                        <div class="settings-group">
+                            <div class="settings-grid">
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Total Questions</label>
+                                    <input type="number" id="totalQuestions" class="num-input" min="1" max="100">
+                                    <span class="setting-desc" style="display:block;margin-top:0.2rem;">Total questions to pull from question bank.</span>
+                                </div>
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Test Duration (Minutes)</label>
+                                    <input type="number" id="testDurationMinutes" class="num-input" min="1" max="180">
+                                    <span class="setting-desc" style="display:block;margin-top:0.2rem;">Total countdown limit for test session.</span>
+                                </div>
                             </div>
-                            <input type="number" id="shortlistLimit" class="num-input" min="1" max="500" value="30">
-                        </div>
-                        
-                        <div class="setting-item">
-                            <div class="setting-label">
-                                <span class="setting-name">Public Leaderboard</span>
-                                <span class="setting-desc">Toggle visibility of the student public leaderboard rankings.</span>
+                            <div class="sidebar-divider" style="margin:0.5rem 0;"></div>
+                            <div class="settings-grid">
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Test Open Window</label>
+                                    <input type="datetime-local" id="testStartDate" class="text-input" style="width:100%;">
+                                    <span class="setting-desc" style="display:block;margin-top:0.2rem;">When students are allowed to start test.</span>
+                                </div>
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Test Close Window</label>
+                                    <input type="datetime-local" id="testEndDate" class="text-input" style="width:100%;">
+                                    <span class="setting-desc" style="display:block;margin-top:0.2rem;">When student attempts are locked.</span>
+                                </div>
                             </div>
-                            <label class="switch">
-                                <input type="checkbox" id="leaderboardEnabled">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
-                        
-                        <div class="setting-item">
-                            <div class="setting-label">
-                                <span class="setting-name">Publish Final Diagnostic Results</span>
-                                <span class="setting-desc">When enabled, students can see their selection status and results on dashboard.</span>
+                            <div class="settings-grid" style="margin-top:0.5rem;">
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Registration Opening Date</label>
+                                    <input type="datetime-local" id="registrationStartDate" class="text-input" style="width:100%;">
+                                </div>
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Registration Closing Date</label>
+                                    <input type="datetime-local" id="registrationEndDate" class="text-input" style="width:100%;">
+                                </div>
                             </div>
-                            <label class="switch">
-                                <input type="checkbox" id="resultsPublished">
-                                <span class="slider"></span>
-                            </label>
+                            <div class="sidebar-divider" style="margin:0.5rem 0;"></div>
+                            <div class="settings-grid">
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Registration Status</label>
+                                    <select id="registrationStatus" class="select-input" style="width:100%;">
+                                        <option value="open">Open</option>
+                                        <option value="closed">Closed</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Test Status</label>
+                                    <select id="testStatus" class="select-input" style="width:100%;">
+                                        <option value="draft">Draft</option>
+                                        <option value="published">Published</option>
+                                        <option value="locked">Locked</option>
+                                        <option value="completed">Completed/Ended</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="settings-grid" style="margin-top:0.5rem;">
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Test Availability</label>
+                                    <select id="testAvailability" class="select-input" style="width:100%;">
+                                        <option value="open">Open / Live</option>
+                                        <option value="closed">Suspended / Closed</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Publish Leaderboard</label>
+                                    <select id="leaderboardEnabled" class="select-input" style="width:100%;">
+                                        <option value="true">Visible to Students</option>
+                                        <option value="false">Hidden / Disabled</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        
                     </div>
                 </div>
                 
-                <button type="submit" class="btn-save-settings">Save Config</button>
+                <!-- TAB 2: SECURITY POLICIES -->
+                <div class="tab-content" id="tab-security">
+                    <div class="settings-section">
+                        <h3 class="settings-title">Anti-Cheat & Security Policy Configuration</h3>
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Fullscreen Enforcement</span>
+                                    <span class="setting-desc">Force test session to run in fullscreen mode. Exiting triggers critical violation.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secFullscreenEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">DevTools Trap / Debugger Block</span>
+                                    <span class="setting-desc">Monitors window dimensions and overrides console log access to block inspectors.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secDevtoolsEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Tab Switch Tracking</span>
+                                    <span class="setting-desc">Detect visibility change of test page. Auto-disqualify after limit.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secTabSwitchEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Copy Block</span>
+                                    <span class="setting-desc">Prevents copying text and keyboard Ctrl+C commands during assessment.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secCopyEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Paste Block</span>
+                                    <span class="setting-desc">Prevents copy-pasting clipboard text into text answer fields.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secPasteEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Right Click Context Menu Block</span>
+                                    <span class="setting-desc">Disables default browser context menus inside test environment.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secRightClickEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Page Refresh Guard</span>
+                                    <span class="setting-desc">Intercept refresh attempts to protect candidate state and log anomalies.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secRefreshEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Multiple Login Sessions Tracker</span>
+                                    <span class="setting-desc">Blocks candidates logging in from multiple devices/browsers simultaneously.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secMultipleLoginEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Idle Detection Rules</span>
+                                    <span class="setting-desc">Logs a warning if user is completely inactive for too long.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secIdleEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Internet Connection Guard</span>
+                                    <span class="setting-desc">Auto-pauses test session timer if student's internet drops.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secInternetDisconnectEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Auto Disqualification on Max Violations</span>
+                                    <span class="setting-desc">Immediately lock and auto-submit candidate if violations exceed limit.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="secAutoDisqualifyEnabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="sidebar-divider" style="margin:0.5rem 0;"></div>
+                            
+                            <div class="settings-grid">
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Max Allowed Tab Switches</label>
+                                    <input type="number" id="secTabSwitchLimit" class="num-input" min="1" max="10">
+                                </div>
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Max Allowed Window Blurs</label>
+                                    <input type="number" id="secWindowBlurLimit" class="num-input" min="1" max="10">
+                                </div>
+                            </div>
+                            
+                            <div class="settings-grid" style="margin-top:0.5rem;">
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Idle Timeout Limit (Seconds)</label>
+                                    <input type="number" id="secIdleTimeoutSeconds" class="num-input" min="10" max="600">
+                                </div>
+                                <div>
+                                    <label class="setting-name" style="display:block;margin-bottom:0.4rem;">Network Grace Period (Seconds)</label>
+                                    <input type="number" id="secDisconnectGraceSeconds" class="num-input" min="5" max="300">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TAB 3: AI EVALUATION WEIGHTS -->
+                <div class="tab-content" id="tab-ai">
+                    <div class="settings-section">
+                        <h3 class="settings-title">AI Evaluation Rules & Weightage Setup</h3>
+                        <p style="color:var(--text-secondary);font-size:0.8rem;margin-bottom:1.5rem;line-height:1.4;">
+                            Configure how much weightage each dimension carries when generating the candidate's final AI score. 
+                            <strong>The sum total must equal exactly 100%.</strong>
+                        </p>
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Logic Weightage</span>
+                                    <span class="setting-desc">Logic, Pattern Recognition, & Critical Thinking marks weight.</span>
+                                </div>
+                                <input type="number" id="weightLogic" class="num-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Creativity Weightage</span>
+                                    <span class="setting-desc">Creativity, Future Thinking, and Startup concept marks weight.</span>
+                                </div>
+                                <input type="number" id="weightCreativity" class="num-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Innovation Weightage</span>
+                                    <span class="setting-desc">Innovation and research categories weight.</span>
+                                </div>
+                                <input type="number" id="weightInnovation" class="num-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Problem Solving Weightage</span>
+                                    <span class="setting-desc">Technical problem analysis and resolution categories weight.</span>
+                                </div>
+                                <input type="number" id="weightProblemSolving" class="num-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Human Intelligence Weightage</span>
+                                    <span class="setting-desc">AI thinking, prompt design, and conceptual engineering categories weight.</span>
+                                </div>
+                                <input type="number" id="weightHumanIntelligence" class="num-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Security Score Weightage</span>
+                                    <span class="setting-desc">Anti-cheating index weight. High violations pull this score down.</span>
+                                </div>
+                                <input type="number" id="weightSecurity" class="num-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+                            
+                            <div class="weight-total-bar valid" id="weightTotalBar">
+                                <span>TOTAL WEIGHTAGE SUM:</span>
+                                <span id="weightTotalVal">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- TAB 4: SHORTLISTING & SEATS -->
+                <div class="tab-content" id="tab-shortlisting">
+                    <div class="settings-section">
+                        <h3 class="settings-title">Shortlisting & Final Selection Parameters</h3>
+                        <div class="settings-group">
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Total Workshop Seats Available</span>
+                                    <span class="setting-desc">Maximum number of candidates to select for the final cohort cohort.</span>
+                                </div>
+                                <input type="number" id="shortlistLimit" class="num-input" min="1" max="500">
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Passing Criteria (Minimum Overall Score)</span>
+                                    <span class="setting-desc">Minimum dynamic percentage score required to pass the selection process.</span>
+                                </div>
+                                <input type="number" id="minScoreRequired" class="num-input" min="0" max="100">
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Security Score Required</span>
+                                    <span class="setting-desc">Minimum required security integrity score (0-100) to remain eligible for auto-selection.</span>
+                                </div>
+                                <input type="number" id="secScoreRequired" class="num-input" min="0" max="100">
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Minimum Score for Waitlisting</span>
+                                    <span class="setting-desc">Minimum overall percentage score to place the candidate on waitlist.</span>
+                                </div>
+                                <input type="number" id="waitlistScoreRequired" class="num-input" min="0" max="100">
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Target Selection Percentage</span>
+                                    <span class="setting-desc">Reference selection target percent of all candidates registered.</span>
+                                </div>
+                                <input type="number" id="pctSelection" class="num-input" min="1" max="100">
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">AI Auto-Shortlist Weight</span>
+                                    <span class="setting-desc">Percentage ratio weight given to AI recommendations during shortlisting.</span>
+                                </div>
+                                <input type="number" id="pctAiShortlist" class="num-input" min="0" max="100">
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Manual Selection Weight</span>
+                                    <span class="setting-desc">Percentage ratio weight given to manual reviews/drawers actions.</span>
+                                </div>
+                                <input type="number" id="pctManualShortlist" class="num-input" min="0" max="100">
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-label">
+                                    <span class="setting-name">Publish Final Diagnostic Results</span>
+                                    <span class="setting-desc">When enabled, students can see their selection status and results on dashboard.</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="resultsPublished">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-save-settings" id="btnSave">Save Configurations</button>
             </form>
         </div>
     </main>
@@ -294,47 +726,184 @@
 
 {% block scripts %}
 <script>
-// Fetch current settings on load
+let currentSettings = {};
+
+// Switch settings tabs
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById('tab-' + tabId).classList.add('active');
+    document.getElementById('btn-' + tabId).classList.add('active');
+}
+
+// Sum weighting parameters
+function calculateWeightsTotal() {
+    const logic = parseInt(document.getElementById('weightLogic').value) || 0;
+    const creativity = parseInt(document.getElementById('weightCreativity').value) || 0;
+    const innovation = parseInt(document.getElementById('weightInnovation').value) || 0;
+    const problemSolving = parseInt(document.getElementById('weightProblemSolving').value) || 0;
+    const humanIntel = parseInt(document.getElementById('weightHumanIntelligence').value) || 0;
+    const security = parseInt(document.getElementById('weightSecurity').value) || 0;
+    
+    const sum = logic + creativity + innovation + problemSolving + humanIntel + security;
+    const bar = document.getElementById('weightTotalBar');
+    const val = document.getElementById('weightTotalVal');
+    
+    val.textContent = sum + '%';
+    
+    if (sum === 100) {
+        bar.className = 'weight-total-bar valid';
+        document.getElementById('btnSave').disabled = false;
+    } else {
+        bar.className = 'weight-total-bar invalid';
+        document.getElementById('btnSave').disabled = true;
+    }
+}
+
+// Retrieve settings from MongoDB Atlas on load
 (async function() {
     try {
-        const stats = await API.get('/api/admin/stats');
-        // Retrieve settings from global stats config
-        const conf = await API.get('/api/admin/publish_status');
+        const stats = await API.get('/api/admin/settings');
+        currentSettings = stats;
         
-        document.getElementById('resultsPublished').checked = conf.results_published || false;
+        // Tab 1: Assessment
+        document.getElementById('totalQuestions').value = stats.total_questions || 15;
+        document.getElementById('testDurationMinutes').value = stats.test_duration_minutes || 15;
+        document.getElementById('testStartDate').value = stats.test_start_date ? stats.test_start_date.substring(0, 16) : '';
+        document.getElementById('testEndDate').value = stats.test_end_date ? stats.test_end_date.substring(0, 16) : '';
+        document.getElementById('registrationStartDate').value = stats.registration_start_date ? stats.registration_start_date.substring(0, 16) : '';
+        document.getElementById('registrationEndDate').value = stats.registration_end_date ? stats.registration_end_date.substring(0, 16) : '';
+        document.getElementById('registrationStatus').value = stats.registration_status || 'open';
+        document.getElementById('testStatus').value = stats.test_status || 'published';
+        document.getElementById('testAvailability').value = stats.test_availability || 'open';
+        document.getElementById('leaderboardEnabled').value = String(stats.leaderboard_enabled);
+
+        // Tab 2: Security Toggles
+        document.getElementById('secFullscreenEnabled').checked = stats.sec_fullscreen_enabled;
+        document.getElementById('secDevtoolsEnabled').checked = stats.sec_devtools_enabled;
+        document.getElementById('secTabSwitchEnabled').checked = stats.sec_tab_switch_enabled;
+        document.getElementById('secCopyEnabled').checked = stats.sec_copy_enabled;
+        document.getElementById('secPasteEnabled').checked = stats.sec_paste_enabled;
+        document.getElementById('secRightClickEnabled').checked = stats.sec_right_click_enabled;
+        document.getElementById('secRefreshEnabled').checked = stats.sec_refresh_enabled;
+        document.getElementById('secMultipleLoginEnabled').checked = stats.sec_multiple_login_enabled;
+        document.getElementById('secIdleEnabled').checked = stats.sec_idle_enabled;
+        document.getElementById('secInternetDisconnectEnabled').checked = stats.sec_internet_disconnect_enabled;
+        document.getElementById('secAutoDisqualifyEnabled').checked = stats.sec_auto_disqualify_enabled;
         
-        // Populate leaderboard enabled from localStorage or direct query if available
-        // Note: admin endpoint settings retrieves these from DB config
-        const db = await API.get('/api/session'); 
-        // We'll also fetch stats distribution
-        document.getElementById('leaderboardEnabled').checked = stats.leaderboard_enabled || false;
-        document.getElementById('shortlistLimit').value = stats.shortlist_limit || 30;
+        document.getElementById('secTabSwitchLimit').value = stats.sec_tab_switch_limit || 3;
+        document.getElementById('secWindowBlurLimit').value = stats.sec_window_blur_limit || 3;
+        document.getElementById('secIdleTimeoutSeconds').value = stats.sec_idle_timeout_seconds || 60;
+        document.getElementById('secDisconnectGraceSeconds').value = stats.sec_disconnect_grace_seconds || 30;
+
+        // Tab 3: Weights
+        document.getElementById('weightLogic').value = stats.weight_logic !== undefined ? stats.weight_logic : 40;
+        document.getElementById('weightCreativity').value = stats.weight_creativity !== undefined ? stats.weight_creativity : 20;
+        document.getElementById('weightInnovation').value = stats.weight_innovation !== undefined ? stats.weight_innovation : 10;
+        document.getElementById('weightProblemSolving').value = stats.weight_problem_solving !== undefined ? stats.weight_problem_solving : 10;
+        document.getElementById('weightHumanIntelligence').value = stats.weight_human_intelligence !== undefined ? stats.weight_human_intelligence : 10;
+        document.getElementById('weightSecurity').value = stats.weight_security !== undefined ? stats.weight_security : 10;
+        
+        // Tab 4: Shortlist
+        document.getElementById('shortlistLimit').value = stats.shortlist_top_n || 30;
+        document.getElementById('minScoreRequired').value = stats.min_score_required || 80;
+        document.getElementById('waitlistScoreRequired').value = stats.waitlist_score_required || 60;
+        document.getElementById('secScoreRequired').value = stats.sec_score_required || 70;
+        document.getElementById('pctSelection').value = stats.pct_selection || 10;
+        document.getElementById('pctAiShortlist').value = stats.pct_ai_shortlist || 50;
+        document.getElementById('pctManualShortlist').value = stats.pct_manual_shortlist || 50;
+        document.getElementById('resultsPublished').checked = stats.results_published;
+
+        calculateWeightsTotal();
     } catch(e) {
-        console.error('Failed to load setting parameters:', e);
+        console.error('Failed to load system settings from database:', e);
+        Toast.show('Failed to fetch configurations from database.', 'error');
     }
 })();
 
+// Save all updated settings directly to MongoDB Atlas
 async function saveSettings(e) {
     e.preventDefault();
-    const btn = document.querySelector('.btn-save-settings');
+    const btn = document.getElementById('btnSave');
     btn.disabled = true;
     
+    // Validate weight total
+    const logic = parseInt(document.getElementById('weightLogic').value) || 0;
+    const creativity = parseInt(document.getElementById('weightCreativity').value) || 0;
+    const innovation = parseInt(document.getElementById('weightInnovation').value) || 0;
+    const problemSolving = parseInt(document.getElementById('weightProblemSolving').value) || 0;
+    const humanIntel = parseInt(document.getElementById('weightHumanIntelligence').value) || 0;
+    const security = parseInt(document.getElementById('weightSecurity').value) || 0;
+    
+    if (logic + creativity + innovation + problemSolving + humanIntel + security !== 100) {
+        Toast.show('AI Evaluation Weight sum must equal exactly 100%.', 'error');
+        btn.disabled = false;
+        return false;
+    }
+    
     const payload = {
-        leaderboard_enabled: document.getElementById('leaderboardEnabled').checked,
+        // Cohort & General
+        leaderboard_enabled: document.getElementById('leaderboardEnabled').value === 'true',
         results_published: document.getElementById('resultsPublished').checked,
-        shortlist_top_n: parseInt(document.getElementById('shortlistLimit').value, 10) || 30
+        
+        // Test Config
+        total_questions: parseInt(document.getElementById('totalQuestions').value, 10),
+        test_duration_minutes: parseInt(document.getElementById('testDurationMinutes').value, 10),
+        test_start_date: document.getElementById('testStartDate').value,
+        test_end_date: document.getElementById('testEndDate').value,
+        registration_start_date: document.getElementById('registrationStartDate').value,
+        registration_end_date: document.getElementById('registrationEndDate').value,
+        registration_status: document.getElementById('registrationStatus').value,
+        test_status: document.getElementById('testStatus').value,
+        test_availability: document.getElementById('testAvailability').value,
+
+        // Security Toggles
+        sec_fullscreen_enabled: document.getElementById('secFullscreenEnabled').checked,
+        sec_devtools_enabled: document.getElementById('secDevtoolsEnabled').checked,
+        sec_tab_switch_enabled: document.getElementById('secTabSwitchEnabled').checked,
+        sec_copy_enabled: document.getElementById('secCopyEnabled').checked,
+        sec_paste_enabled: document.getElementById('secPasteEnabled').checked,
+        sec_right_click_enabled: document.getElementById('secRightClickEnabled').checked,
+        sec_refresh_enabled: document.getElementById('secRefreshEnabled').checked,
+        sec_multiple_login_enabled: document.getElementById('secMultipleLoginEnabled').checked,
+        sec_idle_enabled: document.getElementById('secIdleEnabled').checked,
+        sec_internet_disconnect_enabled: document.getElementById('secInternetDisconnectEnabled').checked,
+        sec_auto_disqualify_enabled: document.getElementById('secAutoDisqualifyEnabled').checked,
+        
+        sec_tab_switch_limit: parseInt(document.getElementById('secTabSwitchLimit').value, 10),
+        sec_window_blur_limit: parseInt(document.getElementById('secWindowBlurLimit').value, 10),
+        sec_idle_timeout_seconds: parseInt(document.getElementById('secIdleTimeoutSeconds').value, 10),
+        sec_disconnect_grace_seconds: parseInt(document.getElementById('secDisconnectGraceSeconds').value, 10),
+
+        // AI Weights
+        weight_logic: logic,
+        weight_creativity: creativity,
+        weight_innovation: innovation,
+        weight_problem_solving: problemSolving,
+        weight_human_intelligence: humanIntel,
+        weight_security: security,
+
+        // Shortlisting & Selection
+        shortlist_top_n: parseInt(document.getElementById('shortlistLimit').value, 10),
+        min_score_required: parseInt(document.getElementById('minScoreRequired').value, 10),
+        waitlist_score_required: parseInt(document.getElementById('waitlistScoreRequired').value, 10),
+        sec_score_required: parseInt(document.getElementById('secScoreRequired').value, 10),
+        pct_selection: parseInt(document.getElementById('pctSelection').value, 10),
+        pct_ai_shortlist: parseInt(document.getElementById('pctAiShortlist').value, 10),
+        pct_manual_shortlist: parseInt(document.getElementById('pctManualShortlist').value, 10),
     };
     
     try {
         const res = await API.post('/api/admin/settings', payload);
         if (res.success) {
-            Toast.show('Settings updated successfully!', 'success');
+            Toast.show('Configurations updated in MongoDB Atlas successfully!', 'success');
         } else {
             throw new Error(res.error || 'Failed to update settings');
         }
     } catch(err) {
         console.error(err);
-        Toast.show(err.message || 'Error saving config parameters', 'error');
+        Toast.show(err.message || 'Error saving config to MongoDB Atlas', 'error');
     } finally {
         btn.disabled = false;
     }

@@ -1,0 +1,1064 @@
+{% extends "base.html" %}
+{% block title %}Security Violations — AI Next Gen Admin{% endblock %}
+
+{% block head %}
+<style>
+    body { background: var(--bg-primary); }
+    
+    .admin-layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+      margin-top: 60px;
+    }
+    
+    .admin-sidebar {
+      width: 240px;
+      background: var(--bg-tertiary);
+      border-right: 1px solid var(--border-default);
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0 0.75rem;
+    }
+    
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    
+    .sidebar-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-primary);
+    }
+    
+    .sidebar-link.active {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      font-weight: 600;
+    }
+    
+    .sidebar-link .icon {
+      font-size: 1.1rem;
+      width: 22px;
+      text-align: center;
+    }
+    
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 0.75rem;
+    }
+    
+    .admin-main {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      max-width: calc(100% - 240px);
+      overflow-y: auto;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      padding: .4rem .9rem;
+      border-radius: 20px;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* Stat Cards */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      padding: 1.25rem 1.5rem;
+      border-radius: 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      transition: all 0.2s;
+    }
+    .stat-card:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
+    }
+    .stat-card.critical { border-left: 3px solid #ef4444; }
+    .stat-card.major { border-left: 3px solid #f97316; }
+    .stat-card.suspicious { border-left: 3px solid #eab308; }
+    .stat-card.safe { border-left: 3px solid #22c55e; }
+    .stat-card.info { border-left: 3px solid var(--accent-primary); }
+    
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+    }
+    
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Premium Table styling */
+    .table-container {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    
+    .panel-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.01);
+    }
+    
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .filter-bar {
+      display: flex;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .filter-btn {
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-default);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+      background: rgba(99, 102, 241, 0.08);
+    }
+    
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: 6px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      max-width: 250px;
+    }
+    
+    .search-box input {
+      background: none;
+      border: none;
+      outline: none;
+      color: inherit;
+      font-size: inherit;
+      width: 100%;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+    
+    .data-table th, .data-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .data-table th {
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.005);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .data-table tbody tr {
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    
+    .data-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .candidate-name { font-weight: 600; color: var(--text-primary); }
+    .candidate-id { font-size: .75rem; color: var(--text-muted); font-family: monospace; }
+    
+    /* Badges */
+    .score-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .3rem;
+      padding: .25rem .65rem;
+      border-radius: 12px;
+      font-size: .78rem;
+      font-weight: 600;
+    }
+    .score-badge.safe { background: rgba(34, 197, 94, 0.08); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+    .score-badge.moderate { background: rgba(234, 179, 8, 0.08); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.2); }
+    .score-badge.danger { background: rgba(249, 115, 22, 0.08); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.2); }
+    .score-badge.critical { background: rgba(239, 68, 68, 0.08); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .score-badge.disqualified { background: rgba(168, 85, 247, 0.08); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.2); }
+
+    .v-pill {
+      padding: .15rem .45rem;
+      border-radius: 4px;
+      font-size: .7rem;
+      font-weight: 600;
+    }
+    .v-pill.c { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .v-pill.m { background: rgba(249, 115, 22, 0.08); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.15); }
+    .v-pill.s { background: rgba(234, 179, 8, 0.06); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.12); }
+
+    .status-badge {
+      display: inline-flex;
+      padding: .2rem .65rem;
+      border-radius: 12px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+    .status-badge.disqualified { background: rgba(239, 68, 68, 0.08); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .status-badge.completed { background: rgba(34, 197, 94, 0.08); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+    .status-badge.in_progress,
+    .status-badge.in-progress { background: rgba(168, 85, 247, 0.08); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.2); }
+    .status-badge.assigned { background: rgba(59, 130, 246, 0.08); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+
+    .btn-view {
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-view:hover {
+      background: var(--border-default);
+    }
+
+    /* Security Drawer overlay */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(30, 34, 11, 0.4);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: stretch;
+      justify-content: flex-end;
+    }
+    .drawer-overlay.open { display: flex; }
+    
+    .security-drawer {
+      width: 600px;
+      max-width: 96vw;
+      background: var(--bg-tertiary);
+      border-left: 1px solid var(--border-default);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-xl);
+      animation: slideInDrawer .3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes slideInDrawer { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    
+    .drawer-header {
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.005);
+      flex-shrink: 0;
+    }
+    .drawer-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .drawer-close:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    
+    .drawer-body { padding: 1.5rem 1.75rem; flex: 1; }
+    
+    .section-title {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: .4rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* Score ring */
+    .score-ring-wrap { display: flex; align-items: center; gap: 2rem; margin-bottom: 1.5rem; }
+    .score-ring {
+      position: relative; width: 90px; height: 90px; flex-shrink: 0;
+    }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-ring-text {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 700; color: var(--text-primary);
+    }
+    .score-ring-label { font-size: .6rem; color: var(--text-muted); font-weight: 600; }
+
+    /* Violation timeline */
+    .timeline { display: flex; flex-direction: column; gap: .75rem; }
+    .timeline-item {
+      display: flex; gap: 1rem; align-items: flex-start;
+      padding: .75rem 1rem; border-radius: 8px;
+      border-left: 3px solid transparent;
+      background: rgba(255, 255, 255, 0.005);
+      border: 1px solid var(--border-default);
+    }
+    .timeline-item.CRITICAL { border-left-color: #ef4444; background: rgba(239, 68, 68, 0.02); }
+    .timeline-item.MAJOR { border-left-color: #f97316; background: rgba(249, 115, 22, 0.02); }
+    .timeline-item.SUSPICIOUS { border-left-color: #eab308; background: rgba(234, 179, 8, 0.02); }
+    .timeline-item.POLICY { border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.02); }
+    
+    .timeline-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: .35rem; }
+    .timeline-item.CRITICAL .timeline-dot { background: #ef4444; }
+    .timeline-item.MAJOR .timeline-dot { background: #f97316; }
+    .timeline-item.SUSPICIOUS .timeline-dot { background: #eab308; }
+    .timeline-item.POLICY .timeline-dot { background: #3b82f6; }
+    
+    .timeline-type { font-size: .82rem; font-weight: 600; }
+    .timeline-detail { font-size: .78rem; color: var(--text-secondary); margin-top: .15rem; }
+    .timeline-time { font-size: .72rem; color: var(--text-muted); margin-top: .2rem; font-family: monospace; }
+    .timeline-level-badge {
+      font-size: .65rem;
+      font-weight: 700;
+      padding: .15rem .45rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-left: .5rem;
+    }
+    .timeline-item.CRITICAL .timeline-level-badge { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+    .timeline-item.MAJOR .timeline-level-badge { background: rgba(249, 115, 22, 0.1); color: #fb923c; }
+    .timeline-item.SUSPICIOUS .timeline-level-badge { background: rgba(234, 179, 8, 0.1); color: #facc15; }
+
+    .d-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin-bottom: 1.5rem; }
+    .d-stat {
+      padding: .75rem; border-radius: 8px; border: 1px solid var(--border-default);
+      background: var(--bg-secondary);
+      text-align: center;
+    }
+    .d-stat-label { font-size: .65rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-bottom: .2rem; }
+    .d-stat-value { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+
+    .ai-rec {
+      padding: .75rem 1rem;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-top: 0.75rem;
+    }
+    .ai-rec.recommended { background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.2); }
+    .ai-rec.borderline { background: rgba(234, 179, 8, 0.06); border: 1px solid rgba(234, 179, 8, 0.2); }
+    .ai-rec.not_recommended { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); }
+    .ai-rec.disqualified { background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.2); }
+    .ai-rec-text { font-size: .88rem; font-weight: 600; }
+    .ai-rec.recommended .ai-rec-text { color: #4ade80; }
+    .ai-rec.borderline .ai-rec-text { color: #facc15; }
+    .ai-rec.not_recommended .ai-rec-text { color: #f87171; }
+    .ai-rec.disqualified .ai-rec-text { color: #c084fc; }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; opacity: .4; }
+
+    @media (max-width: 768px) {
+      .admin-sidebar { display: none; }
+      .admin-main { max-width: 100%; padding: 1.5rem; }
+      .stat-grid { grid-template-columns: 1fr; }
+    }
+
+    .loading-spinner {
+      display: inline-block; width: 20px; height: 20px;
+      border: 2px solid rgba(99, 102, 241, 0.2); border-top-color: var(--accent-primary);
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+
+<!-- SIDEBAR -->
+<aside class="admin-sidebar">
+    <nav class="sidebar-nav">
+        <a href="/admin" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+        <a href="/admin/analytics" class="sidebar-link"><span class="icon">📈</span> Analytics</a>
+        <a href="/admin/tests" class="sidebar-link"><span class="icon">📝</span> Tests</a>
+        <a href="/admin/candidates" class="sidebar-link"><span class="icon">👥</span> Candidates</a>
+        <a href="/admin/security" class="sidebar-link active"><span class="icon">🔐</span> Security</a>
+        <a href="/admin/questions" class="sidebar-link"><span class="icon">❓</span> Question Bank</a>
+        <div class="sidebar-divider"></div>
+        <a href="/admin/settings" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+        <a href="/admin/logs" class="sidebar-link"><span class="icon">📋</span> Logs</a>
+    </nav>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="admin-main">
+    <!-- Header -->
+    <div class="page-header">
+        <div>
+            <h1>Security Violations</h1>
+            <p style="color:var(--text-secondary);margin-top:.3rem;font-size:.85rem;">
+                Real-time anti-cheating logs synced to MongoDB Atlas.
+            </p>
+        </div>
+        <div class="live-badge">
+            <div class="live-dot"></div>
+            LIVE MONITORING
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stat-grid" id="statGrid">
+        <div class="stat-card critical">
+            <div class="stat-label">Critical Violations</div>
+            <div class="stat-value" id="statCritical">—</div>
+            <div class="stat-sub">Immediate termination events</div>
+        </div>
+        <div class="stat-card major">
+            <div class="stat-label">Major Violations</div>
+            <div class="stat-value" id="statMajor">—</div>
+            <div class="stat-sub">Tab switches & blur events</div>
+        </div>
+        <div class="stat-card suspicious">
+            <div class="stat-label">Suspicious Activity</div>
+            <div class="stat-value" id="statSuspicious">—</div>
+            <div class="stat-sub">Idle & typing anomalies</div>
+        </div>
+        <div class="stat-card critical">
+            <div class="stat-label">Disqualified</div>
+            <div class="stat-value" id="statDQ">—</div>
+            <div class="stat-sub">Locked candidate sessions</div>
+        </div>
+        <div class="stat-card safe">
+            <div class="stat-label">Clean Sessions</div>
+            <div class="stat-value" id="statClean">—</div>
+            <div class="stat-sub">Candidates with 0 violations</div>
+        </div>
+        <div class="stat-card info">
+            <div class="stat-label">Total Attempts</div>
+            <div class="stat-value" id="statTotal">—</div>
+            <div class="stat-sub">All test attempts tracked</div>
+        </div>
+    </div>
+
+    <!-- Candidate Violations Table Container -->
+    <div class="table-container">
+        <div class="panel-header">
+            <div class="panel-title">Candidate Security Reports</div>
+            <div style="display:flex;align-items:center;gap:.75rem;">
+                <div class="search-box">
+                    <span>🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search by name or ID..." oninput="filterTable()">
+                </div>
+                <button class="btn-view" style="background:rgba(239, 68, 68, 0.1);color:#ef4444;border-color:rgba(239, 68, 68, 0.25);" onclick="resetAllAttempts()">🔄 Reset All Attempts</button>
+                <button class="btn-view" onclick="loadAll()">🔄 Refresh</button>
+            </div>
+        </div>
+        <div class="filter-bar">
+            <button class="filter-btn active" id="filterAll" onclick="setFilter('all')">All</button>
+            <button class="filter-btn critical" id="filterCritical" onclick="setFilter('critical')">🔴 Critical</button>
+            <button class="filter-btn major" id="filterMajor" onclick="setFilter('major')">🟠 Major</button>
+            <button class="filter-btn" id="filterDQ" onclick="setFilter('disqualified')">🚫 Disqualified</button>
+            <button class="filter-btn safe" id="filterClean" onclick="setFilter('clean')">🟢 Clean</button>
+        </div>
+        <div style="overflow-x:auto;">
+        <table class="data-table" id="candidateTable">
+            <thead>
+                <tr>
+                    <th>Candidate</th>
+                    <th>Status</th>
+                    <th>Security Score</th>
+                    <th>Violations</th>
+                    <th>Tab Switches</th>
+                    <th>Score</th>
+                    <th>AI Rec</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody id="candidateBody">
+                <tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--text-secondary);">
+                    <div class="loading-spinner"></div>
+                    <br><br>Loading candidates...
+                </td></tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+</main>
+</div>
+
+
+<!-- SECURITY DETAIL DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer(event)">
+    <div class="security-drawer" id="securityDrawer">
+        <div class="drawer-header">
+            <div>
+                <div style="font-size:1.2rem;font-weight:800;color:var(--text-primary);" id="drawerName">Loading...</div>
+                <div style="font-size:.8rem;color:var(--text-secondary);margin-top:.3rem;" id="drawerMeta"></div>
+            </div>
+            <button class="drawer-close" onclick="document.getElementById('drawerOverlay').classList.remove('open')">✕</button>
+        </div>
+        <div class="drawer-body" id="drawerBody">
+            <div style="text-align:center;padding:3rem;color:var(--text-secondary);">
+                <div class="loading-spinner"></div>
+                <p style="margin-top:1rem;">Loading security report...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── State ──────────────────────────────────────────────────────
+let allCandidates = [];
+let currentFilter = 'all';
+let currentTestId = null;
+
+// ── Bootstrap ─────────────────────────────────────────────────
+async function init() {
+    const res = await API.get('/api/admin/tests');
+    const tests = res && res.tests ? res.tests : [];
+    if (!tests || tests.length === 0) {
+        document.getElementById('candidateBody').innerHTML =
+            `<tr><td colspan="8"><div class="empty-state"><div class="icon">📭</div>No tests found.</div></td></tr>`;
+        return;
+    }
+    // Use the first published/most recent test
+    const test = tests.find(t => t.status === 'published') || tests[0];
+    currentTestId = test.id || test._id || (test._id && test._id.$oid);
+    await loadAll();
+}
+
+async function loadAll() {
+    if (!currentTestId) return;
+    document.getElementById('candidateBody').innerHTML =
+        `<tr><td colspan="8" style="text-align:center;padding:3rem;color:var(--text-secondary);">
+            <div class="loading-spinner"></div><br><br>Loading...</td></tr>`;
+
+    const candidates = await API.get(`/api/admin/candidates`);
+    if (!candidates) return;
+
+    // Enrich with security data
+    allCandidates = [];
+    for (const c of candidates) {
+        const cid = c.candidate_id || c.id;
+        if (!cid) continue;
+        try {
+            const sec = await API.get(`/api/admin/candidate-security/${cid}/${currentTestId}`);
+            if (sec && !sec.error) {
+                allCandidates.push({ ...c, _sec: sec });
+            } else {
+                allCandidates.push({ ...c, _sec: null });
+            }
+        } catch(e) {
+            allCandidates.push({ ...c, _sec: null });
+        }
+    }
+
+    updateStats();
+    renderTable(allCandidates);
+}
+
+// ── Stats Cards ──────────────────────────────────────────────
+function updateStats() {
+    let critical = 0, major = 0, suspicious = 0, dq = 0, clean = 0;
+    for (const c of allCandidates) {
+        const sec = c._sec;
+        if (!sec) continue;
+        const s = sec.security || {};
+        critical += s.by_level?.CRITICAL || 0;
+        major += s.by_level?.MAJOR || 0;
+        suspicious += s.by_level?.SUSPICIOUS || 0;
+        if (sec.final_status === 'disqualified') dq++;
+        if ((s.total_violations || 0) === 0) clean++;
+    }
+    document.getElementById('statCritical').textContent = critical;
+    document.getElementById('statMajor').textContent = major;
+    document.getElementById('statSuspicious').textContent = suspicious;
+    document.getElementById('statDQ').textContent = dq;
+    document.getElementById('statClean').textContent = clean;
+    document.getElementById('statTotal').textContent = allCandidates.filter(c => c._sec).length;
+}
+
+// ── Table Render ─────────────────────────────────────────────
+function renderTable(list) {
+    const tbody = document.getElementById('candidateBody');
+    const searchVal = document.getElementById('searchInput').value.toLowerCase();
+
+    let filtered = list.filter(c => {
+        const name = (c.name || '').toLowerCase();
+        const id = (c.candidate_id || c.id || '').toLowerCase();
+        if (searchVal && !name.includes(searchVal) && !id.includes(searchVal)) return false;
+        if (!c._sec) return currentFilter === 'all';
+        const sec = c._sec.security || {};
+        const status = c._sec.final_status || '';
+        if (currentFilter === 'disqualified') return status === 'disqualified';
+        if (currentFilter === 'clean') return (sec.total_violations || 0) === 0;
+        if (currentFilter === 'critical') return (sec.by_level?.CRITICAL || 0) > 0;
+        if (currentFilter === 'major') return (sec.by_level?.MAJOR || 0) > 0;
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
+            <div class="icon">🔍</div>No candidates match your filter.
+        </div></td></tr>`;
+        return;
+    }
+
+    // Sort by security score (worst first)
+    filtered.sort((a, b) => {
+        const sa = a._sec?.security?.security_score ?? 100;
+        const sb = b._sec?.security?.security_score ?? 100;
+        return sa - sb;
+    });
+
+    tbody.innerHTML = filtered.map(c => {
+        const cid = c.candidate_id || c.id;
+        const sec = c._sec?.security || {};
+        const test = c._sec?.test || {};
+        const ai = c._sec?.ai_scores || {};
+        const status = c._sec?.final_status || (c.attempt_status || 'not_started');
+        const secScore = sec.security_score ?? 100;
+        const critCount = sec.by_level?.CRITICAL || 0;
+        const majCount = sec.by_level?.MAJOR || 0;
+        const susCount = sec.by_level?.SUSPICIOUS || 0;
+        const tabCount = sec.tab_switch_count || test.tab_switch_count || 0;
+        const score = test.score || c.score || 0;
+        const aiRec = ai.ai_recommendation || c.ai_recommendation || '—';
+
+        const scoreBadge = getScoreBadge(secScore, status);
+        const statusBadge = getStatusBadge(status);
+        const aiRecClass = aiRec.toLowerCase().replace(/\s+/g, '_');
+
+        return `<tr onclick="openDrawer('${cid}','${currentTestId}')">
+            <td>
+                <div class="candidate-name">${c.name || '—'}</div>
+                <div class="candidate-id">${cid}</div>
+                <div style="font-size:.73rem;color:var(--text-secondary);">${c.college || ''}</div>
+            </td>
+            <td>${statusBadge}</td>
+            <td>${scoreBadge}</td>
+            <td>
+                <div class="violation-pills">
+                    ${critCount > 0 ? `<span class="v-pill c">🔴 ${critCount} Critical</span>` : ''}
+                    ${majCount > 0 ? `<span class="v-pill m">🟠 ${majCount} Major</span>` : ''}
+                    ${susCount > 0 ? `<span class="v-pill s">🟡 ${susCount} Suspicious</span>` : ''}
+                    ${critCount + majCount + susCount === 0 ? '<span style="color:var(--safe);font-size:.8rem;">✅ None</span>' : ''}
+                </div>
+            </td>
+            <td style="font-size:.9rem;font-weight:700;${tabCount > 0 ? 'color:var(--major);' : 'color:var(--safe);'}">
+                ${tabCount > 0 ? `⚠️ ${tabCount}` : '✅ 0'}
+            </td>
+            <td style="font-size:.9rem;font-weight:700;">${score}%</td>
+            <td><span style="font-size:.8rem;font-weight:600;color:${aiRecClass.includes('recommended') && !aiRecClass.includes('not') ? 'var(--safe)' : aiRecClass.includes('borderline') ? 'var(--suspicious)' : 'var(--critical)'};">${aiRec}</span></td>
+            <td><button class="btn-view" onclick="event.stopPropagation();openDrawer('${cid}','${currentTestId}')">🔍 View</button></td>
+        </tr>`;
+    }).join('');
+}
+
+function getScoreBadge(score, status) {
+    if (status === 'disqualified') return `<span class="score-badge disqualified">🚫 Disqualified</span>`;
+    if (score >= 90) return `<span class="score-badge safe">🛡 ${score}</span>`;
+    if (score >= 70) return `<span class="score-badge moderate">⚠️ ${score}</span>`;
+    if (score >= 40) return `<span class="score-badge danger">⚡ ${score}</span>`;
+    return `<span class="score-badge critical">🔴 ${score}</span>`;
+}
+
+function getStatusBadge(status) {
+    const map = {
+        'disqualified': '🚫 Disqualified',
+        'completed': '✅ Completed',
+        'in_progress': '⏱ In Progress',
+        'in-progress': '⏱ In Progress',
+        'assigned': '📋 Assigned',
+        'selected': '⭐ Selected',
+        'rejected': '❌ Rejected',
+        'not_started': '⏳ Not Started',
+    };
+    const label = map[status] || status || '—';
+    const cls = status?.replace('-', '_') || '';
+    return `<span class="status-badge ${cls}">${label}</span>`;
+}
+
+// ── Filters & Search ─────────────────────────────────────────
+function setFilter(f) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    const btnMap = { all: 'filterAll', critical: 'filterCritical', major: 'filterMajor', disqualified: 'filterDQ', clean: 'filterClean' };
+    const btn = document.getElementById(btnMap[f]);
+    if (btn) btn.classList.add('active');
+    renderTable(allCandidates);
+}
+
+function filterTable() {
+    renderTable(allCandidates);
+}
+
+// ── Security Drawer ──────────────────────────────────────────
+async function openDrawer(candidateId, testId) {
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('drawerName').textContent = 'Loading...';
+    document.getElementById('drawerMeta').textContent = '';
+    document.getElementById('drawerBody').innerHTML =
+        `<div style="text-align:center;padding:4rem;color:var(--text-secondary);">
+            <div class="loading-spinner"></div>
+            <p style="margin-top:1rem;">Loading security report...</p>
+        </div>`;
+
+    const data = await API.get(`/api/admin/candidate-security/${candidateId}/${testId}`);
+    if (!data || data.error) {
+        document.getElementById('drawerBody').innerHTML =
+            `<div class="empty-state"><div class="icon">❌</div>Could not load security report.<br><small>${data?.error || ''}</small></div>`;
+        return;
+    }
+
+    const cand = data.candidate;
+    const test = data.test;
+    const sec = data.security;
+    const ai = data.ai_scores;
+    const events = data.events || [];
+
+    document.getElementById('drawerName').textContent = cand.name || candidateId;
+    document.getElementById('drawerMeta').textContent =
+        `${cand.candidate_id} • ${cand.college || ''} ${cand.department ? '• ' + cand.department : ''}`;
+
+    // Compute ring score
+    const secScore = sec.security_score ?? 100;
+    const ringColor = secScore >= 80 ? '#22cc66' : secScore >= 50 ? '#ffcc00' : '#ff2244';
+    const dashArray = 2 * Math.PI * 40;
+    const dashOffset = dashArray * (1 - secScore / 100);
+
+    const aiRecClass = (ai.ai_recommendation || '').toLowerCase().replace(/\s+/g, '_');
+    const aiClass = aiRecClass.includes('highly') || (aiRecClass.includes('recommended') && !aiRecClass.includes('not'))
+        ? 'recommended' : aiRecClass.includes('borderline') ? 'borderline' : aiRecClass.includes('disqualified') ? 'disqualified' : 'not_recommended';
+    const aiIcon = { recommended: '⭐', borderline: '⚠️', not_recommended: '❌', disqualified: '🚫' };
+
+    // Status banner
+    const isDQ = data.final_status === 'disqualified';
+    const dqBanner = isDQ ? `
+        <div style="background:rgba(255,34,68,.12);border:1px solid rgba(255,34,68,.4);
+             border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem;">
+            <span style="font-size:1.5rem;">🚫</span>
+            <div>
+                <div style="font-weight:700;color:var(--critical);font-size:.95rem;">DISQUALIFIED</div>
+                <div style="font-size:.8rem;color:#ffaaaa;margin-top:.2rem;">
+                    Reason: ${test.disqualification_reason || 'Security violation'}
+                    ${test.completed_at ? '• ' + new Date(test.completed_at).toLocaleString() : ''}
+                </div>
+            </div>
+        </div>` : '';
+
+    document.getElementById('drawerBody').innerHTML = `
+        ${dqBanner}
+
+        <!-- Admin Quick Actions inside Drawer -->
+        <div style="margin-bottom: 1.5rem; display: flex; gap: 0.5rem;">
+            <button onclick="resetCandidateAttempt('${cand.candidate_id}', '${test.test_id}')" style="
+                flex: 1; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+                color: #cc88ff; padding: 0.6rem; border-radius: 8px; font-weight: 600; cursor: pointer;
+                display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s;
+            " onmouseover="this.style.background='rgba(153,68,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                🔄 Reset Attempt
+            </button>
+            <button onclick="disqualifyCandidate('${cand.candidate_id}', '${test.test_id}')" style="
+                flex: 1; background: rgba(255,34,68,0.1); border: 1px solid rgba(255,34,68,0.3);
+                color: var(--critical); padding: 0.6rem; border-radius: 8px; font-weight: 600; cursor: pointer;
+                display: flex; align-items: center; justify-content: center; gap: 0.4rem; transition: all 0.2s;
+            " onmouseover="this.style.background='rgba(255,34,68,0.2)'" onmouseout="this.style.background='rgba(255,34,68,0.1)'">
+                🚫 Disqualify
+            </button>
+        </div>
+
+        <!-- Score Ring + AI Rec -->
+        <div class="score-ring-wrap">
+            <div class="score-ring">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="10"/>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="${ringColor}" stroke-width="10"
+                        stroke-dasharray="${dashArray.toFixed(1)}" stroke-dashoffset="${dashOffset.toFixed(1)}"
+                        stroke-linecap="round"/>
+                </svg>
+                <div class="score-ring-text">
+                    ${secScore}<div class="score-ring-label">SEC</div>
+                </div>
+            </div>
+            <div style="flex:1;">
+                <div style="font-size:.8rem;color:var(--text-secondary);font-weight:700;margin-bottom:.75rem;">EXAM PERFORMANCE</div>
+                <div style="font-size:2rem;font-weight:800;color:var(--text-primary);">${test.score || 0}%</div>
+                <div style="font-size:.8rem;color:var(--text-secondary);margin-bottom:.75rem;">Exam score</div>
+                <div class="ai-rec ${aiClass}">
+                    <span>${aiIcon[aiClass] || '🤖'}</span>
+                    <div>
+                        <div style="font-size:.72rem;color:var(--text-secondary);font-weight:600;">AI EVALUATION</div>
+                        <div class="ai-rec-text">${ai.ai_recommendation || '—'}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Violation Quick Stats -->
+        <div class="section-title">Violation Breakdown</div>
+        <div class="d-stats">
+            <div class="d-stat">
+                <div class="d-stat-label">🔴 Critical</div>
+                <div class="d-stat-value" style="color:var(--critical);">${sec.by_level?.CRITICAL || 0}</div>
+            </div>
+            <div class="d-stat">
+                <div class="d-stat-label">🟠 Major</div>
+                <div class="d-stat-value" style="color:var(--major);">${sec.by_level?.MAJOR || 0}</div>
+            </div>
+            <div class="d-stat">
+                <div class="d-stat-label">🟡 Suspicious</div>
+                <div class="d-stat-value" style="color:var(--suspicious);">${sec.by_level?.SUSPICIOUS || 0}</div>
+            </div>
+            <div class="d-stat">
+                <div class="d-stat-label">📋 Policy</div>
+                <div class="d-stat-value" style="color:var(--policy);">${sec.by_level?.POLICY || 0}</div>
+            </div>
+        </div>
+
+        <!-- Specific Violations -->
+        <div class="section-title">Specific Violations</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem;margin-bottom:1.5rem;font-size:.82rem;">
+            ${buildViolationStat('Tab Switches', sec.tab_switch_count, 1, 3)}
+            ${buildViolationStat('Window Blur', sec.window_blur_count, 1, 3)}
+            ${buildViolationStat('Copy Attempts', sec.copy_attempts, 0, 1)}
+            ${buildViolationStat('Paste Attempts', sec.paste_attempts, 0, 1)}
+            ${buildViolationStat('Right Clicks', sec.right_click_attempts, 0, 1)}
+            ${buildViolationStat('Fullscreen Exit', sec.fullscreen_violations, 0, 1)}
+            ${buildViolationStat('DevTools', sec.devtools_attempts, 0, 1)}
+            ${buildViolationStat('Browser Resize', sec.resize_count, 1, 2)}
+            ${buildViolationStat('Idle Timeouts', sec.idle_violations, 1, 3)}
+            ${buildViolationStat('Disconnects', sec.disconnect_events, 1, 3)}
+        </div>
+
+        <!-- Session Info -->
+        <div class="section-title">Session Info</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1.5rem;font-size:.82rem;">
+            <div style="padding:.65rem;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid var(--border);">
+                <div style="color:var(--text-secondary);font-size:.7rem;font-weight:600;margin-bottom:.2rem;">STARTED AT</div>
+                <div>${test.started_at ? new Date(test.started_at).toLocaleString() : '—'}</div>
+            </div>
+            <div style="padding:.65rem;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid var(--border);">
+                <div style="color:var(--text-secondary);font-size:.7rem;font-weight:600;margin-bottom:.2rem;">COMPLETED AT</div>
+                <div>${test.completed_at ? new Date(test.completed_at).toLocaleString() : '—'}</div>
+            </div>
+        </div>
+
+        <!-- Violation Timeline -->
+        <div class="section-title">Violation Timeline (${sec.violation_timeline?.length || 0} events)</div>
+        ${renderTimeline(sec.violation_timeline || [])}
+    `;
+}
+
+function buildViolationStat(label, count, warnAt, dangerAt) {
+    const n = count || 0;
+    const color = n === 0 ? 'var(--safe)' : n >= dangerAt ? 'var(--critical)' : n >= warnAt ? 'var(--major)' : 'var(--suspicious)';
+    const icon = n === 0 ? '✅' : n >= dangerAt ? '🔴' : '🟠';
+    return `<div style="padding:.65rem;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid var(--border);">
+        <div style="color:var(--text-secondary);font-size:.7rem;font-weight:600;margin-bottom:.2rem;">${label}</div>
+        <div style="font-size:1.2rem;font-weight:800;color:${color};">${icon} ${n}</div>
+    </div>`;
+}
+
+function renderTimeline(events) {
+    if (!events || events.length === 0) {
+        return `<div style="text-align:center;padding:2rem;color:var(--text-secondary);font-size:.85rem;">✅ No violations recorded</div>`;
+    }
+    return `<div class="timeline">
+        ${events.slice(0, 50).map(e => {
+            const level = e.level || 'SUSPICIOUS';
+            const t = e.timestamp ? new Date(e.timestamp).toLocaleTimeString() : '—';
+            return `<div class="timeline-item ${level}">
+                <div class="timeline-dot"></div>
+                <div style="flex:1;">
+                    <div class="timeline-type">
+                        ${e.type || 'unknown'}
+                        <span class="timeline-level-badge">${level}</span>
+                    </div>
+                    ${e.detail ? `<div class="timeline-detail">${e.detail}</div>` : ''}
+                    <div class="timeline-time">⏱ ${t}${e.question_number ? ' · Q' + e.question_number : ''}</div>
+                </div>
+            </div>`;
+        }).join('')}
+        ${events.length > 50 ? `<div style="text-align:center;color:var(--text-secondary);font-size:.8rem;padding:.5rem;">
+            ... and ${events.length - 50} more events in MongoDB
+        </div>` : ''}
+    </div>`;
+}
+
+function closeDrawer(e) {
+    if (e.target === document.getElementById('drawerOverlay')) {
+        document.getElementById('drawerOverlay').classList.remove('open');
+    }
+}
+
+async function resetCandidateAttempt(candidateId, testId) {
+    if (!confirm(`Are you sure you want to reset the test attempt for candidate ${candidateId}? This will delete all answers, reset the timer, and clear security violations.`)) return;
+    try {
+        const res = await API.post(`/api/admin/tests/${testId}/reset-candidate`, { candidate_id: candidateId });
+        if (res && res.success) {
+            Toast.success('Attempt Reset', res.message);
+            document.getElementById('drawerOverlay').classList.remove('open');
+            await loadAll();
+        } else {
+            Toast.error('Reset Failed', res.error || 'Unknown error');
+        }
+    } catch(e) {
+        Toast.error('Reset Failed', e.message || 'Network error');
+    }
+}
+
+async function disqualifyCandidate(candidateId, testId) {
+    const reason = prompt(`Enter reason for disqualifying candidate ${candidateId}:`, "Manual administrative disqualification");
+    if (reason === null) return; // user cancelled prompt
+    try {
+        const res = await API.post(`/api/admin/tests/${testId}/disqualify`, { candidate_id: candidateId, reason });
+        if (res && res.success) {
+            Toast.success('Candidate Disqualified', res.message);
+            document.getElementById('drawerOverlay').classList.remove('open');
+            await loadAll();
+        } else {
+            Toast.error('Disqualification Failed', res.error || 'Unknown error');
+        }
+    } catch(e) {
+        Toast.error('Disqualification Failed', e.message || 'Network error');
+    }
+}
+
+
+async function resetAllAttempts() {
+    if (!currentTestId) {
+        Toast.error('No Test Selected', 'Please select or load a test first.');
+        return;
+    }
+    if (!confirm('⚠️ WARNING: Are you sure you want to reset the test attempts for ALL candidates? This will delete all answers, reset timers, and clear all violations/locks for every student assigned to this test. This action CANNOT be undone!')) {
+        return;
+    }
+    try {
+        const res = await API.post(`/api/admin/tests/${currentTestId}/reset-all-candidates`);
+        if (res && res.success) {
+            Toast.success('Reset Complete', res.message);
+            await loadAll();
+        } else {
+            Toast.error('Reset Failed', res.error || 'Unknown error');
+        }
+    } catch(e) {
+        Toast.error('Reset Failed', e.message || 'Network error');
+    }
+}
+
+
+// ── AJAX Polling (every 15s) ─────────────────────────────────
+setInterval(async () => {
+    if (allCandidates.length > 0) {
+        await loadAll();
+    }
+}, 15000);
+
+// ── Init ─────────────────────────────────────────────────────
+init();
+</script>
+{% endblock %}

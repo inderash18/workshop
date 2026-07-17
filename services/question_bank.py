@@ -291,7 +291,7 @@ class AIQuestionGenerator:
                 "category": "Logic",
                 "difficulty_level": "hard",
                 "puzzle_type": "systems_thinking",
-                "question_text": "Five houses in a row. Clues:
+                "question_text": """Five houses in a row. Clues:
 - House 1 is red
 - House 2 has a blue roof
 - House 3 has a garden
@@ -304,7 +304,7 @@ class AIQuestionGenerator:
 - The cigar smoker lives next to the person who likes tea
 - The person with 2 windows lives in house 1
 - The person with 4 windows lives next to the tall white house
-What is the full layout?",
+What is the full layout?""",
                 "scenario_context": "Logical deduction puzzle with multiple interconnected clues.",
                 "clues": [
                     "House 1: red, 2 windows",
@@ -500,7 +500,8 @@ What is the full layout?",
                     "Consider alternative explanations",
                     "Think about evidence strength",
                     "Apply critical thinking standards"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Identify the claim",
                     "Step 2: Question the source (friend is not primary source)",
                     "Step 3: Consider plausibility and evidence",
@@ -524,12 +525,14 @@ What is the full layout?",
                     "Look at blood pressure progression",
                     "Notice both systolic and diastolic rising",
                     "Consider what 'next' might mean"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Identify pattern - both systolic and diastolic pressures increasing",
                     "Step 2: Could be approaching hypertension crisis",
                     "Step 3: Next might be 'BP 180/110 (hypertensive emergency)'",
                     "Step 4: Or 'BP measurement every 10 mmHg until reaching crisis levels'"
-                ],n                "answer_json": {
+                ],
+                "answer_json": {
                     "answer": "Hypertensive emergency (e.g., BP 180/110)",
                     "explanation": "The pattern shows progressive worsening of hypertension. Patient A is normal, B is stage 2 hypertension, C is severe hypertension. The logical progression would be approaching hypertensive emergency (180/110 or higher).",
                     "human_thinking": "Requires understanding medical patterns and the clinical significance of blood pressure trends.",
@@ -548,12 +551,14 @@ What is the full layout?",
                     "Look at need, history, contribution",
                     "Think about procedural vs. substantive justice",
                     "Apply conflict resolution principles"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Identify criteria for fairness",
                     "Step 2: Compare need levels",
                     "Step 3: Consider equity principles",
                     "Step 4: Apply conflict resolution approach"
-                ],n                "answer_json": {
+                ],
+                "answer_json": {
                     "answer": "This requires equitable thinking that considers both need-based allocation and procedural fairness. The fairest resolution might involve splitting the decision, considering external criteria (age, hunger level history), or involving a neutral third party.",
                     "explanation": "This requires social-cognitive reasoning about fairness, need assessment, and conflict resolution. The key is balancing competing claims using multiple criteria rather than a single metric.",
                     "human_thinking": "Requires understanding of social justice, equity vs. equality concepts, and practical conflict resolution skills.",
@@ -566,7 +571,8 @@ What is the full layout?",
                 "difficulty_level": "medium",
                 "puzzle_type": "information_theory",
                 "question_text": "A message is sent: 'I will be 2 hours late.' Received: 'I will be 2 hours late.' What is the information content (entropy) of this message?",
-                "scenario_context": "Information theory applied to communication.",n                "clues": [
+                "scenario_context": "Information theory applied to communication.",
+                "clues": [
                     "Consider message predictability",
                     "Think about information content",
                     "Apply Shannon entropy concept"
@@ -623,7 +629,8 @@ What is the full layout?",
                     "Think about natural laws",
                     "Apply biological principles",
                     "Consider multiple variables"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Identify pattern - increasing then plateauing",
                     "Step 2: Consider limiting factors (water, nutrients, CO2)",
                     "Step 3: Think of optimal range concept",
@@ -647,7 +654,8 @@ What is the full layout?",
                     "Look for pattern in weather",
                     "Consider seasonal changes",
                     "Think about probability vs. certainty"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Analyze past weather patterns",
                     "Step 2: Consider seasonal context",
                     "Step 3: Determine what's most likely",
@@ -672,7 +680,8 @@ What is the full layout?",
                     "Think about killing vs. letting die",
                     "Apply different ethical frameworks",
                     "Consider rules vs. consequences"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Identify potential ethical frameworks",
                     "Step 2: Compare deontological vs. utilitarian approaches",
                     "Step 3: Apply 'ends justify means' principle",
@@ -716,19 +725,21 @@ What is the full layout?",
                 "category": "Logic",
                 "difficulty_level": "medium",
                 "puzzle_type": "visual_logic",
-                "question_text": "Observe this pattern and predict the next element:\n⬢⬢⬢⬢⬢  
-⬢⬢⬢⬢○   
-⬢⬢⬢○○○   
-⬢⬢○○○○   
-⬢○○○○○○   
-?",
+                "question_text": """Observe this pattern and predict the next element:
+⬢⬢⬢⬢⬢
+⬢⬢⬢⬢○
+⬢⬢⬢○○○
+⬢⬢○○○○
+⬢○○○○○○
+?""",
                 "scenario_context": "Visual pattern recognition.",
                 "clues": [
                     "Count elements",
                     "Observe color changes",
                     "Track position of ○",
                     "Consider symmetry"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Start with 5 black squares in first row",
                     "Step 2: Replace one black with white, move right",
                     "Step 3: Replace two blacks with whites, move right",
@@ -754,7 +765,8 @@ What is the full layout?",
                     "Consider 3D configuration",
                     "Imagine creating multiple intersecting lines",
                     "Look at star/triangle patterns"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Traditional flat arrangement doesn't work",
                     "Step 2: Consider star configuration (pentagram)",
                     "Step 3: Create intersecting lines where each line is a row",
@@ -785,7 +797,8 @@ What is the full layout?",
                     "Step 2: Round-robin with byes required for power ranking",
                     "Step 3: Some teams get byes in round 1",
                     "Step 4: Teams with byes are undefeated after round 1"
-                ],n                "answer_json": {
+                ],
+                "answer_json": {
                     "answer": "Teams with byes in round 1 must be undefeated after round 1, as they haven't played yet and their undefeated status is preserved until their first match.",
                     "explanation": "In tournament scheduling, when an even number of teams compete and a power ranking format is used, byes are assigned. Teams receiving byes cannot lose in round 1, maintaining an undefeated record until their eventual match.",
                     "human_thinking": "Requires understanding of tournament mathematics, scheduling constraints, and logical deduction about competitive formats.",
@@ -804,12 +817,14 @@ What is the full layout?",
                     "Apply categorical logic",
                     "Test each statement's consistency",
                     "Use real-world knowledge"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Evaluate each option",
                     "Step 2: Check for biological inaccuracies",
                     "Step 3: Identify contradictions",
                     "Step 4: Find the impossible statement"
-                ],n                "answer_json": {
+                ],
+                "answer_json": {
                     "answer": "A) Not all cats are mammals",
                     "explanation": "This contradicts established biology - all cats are mammals by definition. Option D is also false (all dogs are mammals), but option A represents a direct contradiction to a fundamental biological fact.",
                     "human_thinking": "Requires knowledge integration and the ability to identify logical contradictions across domains (linguistics vs. biology).",
@@ -828,7 +843,8 @@ What is the full layout?",
                     "Consider affective priming",
                     "Create contrast examples",
                     "Relate to logical equivalence"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Define priming effects",
                     "Step 2: Explain cognitive mechanism",
                     "Step 3: Create equivalent but differently framed statements",
@@ -879,7 +895,8 @@ What is the full layout?",
                     "Identify constraints",
                     "Calculate profit per hour",
                     "Test combinations"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Calculate profit per hour: A=$12.5/hr, B=$15/hr, C=$15/hr",
                     "Step 2: Identify constraints: labor (≤40 hours), budget (≤$400)",
                     "Step 3: Test combinations, prioritize highest profit/hour",
@@ -904,12 +921,14 @@ What is the full layout?",
                     "Consider what becomes visible",
                     "Think about projection",
                     "Apply geometric reasoning"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Imagine rotating the triangle",
                     "Step 2: Consider what becomes visible",
                     "Step 3: Think about the 2D projection",
                     "Step 4: Determine the shape"
-                ],n                "answer_json": {
+                ],
+                "answer_json": {
                     "answer": "A smaller right triangle (similar triangle) with the right angle at the top.",
                     "explanation": "Rotating a right triangle 90 degrees simply reorients it while preserving its shape and angles. The right triangle remains a right triangle, just positioned differently.",
                     "human_thinking": "Requires spatial visualization and understanding that rotation preserves geometric properties.",
@@ -928,12 +947,14 @@ What is the full layout?",
                     "Think about digit transformations",
                     "Apply mathematical mapping",
                     "Look for patterns"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: 180-degree rotation maps digits to specific pairs",
                     "Step 2: 12:34 becomes 43:21 etc.",
                     "Step 3: Establish mapping rules",
                     "Step 4: Define relationship"
-                ],n                "answer_json": {
+                ],
+                "answer_json": {
                     "answer": "The inverted time shows a digit-reversed mapping where each digit is transformed according to 180-degree rotation rules (e.g., 12:34 → 43:21), creating a specific mathematical relationship based on digit inversion and position reversal.",
                     "explanation": "When a clock is inverted 180 degrees, each digit transforms according to rotation (0↔0, 1↔? etc.), and the hour and minute positions also reverse, creating a specific mathematical transformation between the original and inverted times.",
                     "human_thinking": "Requires understanding of geometric transformations and the ability to track digit and positional changes under rotation.",
@@ -951,7 +972,8 @@ What is the full layout?",
                     "Look at differences",
                     "Consider squares",
                     "Check pattern progression"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Recognize squares: 2²=4, 3²=9, 4²=16, 5²=25, 6²=36",
                     "Step 2: Missing term is 4² = 16",
                     "Step 3: Pattern is consecutive squares"
@@ -975,7 +997,8 @@ What is the full layout?",
                     "Compute travel times",
                     "Compare speeds and directions",
                     "Apply vector mathematics"
-                ],n                "path_to_solution": [
+                ],
+                "path_to_solution": [
                     "Step 1: Ship A: 20 north then 15 east = 35 hours, total time = 35/20 = 1.75 hours",
                     "Step 2: Ship B: 15 east then 20 north = 35 hours, total time = 35/20 = 1.75 hours",
                     "Step 3: Ship C: Northeast = vector (17.7, 17.7), time = distance/speed = √(17.7²+17.7²)/25 ≈ 1.26 hours",

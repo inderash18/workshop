@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Workshop Selection Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .test-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 20px;
+            color: #444;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .security-status {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #f8f9fa;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        @media (max-width: 768px) {
+            .test-container {
+                padding: 20px;
+            }
+
+            .question-text {
+                font-size: 18px;
+            }
+
+            .option {
+                padding: 12px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="timer" id="timer">15:00</div>
+    <div class="security-status" id="security-status">
+        Tab Switches: <span id="tab-count">0</span><br>
+        Right Clicks: <span id="right-click-count">0</span><br>
+        Copy Attempts: <span id="copy-count">0</span><br>
+        Paste Attempts: <span id="paste-count">0</span><br>
+        Status: <strong>SECURE</strong>
+    </div>
+
+    <div class="test-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="question-number" id="question-number">Question 1 of 15</div>
+        <div class="question-text" id="question-text">
+            Loading question...
+        </div>
+
+        <div class="warning" id="warning" style="display: none;">
+            ⚠️ Warning: Once you skip or submit this question, you cannot go back.
+        </div>
+
+        <div class="options" id="options">
+            <!-- Options will be inserted here -->
+        </div>
+
+        <button class="submit-btn" id="submit-btn" onclick="submitQuestion()">
+            Submit Answer
+        </button>
+    </div>
+
+    <script>
+        let currentQuestion = 0;
+        let timeRemaining = 15 * 60; // 15 minutes in seconds
+        let timerInterval;
+        let optionsSelected = false;
+        let securityViolations = {
+            tabSwitches: 0,
+            rightClicks: 0,
+            copyAttempts: 0,
+            pasteAttempts: 0
+        };
+        let candidateId = 'CAND-12345'; // This would be fetched from session
+        let testId = 'test_ai_proof_2026_v1';
+
+        // Initialize test
+        function initTest() {
+            startTimer();
+            loadQuestion(0);
+        }
+
+        // Start timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    finishTest('Time elapsed');
+                }
+            }, 1000);
+        }
+
+        // Update timer display
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Load question
+        async function loadQuestion(questionIndex) {
+            try {
+                const response = await fetch(`/api/test/assignments/${testId}/${candidateId}/question/${questionIndex}`);
+                const question = await response.json();
+
+                if (!question || !question.id) {
+                    // Generate a sample question for demo
+                    generateSampleQuestion(questionIndex);
+                    return;
+                }
+
+                displayQuestion(question);
+                optionsSelected = false;
+                document.getElementById('submit-btn').disabled = true;
+
+            } catch (error) {
+                console.error('Error loading question:', error);
+                generateSampleQuestion(questionIndex);
+            }
+        }
+
+        // Generate sample questions for demonstration
+        function generateSampleQuestion(questionIndex) {
+            const sampleQuestions = [
+                {
+                    id: 'q1',
+                    text: 'Three friends - Alex, Brianna, and Carlos - are standing in a line. Alex is taller than Carlos. Brianna is not the tallest. Carlos is taller than Alex. Who is the tallest?',
+                    options: [
+                        'Alex',
+                        'Brianna',
+                        'Carlos',
+                        'Cannot be determined'
+                    ],
+                    correct: 'Brianna',
+                    explanation: 'This is a logic puzzle requiring understanding of contradictory constraints. The only logical resolution is that these statements describe relative positioning in different contexts. Brianna is the only remaining person who can be tallest.'
+                },
+                {
+                    id: 'q2',
+                    text: 'A man walks into a bar and orders a drink. The bartender says "Sorry, I can\'t serve you because you brought a gun." Why couldn\'t the bartender serve him?',
+                    options: [
+                        'He is a child',
+                        'The location is restricted',
+                        'He had a reason',
+                        'The bartender was in a bad mood'
+                    ],
+                    correct: 'He is a child',
+                    explanation: 'This lateral thinking puzzle requires reinterpreting the scenario. The bartender is actually serving a child without adult supervision, violating age policy.'
+                },
+                {
+                    id: 'q3',
+                    text: 'Pattern: 2, 6, 12, 20, 30, ?, 56. What number comes next?',
+                    options: [
+                        '36',
+                        '42',
+                        '48',
+                        '54'
+                    ],
+                    correct: '42',
+                    explanation: 'The pattern is n*(n+1): 1×2=2, 2×3=6, 3×4=12, 4×5=20, 5×6=30, 6×7=42, 7×8=56'
+                },
+                {
+                    id: 'q4',
+                    text: 'Five houses in a row with clues about colors, windows, and occupants. House 1: red, 2 windows. House 4: white, tall, cigar smoker. What is the full layout?',
+                    options: [
+                        'Too complex to explain',
+                        'Simple arrangement',
+                        'Requires systems thinking',
+                        'Unsolvable'
+                    ],
+                    correct: 'Requires systems thinking',
+                    explanation: 'This complex logic puzzle requires tracking multiple attributes across multiple positions simultaneously.'
+                },
+                {
+                    id: 'q5',
+                    text: 'You meet two people. One is a truth-teller (always tells truth), the other is a liar (always lies). Person A: "We are both truth-tellers." Person B: "That\'s false." What type of people are they?',
+                    options: [
+                        'Both truth-tellers',
+                        'Both liars',
+                        'A is liar, B is truth-teller',
+                        'Cannot determine'
+                    ],
+                    correct: 'A is liar, B is truth-teller',
+                    explanation: 'If A were truth-teller, B would also be truth-teller, making A\'s statement true. But B calls A\'s statement false, creating paradox.'
+                }
+            ];
+
+            const question = sampleQuestions[questionIndex] || sampleQuestions[0];
+            displayQuestion(question);
+        }
+
+        // Display question
+        function displayQuestion(question) {
+            // Set question number
+            const questionNumber = currentQuestion + 1;
+            document.getElementById('question-number').textContent = `Question ${questionNumber} of 15`;
+
+            // Update progress bar
+            const progressPercent = (questionNumber / 15) * 100;
+            document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+
+            // Display question text
+            document.getElementById('question-text').textContent = question.text;
+
+            // Display options
+            const optionsHtml = question.options.map((option, index) => {
+                return `
+                    <div class="option" onclick="selectOption('${option}', ${index})" id="option-${index}">
+                        ${option}
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('options').innerHTML = optionsHtml;
+        }
+
+        // Select option
+        function selectOption(optionText, index) {
+            if (optionsSelected) return;
+
+            // Reset all options
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // Mark selected option
+            document.getElementById(`option-${index}`).classList.add('selected');
+            optionsSelected = true;
+            document.getElementById('submit-btn').disabled = false;
+        }
+
+        // Submit question
+        async function submitQuestion() {
+            if (!optionsSelected) return;
+
+            const selectedOption = document.querySelector('.option.selected').textContent;
+            const optionElements = document.querySelectorAll('.option');
+            const optionIndex = Array.from(optionElements).findIndex(el => el.classList.contains('selected'));
+
+            // Mark option as disabled
+            optionElements[optionIndex].classList.add('disabled');
+
+            // Save answer to database
+            await saveAnswer(currentQuestion, selectedOption);
+
+            // Move to next question
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < 15) {
+                    loadQuestion(currentQuestion);
+                } else {
+                    finishTest('Test completed');
+                }
+            }, 1500);
+        }
+
+        // Save answer
+        async function saveAnswer(questionIndex, answer) {
+            try {
+                const response = await fetch('/api/test/answers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        candidate_id: candidateId,
+                        test_id: testId,
+                        question_id: `q${questionIndex + 1}`, // Simplified question ID
+                        answer: answer,
+                        question_index: questionIndex,
+                        time_taken: 60, // Default 1 minute per question
+                        marks_obtained: 0, // Will be calculated by AI evaluation
+                        security_violations: securityViolations
+                    })
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to save answer:', await response.text());
+                }
+
+            } catch (error) {
+                console.error('Error saving answer:', error);
+            }
+        }
+
+        // Security event handlers
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                logSecurityViolation('tab_switch');
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+C for copy
+            if (e.ctrlKey && e.key === 'c') {
+                e.preventDefault();
+                logSecurityViolation('copy_attempt');
+            }
+
+            // Ctrl+V for paste
+            if (e.ctrlKey && e.key === 'v') {
+                e.preventDefault();
+                logSecurityViolation('paste_attempt');
+            }
+
+            // Right click
+            if (e.button === 2) {
+                e.preventDefault();
+                logSecurityViolation('right_click');
+            }
+        });
+
+        // Log security violation
+        async function logSecurityViolation(violationType) {
+            try {
+                await fetch('/api/security/log', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        candidate_id: candidateId,
+                        test_id: testId,
+                        violation_type: violationType,
+                        timestamp: new Date().toISOString(),
+                        browser_details: navigator.userAgent,
+                        time_remaining: timeRemaining,
+                        window: window.location.href,
+                        session_id: Math.random().toString(36).substring(2, 15)
+                    })
+                });
+
+                // Update security status
+                securityViolations[violationType] += 1;
+                updateSecurityStatus();
+
+                // Check if violation count exceeded limits
+                if (violationType === 'tab_switch' && securityViolations.tabSwitches >= 3) {
+                    finishTest('Too many tab switches');
+                } else if (securityViolations.copyAttempts >= 1 || 
+                          securityViolations.pasteAttempts >= 1 ||
+                          securityViolations.rightClicks >= 1) {
+                    finishTest('Security violation detected');
+                }
+
+            } catch (error) {
+                console.error('Error logging security violation:', error);
+            }
+        }
+
+        // Update security status display
+        function updateSecurityStatus() {
+            document.getElementById('tab-count').textContent = securityViolations.tabSwitches;
+            document.getElementById('right-click-count').textContent = securityViolations.rightClicks;
+            document.getElementById('copy-count').textContent = securityViolations.copyAttempts;
+            document.getElementById('paste-count').textContent = securityViolations.pasteAttempts;
+        }
+
+        // Finish test
+        async function finishTest(reason) {
+            clearInterval(timerInterval);
+
+            // Lock test and submit all answers
+            const response = await fetch(`/api/test/assignments/${testId}/${candidateId}/finish?reason=${encodeURIComponent(reason)}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                // Redirect to results page
+                window.location.href = `/results.html?candidate=${candidateId}&reason=${encodeURIComponent(reason)}`;
+            } else {
+                alert('Error finishing test. Please try again.');
+            }
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            initTest();
+        };
+    </script>
+</body>
+</html>

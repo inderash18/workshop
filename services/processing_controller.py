@@ -1852,7 +1852,7 @@ class AIWorkshopProcessingController:
                 (len([c for c in candidates if c.get("selected") == 1]) / max(1, total)) * 100, 1
             ),
             "admin_review_percentage": round(
-                (len([c for c in candidates if c.get("selected") == 0 and c.get("completed")])) / max(1, total)) * 100, 1
+                (len([c for c in candidates if c.get("selected") == 0 and c.get("completed")]) / max(1, total)) * 100, 1
             ),
             "selection_rate": round(
                 (len([c for c in candidates if c.get("selected") == 1]) / max(1, total)) * 100, 1

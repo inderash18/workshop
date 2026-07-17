@@ -5,11 +5,14 @@ from flask import Blueprint, request, jsonify, session, render_template, redirec
 from models.database import (
     load_db, save_db, get_candidate_by_email,
     get_test_by_id_str, get_assignment, update_assignment,
-    get_assignments_for_candidate, audit_log,
+    get_assignments_for_candidate, audit_log, get_setting,
 )
 from middleware.auth import login_required
 from middleware.security import sanitize_input
-from services.security_engine import process_security_event, is_test_window_active, can_student_access_test
+from services.security_engine import (
+    process_security_event, is_test_window_active, can_student_access_test,
+    DISCONNECT_GRACE_SECONDS,
+)
 from services.test_engine import get_test_questions, get_test_security_rules, compute_scores_from_answers
 from services.scoring_engine import compute_scores
 
@@ -27,11 +30,25 @@ def test_page(test_id):
     if not test:
         return "Test not found", 404
 
+    assignment = get_assignment(test_id, candidate["candidate_id"])
+
+    # If already completed or disqualified, show denied
+    if assignment:
+        status = assignment.get("status", "assigned")
+        if status == "completed":
+            return render_template("test_session.html", test_id=test_id, denied=True,
+                                   reason="You have already completed this test.")
+        if status == "disqualified":
+            reason = assignment.get("locked_reason", "You have been disqualified from this test.")
+            return render_template("test_session.html", test_id=test_id, denied=True, reason=reason)
+
+    # Check if the test window is currently open (admin toggle)
     can_access, reason = can_student_access_test(candidate["candidate_id"], test_id)
     if not can_access:
         return render_template("test_session.html", test_id=test_id, denied=True, reason=reason)
 
     return render_template("test_session.html", test_id=test_id, denied=False)
+
 
 
 @test_session_bp.route("/api/test/<test_id>/questions", methods=["GET"])
@@ -174,8 +191,10 @@ def submit_test(test_id):
             "started_at": assignment.get("started_at") or datetime.now().isoformat(),
         })
 
+    selected_questions = assignment.get("questions") or get_test_questions(test, candidate_id)
     scores_result = compute_scores_from_answers(
-        test, answers, time_taken, assignment.get("violation_count", 0)
+        {"questions": selected_questions},
+        answers, time_taken, assignment.get("violation_count", 0)
     )
     scores = scores_result["scores"]
     selected_status = scores_result["selected_status"]
@@ -422,10 +441,11 @@ def api_student_start_test(test_id):
     if assignment.get("is_locked"):
         return jsonify({"error": "Test session is locked"}), 403
 
-    if assignment.get("status") not in ("in-progress", "in_progress"):
-        if not is_test_window_active(test):
-            return jsonify({"error": "Test is not currently active"}), 400
+    # Allow resuming the test session if it's already in progress
+    is_resuming = assignment.get("status") in ("in-progress", "in_progress", "started")
 
+    if not is_resuming:
+        # Otherwise, initialize the test session
         ip_address = request.remote_addr
         update_assignment(test_id, candidate_id, {
             "status": "in-progress",
@@ -439,6 +459,23 @@ def api_student_start_test(test_id):
 
     questions = get_test_questions(test, candidate_id)
     security_rules = get_test_security_rules(test)
+    
+    # Dynamically retrieve test duration from database configuration settings
+    db_duration = get_setting("test_duration_minutes")
+    test_duration = int(db_duration) if db_duration is not None else int(test.get("duration_minutes", 15))
+
+    # Calculate remaining time
+    started_at_str = assignment.get("started_at")
+    if started_at_str:
+        try:
+            started_at = datetime.fromisoformat(started_at_str)
+            elapsed = (datetime.now() - started_at).total_seconds()
+            time_remaining = max(0, int(test_duration * 60 - elapsed))
+        except Exception:
+            time_remaining = test_duration * 60
+    else:
+        time_remaining = test_duration * 60
+    
     safe_questions = []
     for q in questions:
         safe_q = dict(q)
@@ -450,13 +487,15 @@ def api_student_start_test(test_id):
         "success": True,
         "test_id": test_id,
         "id": test_id,
-        "name": test.get("name", "Untitled Test"),
-        "duration": test.get("duration_minutes", 60),
+        "name": test.get("name", "AI Selection Challenge"),
+        "duration": test_duration,
         "questions": safe_questions,
         "security_rules": security_rules,
         "status": assignment.get("status", "in-progress"),
         "started_at": assignment.get("started_at"),
-        "time_remaining": assignment.get("time_remaining")
+        "time_remaining": time_remaining,
+        "answers": assignment.get("answers", {}),
+        "current_question_index": assignment.get("current_question_index", 0)
     })
 
 
@@ -464,14 +503,184 @@ def api_student_start_test(test_id):
 @login_required
 def api_student_log_violation(test_id):
     data = request.json or {}
-    event_type = data.get("type", "unknown")
-    
-    # Rewrite request JSON to match standard reporter parameters
-    request.json = {
+    event_type = sanitize_input(data.get("type", "unknown"))
+    detail = sanitize_input(data.get("detail", ""))
+    question_number = data.get("question_number")
+    time_remaining = data.get("time_remaining")
+
+    candidate = get_candidate_by_email(session["user_email"])
+    if not candidate:
+        return jsonify({"error": "Candidate not found"}), 404
+
+    test = get_test_by_id_str(test_id)
+    if not test:
+        return jsonify({"error": "Test not found"}), 404
+
+    candidate_id = candidate["candidate_id"]
+    assignment = get_assignment(test_id, candidate_id)
+    if not assignment:
+        return jsonify({"error": "Not assigned to this test"}), 403
+
+    if assignment.get("status") in ("completed",):
+        return jsonify({"error": "Test already finalized"}), 400
+
+    ip_address = request.remote_addr
+    user_agent = request.headers.get("User-Agent", "")
+
+    result = process_security_event(
+        assignment=assignment,
+        test=test,
+        event_type=event_type,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        detail=detail or f"Browser security event: {event_type}",
+        question_number=question_number,
+        time_remaining=time_remaining,
+        session_id=request.cookies.get("session", ""),
+    )
+
+    audit_log("security_event", session["user_email"], {
+        "test_id": test_id,
         "event_type": event_type,
-        "detail": f"Browser triggered event: {event_type}"
+        "level": result.get("level", "UNKNOWN"),
+        "action": result.get("action", "none"),
+    }, ip=ip_address)
+
+    response = {
+        "success": True,
+        "action": result.get("action", "none"),
+        "level": result.get("level", ""),
+        "message": result.get("message", ""),
     }
-    return report_security_event(test_id)
+
+    if result.get("action") in ("auto_submit_disqualify",):
+        response["status"] = "disqualified"
+        response["reason"] = result.get("reason", event_type)
+    elif result.get("action") == "warn":
+        response["tab_count"] = result.get("tab_count")
+        response["blur_count"] = result.get("blur_count")
+        response["remaining"] = result.get("remaining")
+        response["limit"] = result.get("limit")
+    elif result.get("action") == "advance_question":
+        response["advance"] = True
+    elif result.get("action") == "pause_timer":
+        response["pause_seconds"] = result.get("pause_seconds", DISCONNECT_GRACE_SECONDS)
+    elif result.get("action") == "resume_timer":
+        response["resume"] = True
+
+    return jsonify(response)
+
+
+@test_session_bp.route("/api/admin/candidate-security/<candidate_id>/<test_id>", methods=["GET"])
+def api_admin_candidate_security(candidate_id, test_id):
+    """Admin endpoint: full security analytics for a specific candidate's test attempt."""
+    if not session.get("admin_logged_in"):
+        return jsonify({"error": "Admin access required"}), 403
+
+    from models.database import get_candidate_by_id, get_security_events_for_candidate
+    from services.security_engine import get_security_analytics_for_assignment
+
+    assignment = get_assignment(test_id, candidate_id)
+    if not assignment:
+        return jsonify({"error": "Assignment not found"}), 404
+
+    test = get_test_by_id_str(test_id)
+    candidate = get_candidate_by_id(candidate_id)
+
+    analytics = get_security_analytics_for_assignment(assignment)
+
+    # Get all security events from MongoDB for this candidate+test
+    from models.database import _col
+    from bson import ObjectId
+    events = list(_col("security_events").find(
+        {"test_id": test_id, "candidate_id": candidate_id}
+    ).sort("timestamp", -1).limit(200))
+    for e in events:
+        e["_id"] = str(e["_id"])
+
+    scores = assignment.get("scores", {})
+    score_final = float(scores.get("score_final") or scores.get("final") or 0)
+
+    # Question analytics
+    questions = assignment.get("questions", [])
+    answers = assignment.get("answers", {})
+    question_analytics = []
+    for i, q in enumerate(questions):
+        qid = q.get("id") or q.get("_id")
+        answer = answers.get(qid, "")
+        correct = q.get("correct_answer") or q.get("correct", "")
+        is_correct = str(answer).strip().lower() == str(correct).strip().lower() if answer else False
+        question_analytics.append({
+            "number": i + 1,
+            "title": q.get("title") or q.get("text", "")[:80],
+            "type": q.get("type") or q.get("question_type", ""),
+            "answer_submitted": bool(answer),
+            "answer": answer,
+            "correct": is_correct,
+            "marks": q.get("marks", 10),
+            "marks_obtained": q.get("marks", 10) if is_correct else 0,
+        })
+
+    return jsonify({
+        "candidate": {
+            "name": candidate.get("name", "") if candidate else "",
+            "candidate_id": candidate_id,
+            "email": candidate.get("email", "") if candidate else "",
+            "college": candidate.get("college", "") if candidate else "",
+            "department": candidate.get("department", "") if candidate else "",
+        },
+        "test": {
+            "name": test.get("name", "") if test else "",
+            "test_id": test_id,
+            "status": assignment.get("status", ""),
+            "assigned_at": assignment.get("created_at", ""),
+            "started_at": assignment.get("started_at", ""),
+            "completed_at": assignment.get("completed_at", ""),
+            "score": round(score_final, 1),
+            "score_percentage": round(score_final, 1),
+            "violation_count": assignment.get("violation_count", 0),
+            "tab_switch_count": assignment.get("tab_switch_count", 0),
+            "time_taken": assignment.get("time_taken", 0),
+            "disqualification_reason": assignment.get("disqualification_reason", ""),
+        },
+        "security": analytics,
+        "question_analytics": question_analytics,
+        "ai_scores": {
+            "logic": scores.get("score_logic", 0),
+            "creativity": scores.get("score_creativity", 0),
+            "innovation": scores.get("score_creativity", 0),
+            "problem_solving": scores.get("score_problem_solving", 0),
+            "human_intelligence": scores.get("score_ai_knowledge", 0),
+            "security_score": analytics.get("security_score", 100),
+            "ai_recommendation": _get_ai_recommendation(score_final, analytics.get("security_score", 100)),
+        },
+        "final_status": _get_final_status(assignment),
+        "events": events,
+    })
+
+
+def _get_ai_recommendation(score, security_score):
+    if security_score == 0:
+        return "Disqualified"
+    combined = score * 0.7 + security_score * 0.3
+    if combined >= 80:
+        return "Highly Recommended"
+    if combined >= 65:
+        return "Recommended"
+    if combined >= 50:
+        return "Borderline"
+    return "Not Recommended"
+
+
+def _get_final_status(assignment):
+    status = assignment.get("status", "assigned")
+    selected = assignment.get("selected", 0)
+    if status == "disqualified":
+        return "disqualified"
+    if status == "completed":
+        labels = {1: "selected", 2: "rejected", 3: "disqualified", 4: "waitlisted"}
+        return labels.get(selected, "completed")
+    return status
 
 
 @test_session_bp.route("/report/<test_id>")
@@ -590,3 +799,38 @@ def api_get_test_report(test_id, candidate_id=None):
         "achievements": achievements,
         "questions": questions_list
     })
+
+
+@test_session_bp.route("/api/student/tests/<test_id>/answer", methods=["POST"])
+@login_required
+def api_student_save_answer(test_id):
+    candidate = get_candidate_by_email(session["user_email"])
+    if not candidate:
+        return jsonify({"error": "Candidate not found"}), 404
+    
+    assignment = get_assignment(test_id, candidate["candidate_id"])
+    if not assignment:
+        return jsonify({"error": "Not assigned to this test"}), 403
+        
+    if assignment.get("status") in ("completed", "disqualified"):
+        return jsonify({"error": "Test session already finalized"}), 400
+        
+    data = request.json or {}
+    q_id = data.get("question_id")
+    answer_val = data.get("answer")
+    current_index = data.get("current_question_index")
+    
+    # Update answers dictionary in assignment
+    answers = assignment.get("answers", {})
+    answers[q_id] = answer_val
+    
+    update_fields = {"answers": answers}
+    if current_index is not None:
+        try:
+            update_fields["current_question_index"] = int(current_index)
+        except ValueError:
+            pass
+
+    update_assignment(test_id, candidate["candidate_id"], update_fields)
+    
+    return jsonify({"success": True})

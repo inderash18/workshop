@@ -52,8 +52,11 @@
     <aside class="admin-sidebar">
         <nav class="sidebar-nav">
             <a href="/admin" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/analytics" class="sidebar-link"><span class="icon">📈</span> Analytics</a>
             <a href="/admin/tests" class="sidebar-link active"><span class="icon">📝</span> Tests</a>
             <a href="/admin/candidates" class="sidebar-link"><span class="icon">👥</span> Candidates</a>
+            <a href="/admin/security" class="sidebar-link"><span class="icon">🔐</span> Security</a>
+            <a href="/admin/questions" class="sidebar-link"><span class="icon">❓</span> Question Bank</a>
             <div class="sidebar-divider"></div>
             <a href="/admin/settings" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
             <a href="/admin/logs" class="sidebar-link"><span class="icon">📋</span> Logs</a>
@@ -62,14 +65,12 @@
     <main class="admin-main">
         <div class="page-header">
             <h1>Test Management</h1>
-            <a href="/admin/tests/create" class="btn-create">➕ Create Test</a>
         </div>
         <div id="testsContainer">
             <div class="empty-state" id="emptyState" style="display:none;">
                 <div class="icon">📝</div>
                 <h3>No tests created yet</h3>
-                <p>Create your first test to start evaluating candidates.</p>
-                <a href="/admin/tests/create" class="btn-create">Create Test</a>
+                <p>Wait for challenge setup or assignments.</p>
             </div>
             <div class="tests-grid" id="testsGrid"></div>
         </div>

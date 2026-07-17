@@ -558,6 +558,100 @@ def api_disqualify_candidate(test_id):
     }, ip=request.remote_addr)
 
     return jsonify({"success": True, "message": f"Candidate {candidate_id} disqualified"})
+@test_management_bp.route("/api/admin/tests/<test_id>/reset-candidate", methods=["POST"])
+@admin_required
+def api_reset_candidate_attempt(test_id):
+    test = get_test_by_id_str(test_id)
+    if not test:
+        return jsonify({"error": "Test not found"}), 404
+
+    data = request.json or {}
+    candidate_id = sanitize_input(data.get("candidate_id", ""))
+
+    if not candidate_id:
+        return jsonify({"error": "candidate_id is required"}), 400
+
+    assignment = get_assignment(test_id, candidate_id)
+    if not assignment:
+        return jsonify({"error": "Assignment not found"}), 404
+
+    update_fields = {
+        "status": "assigned",
+        "started_at": None,
+        "completed_at": None,
+        "time_remaining": None,
+        "current_question_index": 0,
+        "answers": {},
+        "violations": [],
+        "violation_count": 0,
+        "tab_switch_count": 0,
+        "window_blur_count": 0,
+        "resize_count": 0,
+        "idle_timeout_count": 0,
+        "suspicious_keyboard_count": 0,
+        "focus_change_count": 0,
+        "suspicious_activity_count": 0,
+        "is_locked": False,
+        "locked_reason": None,
+        "disqualified_at": None,
+        "disqualification_reason": None,
+        "security_score": 100,
+        "scores": {},
+    }
+
+    update_assignment(test_id, candidate_id, update_fields)
+
+    audit_log("candidate_test_reset", session.get("admin_username"), {
+        "test_id": test_id, "candidate_id": candidate_id
+    }, ip=request.remote_addr)
+
+    return jsonify({"success": True, "message": f"Candidate {candidate_id} test attempt reset successfully."})
+
+
+@test_management_bp.route("/api/admin/tests/<test_id>/reset-all-candidates", methods=["POST"])
+@admin_required
+def api_reset_all_candidates(test_id):
+    test = get_test_by_id_str(test_id)
+    if not test:
+        return jsonify({"error": "Test not found"}), 404
+
+    assignments = get_assignments_for_test(test_id)
+    
+    update_fields = {
+        "status": "assigned",
+        "started_at": None,
+        "completed_at": None,
+        "time_remaining": None,
+        "current_question_index": 0,
+        "answers": {},
+        "violations": [],
+        "violation_count": 0,
+        "tab_switch_count": 0,
+        "window_blur_count": 0,
+        "resize_count": 0,
+        "idle_timeout_count": 0,
+        "suspicious_keyboard_count": 0,
+        "focus_change_count": 0,
+        "suspicious_activity_count": 0,
+        "is_locked": False,
+        "locked_reason": None,
+        "disqualified_at": None,
+        "disqualification_reason": None,
+        "security_score": 100,
+        "scores": {},
+    }
+
+    for assignment in assignments:
+        c_id = str(assignment.get("candidate_id", ""))
+        if c_id:
+            update_assignment(test_id, c_id, update_fields)
+
+    audit_log("test_reset_all_candidates", session.get("admin_username"), {
+        "test_id": test_id, "count": len(assignments)
+    }, ip=request.remote_addr)
+
+    return jsonify({"success": True, "message": f"Successfully reset attempts for all {len(assignments)} candidates."})
+
 
 
 @test_management_bp.route("/api/admin/tests/<test_id>/shortlist", methods=["POST"])
@@ -708,3 +802,116 @@ def api_export_test_results(test_id):
         mimetype="text/csv",
         headers={"Content-Disposition": f"attachment;filename={test_name}_results.csv"},
     )
+
+
+# ─── QUESTION BANK API ENDPOINTS ───
+
+@test_management_bp.route("/api/admin/questions", methods=["GET"])
+@admin_required
+def api_get_questions():
+    from models.database import _col
+    questions = list(_col("question_bank").find())
+    results = []
+    for q in questions:
+        q_data = dict(q)
+        if "_id" in q_data:
+            q_data["_id"] = str(q_data["_id"])
+        results.append(q_data)
+    return jsonify(results)
+
+
+@test_management_bp.route("/api/admin/questions", methods=["POST"])
+@admin_required
+def api_add_question():
+    from models.database import _col
+    data = request.json or {}
+    
+    title = sanitize_input(data.get("title", ""))
+    description = sanitize_input(data.get("description", ""))
+    category = sanitize_input(data.get("category", "Logic"))
+    difficulty_level = sanitize_input(data.get("difficulty_level", "medium"))
+    correct_answer = sanitize_input(data.get("correct_answer", ""))
+    explanation = sanitize_input(data.get("explanation", ""))
+    marks = int(data.get("marks", 10))
+    time_limit = int(data.get("time_limit", 60))
+    question_type = sanitize_input(data.get("question_type", "mcq"))
+    options = data.get("options", [])
+    is_active = bool(data.get("is_active", True))
+
+    if not description:
+        return jsonify({"error": "Question description/text is required"}), 400
+
+    import uuid
+    q_id = data.get("id") or f"q_{str(uuid.uuid4())[:8]}"
+    
+    question_doc = {
+        "id": q_id,
+        "title": title or description[:30],
+        "description": description,
+        "text": description,
+        "category": category,
+        "difficulty_level": difficulty_level,
+        "correct_answer": correct_answer,
+        "correct": correct_answer,
+        "explanation": explanation,
+        "marks": marks,
+        "xp_points": marks,
+        "time_limit": time_limit,
+        "question_type": question_type,
+        "type": question_type,
+        "options": options,
+        "is_active": is_active,
+        "created_at": datetime.now().isoformat()
+    }
+
+    _col("question_bank").replace_one({"id": q_id}, question_doc, upsert=True)
+    audit_log("question_created", session.get("admin_username"), {"question_id": q_id}, ip=request.remote_addr)
+    return jsonify({"success": True, "question": question_doc})
+
+
+@test_management_bp.route("/api/admin/questions/<q_id>", methods=["PUT", "PATCH"])
+@admin_required
+def api_edit_question(q_id):
+    from models.database import _col
+    question = _col("question_bank").find_one({"id": q_id})
+    if not question:
+        return jsonify({"error": "Question not found"}), 404
+
+    data = request.json or {}
+    
+    update_doc = dict(question)
+    if "title" in data: update_doc["title"] = sanitize_input(data["title"])
+    if "description" in data:
+        update_doc["description"] = sanitize_input(data["description"])
+        update_doc["text"] = sanitize_input(data["description"])
+    if "category" in data: update_doc["category"] = sanitize_input(data["category"])
+    if "difficulty_level" in data: update_doc["difficulty_level"] = sanitize_input(data["difficulty_level"])
+    if "correct_answer" in data:
+        update_doc["correct_answer"] = sanitize_input(data["correct_answer"])
+        update_doc["correct"] = sanitize_input(data["correct_answer"])
+    if "explanation" in data: update_doc["explanation"] = sanitize_input(data["explanation"])
+    if "marks" in data:
+        update_doc["marks"] = int(data["marks"])
+        update_doc["xp_points"] = int(data["marks"])
+    if "time_limit" in data: update_doc["time_limit"] = int(data["time_limit"])
+    if "question_type" in data:
+        update_doc["question_type"] = sanitize_input(data["question_type"])
+        update_doc["type"] = sanitize_input(data["question_type"])
+    if "options" in data: update_doc["options"] = data["options"]
+    if "is_active" in data: update_doc["is_active"] = bool(data["is_active"])
+
+    _col("question_bank").replace_one({"id": q_id}, update_doc)
+    audit_log("question_updated", session.get("admin_username"), {"question_id": q_id}, ip=request.remote_addr)
+    return jsonify({"success": True, "question": update_doc})
+
+
+@test_management_bp.route("/api/admin/questions/<q_id>", methods=["DELETE"])
+@admin_required
+def api_delete_question(q_id):
+    from models.database import _col
+    res = _col("question_bank").delete_one({"id": q_id})
+    if res.deleted_count == 0:
+        return jsonify({"error": "Question not found"}), 404
+        
+    audit_log("question_deleted", session.get("admin_username"), {"question_id": q_id}, ip=request.remote_addr)
+    return jsonify({"success": True})

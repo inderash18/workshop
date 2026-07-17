@@ -120,6 +120,174 @@ class VirtualStateDict(dict):
         return super().setdefault(key, default)
 
 
+def seed_questions(db):
+    try:
+        puzzles = [
+            {
+                "id": "puzzle_01",
+                "title": "Hat Logic Puzzle",
+                "description": "Three students (A, B, C) sit in a line. C sits in the back and can see B and A. B sits in the middle and can see A. A sits in the front and can see no one. They are shown 3 red hats and 2 white hats. They close their eyes, and one hat is placed on each student. The remaining hats are hidden. When asked their hat color, C says: 'I do not know.' B then says: 'I do not know.' Finally, A says: 'I know my hat color!' What color is A's hat?",
+                "category": "Logic",
+                "difficulty_level": "medium",
+                "correct_answer": "Red",
+                "explanation": "If A and B both had white hats, C would immediately know they had red. Since C doesn't know, A and B are not both white. If A had a white hat, B would know A had white, and since A and B are not both white, B would deduce they had a red hat. Since B doesn't know, A must have a red hat.",
+                "marks": 10,
+                "time_limit": 60,
+                "question_type": "mcq",
+                "options": ["Red", "White", "Undetermined"],
+                "is_active": True,
+                "created_at": datetime.now().isoformat()
+            },
+            {
+                "id": "puzzle_02",
+                "title": "Look and Say Sequence",
+                "description": "Observe the following sequence of numbers: 1, 11, 21, 1211, 111221. What is the next number in this sequence?",
+                "category": "Pattern Recognition",
+                "difficulty_level": "medium",
+                "correct_answer": "312211",
+                "explanation": "Each term describes the previous term. 11 is 'one 1'. 21 is 'two 1s'. 1211 is 'one 2, one 1'. 111221 is 'one 1, one 2, two 1s'. The next term is 'three 1s, two 2s, one 1', which is 312211.",
+                "marks": 10,
+                "time_limit": 60,
+                "question_type": "text",
+                "is_active": True,
+                "created_at": datetime.now().isoformat()
+            },
+            {
+                "id": "puzzle_03",
+                "title": "Duncker's Candle Problem",
+                "description": "You are given a candle, a box of thumbtacks, and a book of matches. How can you mount the candle on a cork bulletin board so that it burns cleanly without dripping wax onto the table below?",
+                "category": "Innovation",
+                "difficulty_level": "hard",
+                "correct_answer": "Empty the box of thumbtacks, pin the box to the board, and place the candle inside it.",
+                "explanation": "To solve this, you must overcome functional fixedness and see the box of tacks as a candle holder rather than just a container.",
+                "marks": 10,
+                "time_limit": 60,
+                "question_type": "mcq",
+                "options": [
+                    "Tack the candle directly to the board.",
+                    "Melt the candle back to stick it to the board.",
+                    "Empty the box of thumbtacks, pin the box to the board, and place the candle inside it.",
+                    "Hold the candle against the board until it sticks."
+                ],
+                "is_active": True,
+                "created_at": datetime.now().isoformat()
+            },
+            {
+                "id": "puzzle_04",
+                "title": "River Crossing Puzzle",
+                "description": "A farmer needs to cross a river with a wolf, a goat, and a cabbage. His boat can only hold himself and one of the three. If left alone, the wolf will eat the goat, or the goat will eat the cabbage. How many total river trips must the farmer make to safely cross everyone?",
+                "category": "Problem Solving",
+                "difficulty_level": "medium",
+                "correct_answer": "7",
+                "explanation": "Trip 1: Take goat across. Trip 2: Return alone. Trip 3: Take wolf across. Trip 4: Return with goat. Trip 5: Take cabbage across. Trip 6: Return alone. Trip 7: Take goat across. Total = 7 trips.",
+                "marks": 10,
+                "time_limit": 60,
+                "question_type": "mcq",
+                "options": ["5", "7", "9", "11"],
+                "is_active": True,
+                "created_at": datetime.now().isoformat()
+            },
+            {
+                "id": "puzzle_05",
+                "title": "The False Coin Problem",
+                "description": "You have 9 identical-looking coins. One is counterfeit and slightly lighter than the others. Using a balance scale, what is the minimum number of weighings needed to guarantee finding the fake coin?",
+                "category": "Critical Thinking",
+                "difficulty_level": "hard",
+                "correct_answer": "2",
+                "explanation": "Divide coins into three groups of 3. Weigh group A against B. If they balance, fake is in C. If A is lighter, fake is in A. Take the lighter group, choose 2 coins, and weigh them. If they balance, the third coin is fake. Otherwise, the lighter one is fake. Total = 2 weighings.",
+                "marks": 10,
+                "time_limit": 60,
+                "question_type": "text",
+                "is_active": True,
+                "created_at": datetime.now().isoformat()
+            },
+            {
+                "id": "puzzle_06",
+                "title": "No-Letter Prompting",
+                "description": "You need an LLM to generate a text about a sudden downpour, but you cannot use the letters 'e' or 'a' in your prompt. Write a simple prompt that forces the LLM to output a description of rain.",
+                "category": "Prompt Engineering",
+                "difficulty_level": "hard",
+                "correct_answer": "Describe drops from sky.",
+                "explanation": "This requires prompt design using strict constraint programming without default words.",
+                "marks": 10,
+                "time_limit": 60,
+                "question_type": "text",
+                "is_active": True,
+                "created_at": datetime.now().isoformat()
+            },
+            {
+                "id": "puzzle_07",
+                "title": "The Two Hourglasses",
+                "description": "You need to measure exactly 9 minutes of time using only a 4-minute hourglass and a 7-minute hourglass. What is the minimum number of times you must flip any hourglass to complete this measurement?",
+                "category": "Logic",
+                "difficulty_level": "hard",
+                "correct_answer": "6",
+                "explanation": "Start both. When 4 min expires (flip 1), 3 min remains in 7. When 7 min expires (flip 2), start measuring. Flip 4-min again (flip 3). When it expires, 1 min has passed. Start 4-min again (flip 4). When it expires, 5 mins have passed. Start 4-min again (flip 5). Total 9 minutes measured with 6 total flips.",
+                "marks": 10,
+                "time_limit": 60,
+                "question_type": "mcq",
+                "options": ["4", "5", "6", "8"],
+                "is_active": True,
+                "created_at": datetime.now().isoformat()
+            },
+            {
+                "id": "puzzle_08",
+                "title": "AI Self-Reference Paradox",
+                "description": "If an AI system is trained to output the phrase 'I am lying' whenever it detects a contradiction, what does it output when it evaluates its own training rule?",
+                "category": "AI Thinking",
+                "difficulty_level": "expert",
+                "correct_answer": "Infinite loop or paradox",
+                "explanation": "This is a classic self-referential paradox that breaks binary logic checks.",
+                "marks": 10,
+                "time_limit": 60,
+                "question_type": "mcq",
+                "options": ["True", "False", "I am lying", "Infinite loop or paradox"],
+                "is_active": True,
+                "created_at": datetime.now().isoformat()
+            },
+            {
+                "id": "puzzle_09",
+                "title": "Startup Resource Constraints",
+                "description": "A startup has a prototype that fails 50% of the time, and they only have budget to test it 3 times. What is the probability that they will get at least one successful run?",
+                "category": "Startup Thinking",
+                "difficulty_level": "medium",
+                "correct_answer": "87.5%",
+                "explanation": "The probability of failing all 3 times is (0.5)^3 = 12.5%. The probability of at least one success is 1 - 0.125 = 87.5%.",
+                "marks": 10,
+                "time_limit": 60,
+                "question_type": "mcq",
+                "options": ["50%", "75%", "87.5%", "93.75%"],
+                "is_active": True,
+                "created_at": datetime.now().isoformat()
+            },
+            {
+                "id": "puzzle_10",
+                "title": "Future Resource Scarcity",
+                "description": "In a future smart city, electricity is allocated using a priority queue. If hospital systems have weight 10, public transit has weight 8, and residential has weight 5, which system will experience power shedding first under a 30% load deficit?",
+                "category": "Future Thinking",
+                "difficulty_level": "medium",
+                "correct_answer": "Residential",
+                "explanation": "Priority queues allocate resources to higher weights first, meaning lower weight systems (Residential) shed first.",
+                "marks": 10,
+                "time_limit": 60,
+                "question_type": "mcq",
+                "options": ["Hospitals", "Public Transit", "Residential", "Equally shared"],
+                "is_active": True,
+                "created_at": datetime.now().isoformat()
+            }
+        ]
+        extra_puzzles = []
+        for p in puzzles:
+            p_copy = dict(p)
+            p_copy["id"] = p_copy["id"] + "_alt"
+            p_copy["title"] = p_copy["title"] + " (Variant B)"
+            p_copy["created_at"] = datetime.now().isoformat()
+            extra_puzzles.append(p_copy)
+        db["question_bank"].insert_many(puzzles + extra_puzzles)
+    except Exception as e:
+        print(f"[DB Seed] Error seeding question bank: {e}")
+
+
 def _ensure_indexes(db):
     try:
         db["candidates"].create_index([("candidate_id", ASCENDING)], unique=True)
@@ -149,6 +317,9 @@ def _ensure_indexes(db):
         db["tests"].create_index([("created_at", DESCENDING)])
         
         db["test_configuration"].create_index([("key", ASCENDING)], unique=True)
+        
+        if db["question_bank"].count_documents({}) == 0:
+            seed_questions(db)
     except Exception as e:
         print(f"[DB] Index creation error: {e}")
 

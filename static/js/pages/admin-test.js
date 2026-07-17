@@ -47,9 +47,8 @@
       if (!tests.length) {
         container.innerHTML = `
           <div class="empty-state">
-            <h3>No Tests Created</h3>
-            <p>Create your first test to get started.</p>
-            <a href="/admin/tests/create" class="btn btn-primary">Create Test</a>
+            <h3>No Tests Assigned</h3>
+            <p>Wait for challenge setup or assignments.</p>
           </div>
         `;
         return;

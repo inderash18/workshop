@@ -385,6 +385,16 @@
 {% endblock %}
 
 {% block content %}
+{% if denied %}
+<div class="test-session" style="justify-content:center;align-items:center;padding:2rem;">
+    <div style="text-align:center;max-width:500px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);padding:3rem 2rem;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+        <div style="font-size:4rem;margin-bottom:1.5rem;animation:pulse 2s infinite;">🔒</div>
+        <h2 style="font-size:1.6rem;font-weight:700;margin-bottom:1rem;color:#f4f4f5;">Access Denied</h2>
+        <p style="color:#a1a1aa;font-size:0.95rem;line-height:1.6;margin-bottom:2rem;">{{ reason }}</p>
+        <a href="/dashboard" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:0.75rem 2rem;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:.85rem;font-weight:600;transition:all .3s;box-shadow:0 4px 16px rgba(99,102,241,.3);">Return to Dashboard</a>
+    </div>
+</div>
+{% else %}
 <div class="test-session">
     <div class="session-topbar">
         <div class="session-topbar-left">
@@ -421,36 +431,231 @@
             <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
         </div>
         <div class="nav-buttons">
-            <button class="btn-nav btn-prev btn-disabled" id="btnPrev" onclick="prevQuestion()">← Previous</button>
+            <button class="btn-nav btn-prev" id="btnPrev" style="display:none !important">← Previous</button>
             <button class="btn-nav btn-next" id="btnNext" onclick="nextQuestion()">Next →</button>
             <button class="btn-submit-test" id="btnSubmit" onclick="submitTest()" style="display:none">Submit Test</button>
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script src="/static/js/components/timer.js"></script>
 <script>
+// ═══════════════════════════════════════════════════════════
+// ENTERPRISE SECURITY ENGINE — AI NEXT GEN 2026
+// All violations are validated server-side. Frontend only reports.
+// ═══════════════════════════════════════════════════════════
 const TEST_ID = '{{ test_id }}';
 let test = null;
 let questions = [];
 let currentQ = 0;
 let answers = {};
-let securityViolations = 0;
 let timerInterval = null;
 let remainingSeconds = 0;
-let isFullscreen = false;
+let isTestActive = false;
 
+// ─── Security State ───
+const SEC = {
+    tabSwitchCount: 0,
+    blurCount: 0,
+    resizeCount: 0,
+    totalViolations: 0,
+    isDisqualified: false,
+    timerPaused: false,
+    idleSeconds: 0,
+    idleInterval: null,
+    disconnectTimer: null,
+    suspiciousKeyCount: 0,
+    devtoolsInterval: null,
+    lastViolationTime: 0,
+    mutationObserver: null,
+};
+
+// ─── Warning Modal System ────────────────────────────────────
+function showWarningModal(title, body, countdownSeconds = 0, onClose = null) {
+    let existing = document.getElementById('secWarningModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'secWarningModal';
+    modal.style.cssText = `
+        position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;
+        background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;
+        backdrop-filter:blur(8px);font-family:'Inter',sans-serif;
+    `;
+    modal.innerHTML = `
+    <div style="background:linear-gradient(135deg,#1a0a0a,#2d0a0a);border:2px solid #ff4444;
+         border-radius:20px;padding:2.5rem 3rem;max-width:500px;width:90%;text-align:center;
+         box-shadow:0 0 60px rgba(255,68,68,.4);animation:warningPulse .4s ease;">
+        <div style="font-size:3rem;margin-bottom:1rem;">⚠️</div>
+        <h2 style="color:#ff6b6b;font-size:1.5rem;margin-bottom:1rem;">${title}</h2>
+        <p style="color:#ffcccc;line-height:1.6;margin-bottom:1.5rem;">${body}</p>
+        ${countdownSeconds > 0 ? `<p style="color:#ff9999;font-size:0.9rem;">Closing in <strong id="warningCountdown">${countdownSeconds}</strong>s...</p>` : ''}
+        <button onclick="closeWarningModal()" style="
+            background:linear-gradient(135deg,#ff4444,#cc0000);color:white;border:none;
+            padding:.75rem 2rem;border-radius:10px;font-size:1rem;cursor:pointer;margin-top:1rem;
+        ">✓ I Understand</button>
+    </div>`;
+    document.body.appendChild(modal);
+
+    if (countdownSeconds > 0) {
+        let cd = countdownSeconds;
+        const cdEl = document.getElementById('warningCountdown');
+        const cdInterval = setInterval(() => {
+            cd--;
+            if (cdEl) cdEl.textContent = cd;
+            if (cd <= 0) { clearInterval(cdInterval); closeWarningModal(); if (onClose) onClose(); }
+        }, 1000);
+    }
+}
+
+function closeWarningModal() {
+    const m = document.getElementById('secWarningModal');
+    if (m) m.remove();
+    // Return to fullscreen if needed
+    if (isTestActive && !document.fullscreenElement) tryFullscreen();
+}
+
+// ─── Disqualification Modal ──────────────────────────────────
+function showDisqualifyModal(reason, detail = '') {
+    if (SEC.isDisqualified) return;
+    SEC.isDisqualified = true;
+    isTestActive = false;
+
+    // Clear all intervals immediately
+    clearAllIntervals();
+
+    let existing = document.getElementById('disqualifyModal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'disqualifyModal';
+    modal.style.cssText = `
+        position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;
+        background:rgba(0,0,0,.96);display:flex;align-items:center;justify-content:center;
+        font-family:'Inter',sans-serif;
+    `;
+    modal.innerHTML = `
+    <div style="background:linear-gradient(135deg,#0a0010,#1a0020);border:2px solid #9900ff;
+         border-radius:24px;padding:3rem;max-width:560px;width:90%;text-align:center;
+         box-shadow:0 0 80px rgba(153,0,255,.5);">
+        <div style="font-size:4rem;margin-bottom:1.5rem;animation:shake .5s ease;">🚫</div>
+        <h1 style="color:#ff4444;font-size:2rem;margin-bottom:0.75rem;">Test Terminated</h1>
+        <p style="color:#ff9999;font-size:1.1rem;margin-bottom:1rem;">Your test session has been <strong>permanently terminated</strong>.</p>
+        <div style="background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);
+             border-radius:12px;padding:1rem;margin-bottom:1.5rem;">
+            <p style="color:#ffcccc;font-size:.9rem;margin:0;"><strong>Reason:</strong> ${detail || reason}</p>
+        </div>
+        <p style="color:#aaa;font-size:.85rem;margin-bottom:2rem;">This violation has been logged and reported to the admin. Redirecting in <span id='dqCountdown'>5</span>s...</p>
+        <div style="display:flex;gap:1rem;justify-content:center;">
+            <button onclick="window.location.href='/dashboard'" style="
+                background:linear-gradient(135deg,#6600cc,#9900ff);color:white;border:none;
+                padding:.75rem 2rem;border-radius:10px;font-size:1rem;cursor:pointer;
+            ">Go to Dashboard</button>
+        </div>
+    </div>`;
+    document.body.appendChild(modal);
+
+    let cd = 5;
+    const cdEl = document.getElementById('dqCountdown');
+    const cdInt = setInterval(() => {
+        cd--;
+        if (cdEl) cdEl.textContent = cd;
+        if (cd <= 0) { clearInterval(cdInt); window.location.href = '/dashboard'; }
+    }, 1000);
+}
+
+// ─── Violation Reporter ──────────────────────────────────────
+const VIOLATION_COOLDOWNS = {};
+async function logViolation(type, detail = '', force = false) {
+    if (SEC.isDisqualified) return;
+    if (!isTestActive && !force) return;
+
+    // Cooldown: avoid duplicate rapid events (except critical)
+    const CRITICAL = ['fullscreen_exit','copy_attempt','paste_attempt','devtools_opened',
+        'refresh_attempt','multiple_tabs','script_manipulation','right_click'];
+    const now = Date.now();
+    if (!CRITICAL.includes(type)) {
+        const last = VIOLATION_COOLDOWNS[type] || 0;
+        if (now - last < 3000) return;  // 3s cooldown for non-critical
+    }
+    VIOLATION_COOLDOWNS[type] = now;
+
+    SEC.totalViolations++;
+    updateSecurityBadge();
+
+    try {
+        const res = await API.post(`/api/student/tests/${TEST_ID}/violation`, {
+            type,
+            detail: detail || type,
+            question_number: currentQ + 1,
+            time_remaining: remainingSeconds,
+        });
+
+        if (!res) return;
+
+        if (res.action === 'auto_submit_disqualify' || res.status === 'disqualified') {
+            // Save answers before disqualify
+            try { await saveCurrentAnswer(); } catch(e) {}
+            try { await API.post(`/api/student/tests/${TEST_ID}/submit`, { answers, _auto: true }); } catch(e) {}
+            showDisqualifyModal(type, res.message || 'Security violation detected.');
+            return;
+        }
+
+        if (res.action === 'warn') {
+            const remaining = res.remaining;
+            if (remaining !== null && remaining !== undefined) {
+                showWarningModal(
+                    '⚠️ Security Warning',
+                    `<strong>${res.message || 'Violation detected.'}</strong><br><br>You have <strong style="color:#ff6b6b">${remaining}</strong> more chance(s) before automatic disqualification.`,
+                    8
+                );
+            }
+        } else if (res.action === 'advance_question') {
+            Toast.show('Idle timeout. Moving to next question.', 'warning');
+            if (currentQ < questions.length - 1) renderQuestion(currentQ + 1);
+            else autoSubmit();
+        } else if (res.action === 'pause_timer') {
+            SEC.timerPaused = true;
+            Toast.show(`Internet disconnected. Timer paused for ${res.pause_seconds || 30}s.`, 'error');
+        } else if (res.action === 'resume_timer') {
+            SEC.timerPaused = false;
+            Toast.show('Connection restored. Timer resumed.', 'success');
+        }
+    } catch(e) {
+        // Network error — still track locally
+    }
+}
+
+function updateSecurityBadge() {
+    const indicator = document.getElementById('securityIndicator');
+    const text = document.getElementById('securityText');
+    if (!indicator || !text) return;
+    if (SEC.totalViolations === 0) {
+        indicator.className = 'security-indicator secure';
+        text.textContent = 'Secure';
+    } else {
+        indicator.className = 'security-indicator violation';
+        text.textContent = `${SEC.totalViolations} violation${SEC.totalViolations > 1 ? 's' : ''}`;
+    }
+}
+
+// ─── Test Initializer ────────────────────────────────────────
 async function initTest() {
     try {
         test = await API.get(`/api/student/tests/${TEST_ID}/start`);
         if (!test || !test.questions) { Toast.show('Failed to load test', 'error'); return; }
         questions = test.questions;
         document.getElementById('testTitle').textContent = test.name;
-        remainingSeconds = (test.duration || 60) * 60;
+        remainingSeconds = test.time_remaining !== undefined ? test.time_remaining : (test.duration || 60) * 60;
+        answers = test.answers || {};
+        const savedQ = test.current_question_index || 0;
+
         startTimer();
-        renderQuestion(0);
+        renderQuestion(savedQ);
+        isTestActive = true;
         enableSecurity();
         tryFullscreen();
     } catch(e) {
@@ -459,31 +664,36 @@ async function initTest() {
     }
 }
 
+// ─── Render Question ─────────────────────────────────────────
 function renderQuestion(idx) {
     currentQ = idx;
     const q = questions[idx];
     document.getElementById('qNumber').textContent = idx + 1;
     const typeEl = document.getElementById('qType');
-    typeEl.textContent = q.type.toUpperCase();
-    typeEl.className = 'q-type ' + q.type;
-    document.getElementById('qXp').textContent = (q.xp || 10) + ' XP';
+    typeEl.textContent = (q.type || 'text').toUpperCase();
+    typeEl.className = 'q-type ' + (q.type || 'text');
+    document.getElementById('qXp').textContent = (q.xp || q.marks || 10) + ' XP';
     document.getElementById('qText').textContent = q.text;
     const ansEl = document.getElementById('qAnswer');
     if (q.type === 'mcq') {
         const letters = ['A','B','C','D','E','F','G','H'];
         ansEl.innerHTML = `<div class="mcq-options">${(q.options || []).map((opt, i) => `
-            <div class="mcq-option ${answers[q.id] === opt ? 'selected' : ''}" onclick="selectMCQ('${q.id}','${opt.replace(/'/g,"\\'")}',this)">
+            <div class="mcq-option ${answers[q.id] === opt ? 'selected' : ''}" onclick="selectMCQ('${q.id}','${opt.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)">
                 <span class="option-letter">${letters[i]}</span>
                 <span class="option-text">${opt}</span>
             </div>`).join('')}</div>`;
     } else if (q.type === 'text') {
-        ansEl.innerHTML = `<input type="text" class="text-input" placeholder="Type your answer..." value="${answers[q.id] || ''}" oninput="answers['${q.id}']=this.value">`;
+        ansEl.innerHTML = `<input type="text" class="text-input" id="answerInput_${idx}"
+            placeholder="Type your answer..."
+            value="${(answers[q.id] || '').replace(/"/g, '&quot;')}"
+            oninput="answers['${q.id}']=this.value">`;
     } else {
-        ansEl.innerHTML = `<textarea class="textarea-input" placeholder="Write your detailed answer..." oninput="answers['${q.id}']=this.value">${answers[q.id] || ''}</textarea>`;
+        ansEl.innerHTML = `<textarea class="textarea-input" id="answerInput_${idx}"
+            placeholder="Write your detailed answer..."
+            oninput="answers['${q.id}']=this.value">${answers[q.id] || ''}</textarea>`;
     }
     document.getElementById('progressText').textContent = `${idx + 1} / ${questions.length}`;
     document.getElementById('progressFill').style.width = ((idx + 1) / questions.length * 100) + '%';
-    document.getElementById('btnPrev').classList.toggle('btn-disabled', idx === 0);
     document.getElementById('btnNext').style.display = idx === questions.length - 1 ? 'none' : 'flex';
     document.getElementById('btnSubmit').style.display = idx === questions.length - 1 ? 'block' : 'none';
     const container = document.getElementById('questionContainer');
@@ -491,6 +701,7 @@ function renderQuestion(idx) {
     container.offsetHeight;
     container.style.animation = 'fadeSlideIn .4s cubic-bezier(.4,0,.2,1)';
     window.scrollTo(0, 0);
+    SEC.idleSeconds = 0;
 }
 
 function selectMCQ(qId, value, el) {
@@ -499,18 +710,37 @@ function selectMCQ(qId, value, el) {
     el.classList.add('selected');
 }
 
-function nextQuestion() {
-    if (currentQ < questions.length - 1) renderQuestion(currentQ + 1);
-}
-function prevQuestion() {
-    if (currentQ > 0) renderQuestion(currentQ - 1);
+async function saveCurrentAnswer() {
+    if (!questions[currentQ]) return;
+    const q = questions[currentQ];
+    const ans = answers[q.id] || '';
+    try {
+        await API.post(`/api/student/tests/${TEST_ID}/answer`, {
+            question_id: q.id,
+            answer: ans,
+            current_question_index: currentQ + 1,
+        });
+    } catch(e) {}
 }
 
+async function nextQuestion() {
+    await saveCurrentAnswer();
+    SEC.idleSeconds = 0;
+    if (currentQ < questions.length - 1) renderQuestion(currentQ + 1);
+}
+
+function prevQuestion() {
+    // Navigating backwards is strictly prohibited
+}
+
+// ─── Timer ───────────────────────────────────────────────────
 function startTimer() {
     updateTimerDisplay();
     timerInterval = setInterval(() => {
-        remainingSeconds--;
-        updateTimerDisplay();
+        if (!SEC.timerPaused) {
+            remainingSeconds--;
+            updateTimerDisplay();
+        }
         if (remainingSeconds <= 0) { clearInterval(timerInterval); autoSubmit(); }
     }, 1000);
 }
@@ -521,57 +751,334 @@ function updateTimerDisplay() {
     const s = remainingSeconds % 60;
     const display = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     const el = document.getElementById('timerValue');
+    if (!el) return;
     el.textContent = display;
     el.className = 'timer-value';
     if (remainingSeconds <= 300) el.classList.add('danger');
     else if (remainingSeconds <= 600) el.classList.add('warning');
-    if (remainingSeconds <= 300) document.getElementById('timerDisplay').classList.add('danger-flash');
+    const td = document.getElementById('timerDisplay');
+    if (td && remainingSeconds <= 300) td.classList.add('danger-flash');
 }
 
+// ─── ENTERPRISE SECURITY LAYER ───────────────────────────────
 function enableSecurity() {
-    document.addEventListener('contextmenu', e => { e.preventDefault(); logViolation('rightclick'); });
-    document.addEventListener('copy', () => logViolation('copy'));
-    document.addEventListener('paste', e => { e.preventDefault(); logViolation('paste'); });
+    const rules = test.security_rules || {};
+
+    // 1. CONTEXT MENU — CRITICAL
+    if (rules.right_click_detection) {
+        document.addEventListener('contextmenu', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            logViolation('right_click', 'Right-click menu opened');
+        }, true);
+    }
+
+    // 2. CLIPBOARD — CRITICAL
+    if (rules.copy_detection) {
+        document.addEventListener('copy', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            logViolation('copy_attempt', 'Text copy attempted');
+        }, true);
+        document.addEventListener('cut', e => {
+            e.preventDefault();
+            logViolation('copy_attempt', 'Text cut attempted');
+        }, true);
+    }
+    if (rules.paste_detection) {
+        document.addEventListener('paste', e => {
+            e.preventDefault();
+            logViolation('paste_attempt', 'Paste attempted');
+        }, true);
+    }
+
+    // 3. TEXT SELECTION — CRITICAL (treat as copy attempt)
+    if (rules.copy_detection) {
+        document.addEventListener('selectstart', e => {
+            // allow selection in answer inputs
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            e.preventDefault();
+        }, true);
+    }
+
+    // 4. KEYBOARD SHORTCUTS — CRITICAL
     document.addEventListener('keydown', e => {
-        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.shiftKey && e.key === 'J')) { e.preventDefault(); logViolation('devtools'); }
-        if (e.ctrlKey && e.key === 'u') { e.preventDefault(); logViolation('viewsource'); }
-    });
-    document.addEventListener('visibilitychange', () => { if (document.hidden) logViolation('tabswitch'); });
-    window.addEventListener('resize', () => logViolation('resize'));
-    window.addEventListener('beforeunload', e => { e.preventDefault(); e.returnValue = ''; });
+        const ctrl = e.ctrlKey || e.metaKey;
+        // Dev tools
+        if (rules.devtools_detection && (e.key === 'F12' || (ctrl && e.shiftKey && ['I','J','C'].includes(e.key)) ||
+            (ctrl && e.shiftKey && e.key === 'K'))) {
+            e.preventDefault();
+            logViolation('devtools_opened', `DevTools shortcut: ${e.key}`);
+            return;
+        }
+        // View source
+        if (rules.copy_detection && ctrl && e.key === 'u') { e.preventDefault(); logViolation('copy_attempt', 'View source attempted'); return; }
+        // Print
+        if (rules.copy_detection && ctrl && e.key === 'p') { e.preventDefault(); logViolation('copy_attempt', 'Print attempted'); return; }
+        // Save As
+        if (ctrl && e.key === 's') { e.preventDefault(); return; }
+        // Find (allow)
+        // Refresh — CRITICAL
+        if (rules.refresh_detection && (e.key === 'F5' || (ctrl && e.key === 'r') || (ctrl && e.shiftKey && e.key === 'R'))) {
+            e.preventDefault();
+            logViolation('refresh_attempt', 'Keyboard refresh attempted');
+            return;
+        }
+        // Alt+Tab / Alt+F4
+        if (rules.tab_switch_limit > 0 && e.altKey && (e.key === 'Tab' || e.key === 'F4')) {
+            e.preventDefault();
+            logViolation('tab_switch', 'Alt+Tab window switch attempt');
+        }
+        // Win key
+        if (e.key === 'Meta' || e.key === 'OS') {
+            e.preventDefault();
+        }
+        // Escape from fullscreen
+        if (rules.fullscreen_mandatory && e.key === 'Escape') {
+            e.preventDefault();
+        }
+    }, true);
+
+    // 5. VISIBILITY / TAB SWITCH — MAJOR
+    if (rules.tab_switch_limit > 0) {
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isTestActive) {
+                SEC.tabSwitchCount++;
+                logViolation('tab_switch', `Tab switch #${SEC.tabSwitchCount}`);
+            }
+        });
+    }
+
+    // 6. WINDOW BLUR — MAJOR
+    if (rules.window_blur_limit > 0) {
+        window.addEventListener('blur', () => {
+            if (!isTestActive) return;
+            SEC.blurCount++;
+            logViolation('window_blur', `Window left focus #${SEC.blurCount}`);
+        });
+    }
+
+    // 7. WINDOW FOCUS (reconnect)
+    if (rules.fullscreen_mandatory) {
+        window.addEventListener('focus', () => {
+            if (isTestActive && !document.fullscreenElement) {
+                setTimeout(tryFullscreen, 500);
+            }
+        });
+    }
+
+    // 8. FULLSCREEN CHANGE — CRITICAL
+    if (rules.fullscreen_mandatory) {
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement && isTestActive) {
+                logViolation('fullscreen_exit', 'Exited fullscreen mode');
+                // Show re-enter warning
+                showWarningModal(
+                    '🔒 Fullscreen Required',
+                    'You have exited fullscreen mode. Please re-enter fullscreen to continue your test. Repeated exits will result in disqualification.',
+                    0,
+                    () => tryFullscreen()
+                );
+            }
+        });
+    }
+
+    // 9. BROWSER RESIZE — MAJOR
+    if (rules.browser_resize_limit > 0) {
+        let resizeDebounce = null;
+        window.addEventListener('resize', () => {
+            if (!isTestActive) return;
+            clearTimeout(resizeDebounce);
+            resizeDebounce = setTimeout(() => {
+                if (document.fullscreenElement) return; // ignore while fullscreen adjusting
+                SEC.resizeCount++;
+                logViolation('browser_resize', `Browser resized #${SEC.resizeCount}`);
+            }, 800);
+        });
+    }
+
+    // 10. BEFORE UNLOAD — CRITICAL
+    if (rules.refresh_detection) {
+        window.addEventListener('beforeunload', e => {
+            if (isTestActive) {
+                e.preventDefault();
+                e.returnValue = 'Your test is in progress. Are you sure you want to leave?';
+                logViolation('refresh_attempt', 'Page unload/refresh attempted', true);
+            }
+        });
+    }
+
+    // 11. NETWORK MONITORING — MAJOR
+    if (rules.internet_disconnect_rules) {
+        startConnectionTracker();
+    }
+
+    // 12. IDLE DETECTION — MAJOR
+    if (rules.idle_detection) {
+        startIdleTracker();
+    }
+
+    // 13. DEVTOOLS DETECTION — CRITICAL (size-based trap)
+    if (rules.devtools_detection) {
+        startDevToolsDetector();
+    }
+
+    // 14. DOM MUTATION GUARD — CRITICAL
+    startDomMutationGuard();
+
+    // 15. MOUSE TRACKING — SUSPICIOUS (no movement = suspicious)
+    startMouseTracker();
 }
 
-async function logViolation(type) {
-    securityViolations++;
-    const indicator = document.getElementById('securityIndicator');
-    indicator.className = 'security-indicator violation';
-    document.getElementById('securityText').textContent = `${securityViolations} violation${securityViolations > 1 ? 's' : ''}`;
+// ─── DevTools Detector ───────────────────────────────────────
+function startDevToolsDetector() {
+    let devtoolsOpen = false;
+    SEC.devtoolsInterval = setInterval(() => {
+        const threshold = 160;
+        const widthDiff = window.outerWidth - window.innerWidth;
+        const heightDiff = window.outerHeight - window.innerHeight;
+        const opened = widthDiff > threshold || heightDiff > threshold;
+        if (document.fullscreenElement && opened && !devtoolsOpen && isTestActive) {
+            devtoolsOpen = true;
+            logViolation('devtools_opened', `DevTools panel detected (size diff: ${widthDiff}x${heightDiff})`);
+        } else if (!opened) {
+            devtoolsOpen = false;
+        }
+    }, 1500);
+
+    // Console override trap
     try {
-        await API.post(`/api/student/tests/${TEST_ID}/violation`, { type });
+        const consoleProxy = {};
+        ['log','warn','error','info','debug','table','dir'].forEach(method => {
+            consoleProxy[method] = function() {
+                if (isTestActive) logViolation('devtools_opened', 'Console access detected');
+            };
+        });
+        // Don't override — just monitor
     } catch(e) {}
 }
 
+// ─── DOM Mutation Guard ──────────────────────────────────────
+function startDomMutationGuard() {
+    try {
+        SEC.mutationObserver = new MutationObserver((mutations) => {
+            if (!isTestActive) return;
+            for (const mut of mutations) {
+                // Detect script injection
+                for (const node of mut.addedNodes) {
+                    if (node.tagName === 'SCRIPT') {
+                        logViolation('script_manipulation', 'Script injection detected');
+                    }
+                }
+            }
+        });
+        SEC.mutationObserver.observe(document.documentElement, {
+            childList: true, subtree: true
+        });
+    } catch(e) {}
+}
+
+// ─── Mouse Tracker ────────────────────────────────────────────
+let mouseCheckInterval = null;
+let lastMouseTime = Date.now();
+function startMouseTracker() {
+    document.addEventListener('mousemove', () => { lastMouseTime = Date.now(); });
+    mouseCheckInterval = setInterval(() => {
+        if (!isTestActive) return;
+        const now = Date.now();
+        if (now - lastMouseTime > 120000) { // 2 min no mouse
+            logViolation('no_mouse_movement', 'No mouse movement for 2+ minutes');
+        }
+    }, 60000);
+}
+
+function startIdleTracker() {
+    const resetIdle = () => { SEC.idleSeconds = 0; };
+    document.addEventListener('mousemove', resetIdle);
+    document.addEventListener('keydown', resetIdle);
+    document.addEventListener('click', resetIdle);
+    document.addEventListener('touchstart', resetIdle);
+
+    SEC.idleInterval = setInterval(() => {
+        if (!isTestActive || SEC.timerPaused) return;
+        SEC.idleSeconds++;
+        const limit = (test.security_rules && test.security_rules.idle_timeout_seconds) || 60;
+        if (SEC.idleSeconds >= limit) {
+            SEC.idleSeconds = 0;
+            logViolation('idle_timeout', `Student idle for ${limit} seconds on one question`);
+        }
+    }, 1000);
+}
+
+// ─── Network Monitor ──────────────────────────────────────────
+function startConnectionTracker() {
+    window.addEventListener('offline', () => {
+        if (!isTestActive) return;
+        logViolation('internet_disconnect', 'Internet connection lost');
+        Toast.show('⚠️ Internet disconnected! Your answers are saved. Reconnect to continue.', 'error');
+    });
+    window.addEventListener('online', () => {
+        if (!isTestActive) return;
+        logViolation('internet_reconnect', 'Internet connection restored');
+        Toast.show('✅ Internet connection restored!', 'success');
+    });
+}
+
+// ─── Fullscreen ───────────────────────────────────────────────
 function tryFullscreen() {
     const el = document.documentElement;
     if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
 }
 
+// ─── Submit & AutoSubmit ─────────────────────────────────────
 async function submitTest() {
     if (!confirm('Are you sure you want to submit? This cannot be undone.')) return;
+    await _doSubmit();
+}
+
+async function autoSubmit() {
+    Toast.show('⏰ Time is up! Auto-submitting...', 'warning');
+    await _doSubmit();
+}
+
+async function _doSubmit() {
+    isTestActive = false;
+    clearAllIntervals();
     try {
         await API.post(`/api/student/tests/${TEST_ID}/submit`, { answers });
-        Toast.show('Test submitted successfully!', 'success');
-        setTimeout(() => window.location.href = '/dashboard', 1000);
+        Toast.show('✅ Test submitted successfully!', 'success');
+        setTimeout(() => window.location.href = '/dashboard', 1500);
     } catch(e) {
-        Toast.show('Submit failed: ' + e.message, 'error');
+        Toast.show('❌ Submit failed: ' + (e.message || 'Network error'), 'error');
     }
 }
 
-function autoSubmit() {
-    Toast.show('Time expired! Auto-submitting...', 'warning');
-    submitTest();
+function clearAllIntervals() {
+    if (timerInterval) clearInterval(timerInterval);
+    if (SEC.idleInterval) clearInterval(SEC.idleInterval);
+    if (SEC.devtoolsInterval) clearInterval(SEC.devtoolsInterval);
+    if (SEC.disconnectTimer) clearTimeout(SEC.disconnectTimer);
+    if (mouseCheckInterval) clearInterval(mouseCheckInterval);
+    if (SEC.mutationObserver) SEC.mutationObserver.disconnect();
 }
 
+{% if not denied %}
 initTest();
+{% endif %}
 </script>
+
+<style>
+@keyframes warningPulse {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes shake {
+    0%,100%{transform:translateX(0)}
+    25%{transform:translateX(-12px)}
+    75%{transform:translateX(12px)}
+}
+</style>
 {% endblock %}
+

@@ -1,0 +1,790 @@
+{% extends "base.html" %}
+{% block title %}Question Bank — AI Next Gen Admin{% endblock %}
+
+{% block head %}
+<style>
+    body { background: var(--bg-primary); }
+    
+    .admin-layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+      margin-top: 60px;
+    }
+    
+    .admin-sidebar {
+      width: 240px;
+      background: var(--bg-tertiary);
+      border-right: 1px solid var(--border-default);
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0 0.75rem;
+    }
+    
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    
+    .sidebar-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-primary);
+    }
+    
+    .sidebar-link.active {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      font-weight: 600;
+    }
+    
+    .sidebar-link .icon {
+      font-size: 1.1rem;
+      width: 22px;
+      text-align: center;
+    }
+    
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 0.75rem;
+    }
+    
+    .admin-main {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      max-width: calc(100% - 240px);
+      overflow-y: auto;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .btn-create {
+      padding: 0.6rem 1.25rem;
+      background: var(--gradient-brand);
+      color: var(--text-inverse);
+      font-size: 0.85rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .btn-create:hover {
+      opacity: 0.95;
+    }
+    
+    /* Search and Filters */
+    .filter-section {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .search-input, .filter-select {
+      padding: 0.55rem 0.75rem;
+      border-radius: 6px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+    }
+    
+    /* Table styling */
+    .table-container {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    
+    .data-table th {
+      text-align: left;
+      padding: 0.85rem 1.25rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-default);
+      background: rgba(255,255,255, 0.005);
+    }
+    
+    .data-table td {
+      padding: 1rem 1.25rem;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .data-table tr:hover td {
+      background: rgba(255,255,255, 0.015);
+    }
+    
+    .difficulty-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      display: inline-block;
+    }
+    .difficulty-badge.easy { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+    .difficulty-badge.medium { background: rgba(234, 179, 8, 0.1); color: #facc15; }
+    .difficulty-badge.hard { background: rgba(249, 115, 22, 0.1); color: #fb923c; }
+    .difficulty-badge.expert { background: rgba(239, 68, 68, 0.1); color: #f87171; }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.4rem;
+    }
+    .status-dot.active { background: #22c55e; }
+    .status-dot.inactive { background: #9ca3af; }
+    
+    .btn-action {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    .btn-action:hover {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+    }
+    .btn-action.delete:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+    
+    /* Sliding Drawer Modal */
+    .drawer-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .drawer-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .drawer {
+      position: fixed;
+      top: 0; right: -500px; bottom: 0;
+      width: 500px;
+      max-width: 100%;
+      background: var(--bg-tertiary);
+      border-left: 1px solid var(--border-default);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+      z-index: 1001;
+      padding: 2rem;
+      overflow-y: auto;
+      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .drawer-overlay.open .drawer {
+      right: 0;
+    }
+    
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-default);
+      padding-bottom: 0.75rem;
+    }
+    .drawer-header h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .btn-close-drawer {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+    .btn-close-drawer:hover {
+      color: var(--text-primary);
+    }
+    
+    .form-group {
+      margin-bottom: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border-radius: 6px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      outline: none;
+    }
+    .form-control:focus {
+      border-color: var(--accent-primary);
+    }
+    
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    /* Toggle switch for form */
+    .switch-group {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    
+    .btn-save-question {
+      width: 100%;
+      padding: 0.7rem;
+      background: var(--gradient-brand);
+      color: var(--text-inverse);
+      font-size: 0.88rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .btn-save-question:hover {
+      opacity: 0.95;
+    }
+    
+    .options-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    
+    .option-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    
+    .option-marker {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      width: 20px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-secondary);
+    }
+    
+    @media (max-width: 768px) {
+      .admin-sidebar { display: none; }
+      .admin-main { max-width: 100%; padding: 1.5rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <!-- Sidebar navigation -->
+    <aside class="admin-sidebar">
+        <nav class="sidebar-nav">
+            <a href="/admin" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/analytics" class="sidebar-link"><span class="icon">📈</span> Analytics</a>
+            <a href="/admin/tests" class="sidebar-link"><span class="icon">📝</span> Tests</a>
+            <a href="/admin/candidates" class="sidebar-link"><span class="icon">👥</span> Candidates</a>
+            <a href="/admin/security" class="sidebar-link"><span class="icon">🔐</span> Security</a>
+            <a href="/admin/questions" class="sidebar-link active"><span class="icon">❓</span> Question Bank</a>
+            <div class="sidebar-divider"></div>
+            <a href="/admin/settings" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+            <a href="/admin/logs" class="sidebar-link"><span class="icon">📋</span> Logs</a>
+        </nav>
+    </aside>
+    
+    <main class="admin-main">
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <h1>Question Bank System</h1>
+                <p style="color:var(--text-secondary);font-size:0.85rem;margin-top:0.3rem;">
+                    Dynamic questions stored in MongoDB Atlas, fetched on-the-fly during candidate sessions.
+                </p>
+            </div>
+            <button class="btn-create" onclick="openCreateDrawer()">
+                <span>➕</span> Create Question
+            </button>
+        </div>
+        
+        <!-- Search and Filters Section -->
+        <div class="filter-section">
+            <input type="text" id="searchBox" class="search-input" placeholder="Search questions by text or title..." oninput="filterQuestions()">
+            
+            <select id="filterCategory" class="filter-select" onchange="filterQuestions()">
+                <option value="">All Categories</option>
+                <option value="Logic">Logic</option>
+                <option value="Pattern Recognition">Pattern Recognition</option>
+                <option value="Critical Thinking">Critical Thinking</option>
+                <option value="Creativity">Creativity</option>
+                <option value="Future Thinking">Future Thinking</option>
+                <option value="Startup Thinking">Startup Thinking</option>
+                <option value="Innovation">Innovation</option>
+                <option value="Problem Solving">Problem Solving</option>
+                <option value="AI Thinking">AI Thinking</option>
+                <option value="Prompt Engineering">Prompt Engineering</option>
+            </select>
+            
+            <select id="filterDifficulty" class="filter-select" onchange="filterQuestions()">
+                <option value="">All Difficulties</option>
+                <option value="easy">🟢 Easy</option>
+                <option value="medium">🟡 Medium</option>
+                <option value="hard">🟠 Hard</option>
+                <option value="expert">🔴 Expert</option>
+            </select>
+            
+            <select id="filterStatus" class="filter-select" onchange="filterQuestions()">
+                <option value="">All Statuses</option>
+                <option value="active">Active Only</option>
+                <option value="inactive">Inactive Only</option>
+            </select>
+        </div>
+        
+        <!-- Questions Grid Table -->
+        <div class="table-container">
+            <table class="data-table" id="questionsTable">
+                <thead>
+                    <tr>
+                        <th style="width:250px;">Question</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Difficulty</th>
+                        <th>Marks</th>
+                        <th>Time Limit</th>
+                        <th>Status</th>
+                        <th style="text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="questionsBody">
+                    <tr>
+                        <td colspan="8" style="text-align:center;padding:3rem;color:var(--text-secondary);">
+                            Loading questions from MongoDB Atlas...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<!-- FORM DRAWER MODAL -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer(event)">
+    <div class="drawer" id="questionDrawer" onclick="event.stopPropagation()">
+        <div class="drawer-header">
+            <h3 id="drawerTitle">Create Question</h3>
+            <button class="btn-close-drawer" onclick="toggleDrawer(false)">✕</button>
+        </div>
+        <form onsubmit="return submitQuestionForm(event)">
+            <input type="hidden" id="formQuestionId">
+            
+            <div class="form-group">
+                <label>Question Title</label>
+                <input type="text" id="formTitle" class="form-control" placeholder="e.g. Look and Say Sequence" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Description / Question Text</label>
+                <textarea id="formDescription" class="form-control" placeholder="e.g. What is the next number in sequence?" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Category</label>
+                <select id="formCategory" class="form-control" required>
+                    <option value="Logic">Logic</option>
+                    <option value="Pattern Recognition">Pattern Recognition</option>
+                    <option value="Critical Thinking">Critical Thinking</option>
+                    <option value="Creativity">Creativity</option>
+                    <option value="Future Thinking">Future Thinking</option>
+                    <option value="Startup Thinking">Startup Thinking</option>
+                    <option value="Innovation">Innovation</option>
+                    <option value="Problem Solving">Problem Solving</option>
+                    <option value="AI Thinking">AI Thinking</option>
+                    <option value="Prompt Engineering">Prompt Engineering</option>
+                    <option value="Human Intelligence">Human Intelligence</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Question Type</label>
+                <select id="formType" class="form-control" onchange="toggleFormOptionsVisibility()" required>
+                    <option value="mcq">Multiple Choice (MCQ)</option>
+                    <option value="text">Short Answer Text</option>
+                    <option value="textarea">Detailed Paragraph Textarea</option>
+                </select>
+            </div>
+            
+            <!-- MCQ OPTIONS CONTAINER -->
+            <div class="form-group" id="formOptionsWrapper" style="display:none;">
+                <label>Options / Choices (Provide at least 2)</label>
+                <div class="options-container">
+                    <div class="option-row">
+                        <span class="option-marker">A</span>
+                        <input type="text" id="optA" class="form-control option-val" placeholder="Option A">
+                    </div>
+                    <div class="option-row">
+                        <span class="option-marker">B</span>
+                        <input type="text" id="optB" class="form-control option-val" placeholder="Option B">
+                    </div>
+                    <div class="option-row">
+                        <span class="option-marker">C</span>
+                        <input type="text" id="optC" class="form-control option-val" placeholder="Option C">
+                    </div>
+                    <div class="option-row">
+                        <span class="option-marker">D</span>
+                        <input type="text" id="optD" class="form-control option-val" placeholder="Option D">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Correct Answer</label>
+                <input type="text" id="formCorrect" class="form-control" placeholder="e.g. Option B value or numeric value" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Answer Explanation</label>
+                <textarea id="formExplanation" class="form-control" placeholder="Provide candidate explanation of why this answer is correct..."></textarea>
+            </div>
+            
+            <div class="settings-grid" style="grid-template-columns: repeat(3, 1fr); gap: 0.75rem;">
+                <div class="form-group">
+                    <label>Difficulty</label>
+                    <select id="formDifficulty" class="form-control" required>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                        <option value="expert">Expert</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Marks (XP)</label>
+                    <input type="number" id="formMarks" class="form-control" min="1" max="100" value="10" required>
+                </div>
+                <div class="form-group">
+                    <label>Time Limit (s)</label>
+                    <input type="number" id="formTimeLimit" class="form-control" min="5" max="600" value="60" required>
+                </div>
+            </div>
+            
+            <div class="switch-group">
+                <label class="switch">
+                    <input type="checkbox" id="formIsActive" checked>
+                    <span class="slider"></span>
+                </label>
+                <span class="setting-name" style="font-weight:normal;">Activate Question (Candidates will see this question)</span>
+            </div>
+            
+            <button type="submit" class="btn-save-question" id="btnSaveQuestion">Save Question</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allQuestions = [];
+
+async function loadQuestions() {
+    try {
+        const questions = await API.get('/api/admin/questions');
+        allQuestions = questions || [];
+        renderQuestionsTable(allQuestions);
+        
+        // Dynamically extract categories for filter list if needed
+    } catch(err) {
+        console.error('Failed to load questions:', err);
+        Toast.show('Error loading question bank.', 'error');
+    }
+}
+
+function renderQuestionsTable(questions) {
+    const tbody = document.getElementById('questionsBody');
+    if (!questions || questions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">
+            <div style="font-size:2.5rem;opacity:0.3;margin-bottom:0.75rem;">❓</div>
+            No questions found in Question Bank.
+        </td></tr>`;
+        return;
+    }
+    
+    tbody.innerHTML = questions.map(q => {
+        const textTrunc = q.description && q.description.length > 70 
+            ? q.description.substring(0, 70) + '...' 
+            : (q.description || q.text || '');
+        const titleText = q.title || 'Untitled';
+        
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight:700;color:var(--text-primary);">${titleText}</div>
+                    <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.15rem;max-width:320px;word-break:break-all;">${textTrunc}</div>
+                </td>
+                <td><strong style="color:var(--accent-primary);">${q.category || 'Logic'}</strong></td>
+                <td><code style="background:rgba(255,255,255,0.03);padding:0.1rem 0.3rem;border-radius:4px;font-size:0.78rem;">${(q.question_type || q.type || 'mcq').toUpperCase()}</code></td>
+                <td><span class="difficulty-badge ${q.difficulty_level || q.difficulty || 'medium'}">${q.difficulty_level || q.difficulty || 'medium'}</span></td>
+                <td><strong>${q.marks || q.xp_points || 10} XP</strong></td>
+                <td style="font-family:monospace;">${q.time_limit || 60}s</td>
+                <td>
+                    <span class="status-dot ${q.is_active ? 'active' : 'inactive'}"></span>
+                    <span>${q.is_active ? 'Active' : 'Inactive'}</span>
+                </td>
+                <td style="text-align:right;white-space:nowrap;">
+                    <button class="btn-action" onclick="openEditDrawer('${q.id}')">✏️ Edit</button>
+                    <button class="btn-action delete" onclick="deleteQuestion('${q.id}')">🗑️ Delete</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterQuestions() {
+    const search = document.getElementById('searchBox').value.toLowerCase();
+    const cat = document.getElementById('filterCategory').value.toLowerCase();
+    const diff = document.getElementById('filterDifficulty').value.toLowerCase();
+    const status = document.getElementById('filterStatus').value;
+    
+    const filtered = allQuestions.filter(q => {
+        const qTitle = (q.title || '').toLowerCase();
+        const qDesc = (q.description || q.text || '').toLowerCase();
+        const qCat = (q.category || '').toLowerCase();
+        const qDiff = (q.difficulty_level || q.difficulty || '').toLowerCase();
+        
+        const matchesSearch = !search || qTitle.includes(search) || qDesc.includes(search);
+        const matchesCat = !cat || qCat.includes(cat);
+        const matchesDiff = !diff || qDiff === diff;
+        
+        let matchesStatus = true;
+        if (status === 'active') matchesStatus = q.is_active === true;
+        if (status === 'inactive') matchesStatus = q.is_active === false;
+        
+        return matchesSearch && matchesCat && matchesDiff && matchesStatus;
+    });
+    
+    renderQuestionsTable(filtered);
+}
+
+function toggleDrawer(isOpen) {
+    const overlay = document.getElementById('drawerOverlay');
+    if (isOpen) overlay.classList.add('open');
+    else overlay.classList.remove('open');
+}
+
+function closeDrawer(e) {
+    if (e.target.id === 'drawerOverlay') toggleDrawer(false);
+}
+
+function toggleFormOptionsVisibility() {
+    const type = document.getElementById('formType').value;
+    const wrapper = document.getElementById('formOptionsWrapper');
+    if (type === 'mcq') {
+        wrapper.style.display = 'block';
+        document.getElementById('optA').required = true;
+        document.getElementById('optB').required = true;
+    } else {
+        wrapper.style.display = 'none';
+        document.getElementById('optA').required = false;
+        document.getElementById('optB').required = false;
+    }
+}
+
+function openCreateDrawer() {
+    document.getElementById('drawerTitle').textContent = 'Create Question';
+    document.getElementById('formQuestionId').value = '';
+    document.getElementById('formTitle').value = '';
+    document.getElementById('formDescription').value = '';
+    document.getElementById('formCategory').value = 'Logic';
+    document.getElementById('formType').value = 'mcq';
+    document.getElementById('formCorrect').value = '';
+    document.getElementById('formExplanation').value = '';
+    document.getElementById('formMarks').value = 10;
+    document.getElementById('formTimeLimit').value = 60;
+    document.getElementById('formIsActive').checked = true;
+    
+    document.getElementById('optA').value = '';
+    document.getElementById('optB').value = '';
+    document.getElementById('optC').value = '';
+    document.getElementById('optD').value = '';
+    
+    toggleFormOptionsVisibility();
+    toggleDrawer(true);
+}
+
+function openEditDrawer(qId) {
+    const q = allQuestions.find(x => x.id === qId);
+    if (!q) return;
+    
+    document.getElementById('drawerTitle').textContent = 'Edit Question';
+    document.getElementById('formQuestionId').value = q.id;
+    document.getElementById('formTitle').value = q.title || '';
+    document.getElementById('formDescription').value = q.description || q.text || '';
+    document.getElementById('formCategory').value = q.category || 'Logic';
+    document.getElementById('formType').value = q.question_type || q.type || 'mcq';
+    document.getElementById('formCorrect').value = q.correct_answer || q.correct || '';
+    document.getElementById('formExplanation').value = q.explanation || '';
+    document.getElementById('formDifficulty').value = q.difficulty_level || q.difficulty || 'medium';
+    document.getElementById('formMarks').value = q.marks || q.xp_points || 10;
+    document.getElementById('formTimeLimit').value = q.time_limit || 60;
+    document.getElementById('formIsActive').checked = q.is_active !== false;
+    
+    const opts = q.options || [];
+    document.getElementById('optA').value = opts[0] || '';
+    document.getElementById('optB').value = opts[1] || '';
+    document.getElementById('optC').value = opts[2] || '';
+    document.getElementById('optD').value = opts[3] || '';
+    
+    toggleFormOptionsVisibility();
+    toggleDrawer(true);
+}
+
+async function submitQuestionForm(e) {
+    e.preventDefault();
+    const saveBtn = document.getElementById('btnSaveQuestion');
+    saveBtn.disabled = true;
+    
+    const qId = document.getElementById('formQuestionId').value;
+    const type = document.getElementById('formType').value;
+    
+    let options = [];
+    if (type === 'mcq') {
+        options = [
+            document.getElementById('optA').value.trim(),
+            document.getElementById('optB').value.trim(),
+        ];
+        const optC = document.getElementById('optC').value.trim();
+        const optD = document.getElementById('optD').value.trim();
+        if (optC) options.push(optC);
+        if (optD) options.push(optD);
+    }
+    
+    const payload = {
+        title: document.getElementById('formTitle').value.trim(),
+        description: document.getElementById('formDescription').value.trim(),
+        category: document.getElementById('formCategory').value,
+        question_type: type,
+        options: options,
+        correct_answer: document.getElementById('formCorrect').value.trim(),
+        explanation: document.getElementById('formExplanation').value.trim(),
+        difficulty_level: document.getElementById('formDifficulty').value,
+        marks: parseInt(document.getElementById('formMarks').value, 10),
+        time_limit: parseInt(document.getElementById('formTimeLimit').value, 10),
+        is_active: document.getElementById('formIsActive').checked
+    };
+    
+    try {
+        let res;
+        if (qId) {
+            // Edit Question
+            res = await API.put(`/api/admin/questions/${qId}`, payload);
+            if (res.success) Toast.show('Question updated successfully!', 'success');
+        } else {
+            // Create Question
+            res = await API.post('/api/admin/questions', payload);
+            if (res.success) Toast.show('Question created successfully!', 'success');
+        }
+        
+        toggleDrawer(false);
+        await loadQuestions();
+    } catch(err) {
+        console.error(err);
+        Toast.show(err.message || 'Error saving question.', 'error');
+    } finally {
+        saveBtn.disabled = false;
+    }
+    return false;
+}
+
+async function deleteQuestion(qId) {
+    if (!confirm('Are you sure you want to permanently delete this question from the Question Bank?')) return;
+    try {
+        const res = await API.delete(`/api/admin/questions/${qId}`);
+        if (res.success) {
+            Toast.show('Question deleted from MongoDB Atlas.', 'success');
+            await loadQuestions();
+        }
+    } catch(err) {
+        console.error(err);
+        Toast.show('Failed to delete question.', 'error');
+    }
+}
+
+// Bootstrap initialization
+loadQuestions();
+</script>
+{% endblock %}

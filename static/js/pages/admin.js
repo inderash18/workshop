@@ -132,7 +132,9 @@
             <th class="sortable" data-sort="name">Name ${sortIndicator('name')}</th>
             <th class="sortable" data-sort="email">Email ${sortIndicator('email')}</th>
             <th>ID</th>
-            <th>Test Score</th>
+            <th>Score</th>
+            <th>Security</th>
+            <th>AI Verdict</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -140,26 +142,66 @@
         <tbody>
     `;
 
+    const AI_REC_CLASS = {
+      'Highly Recommended': 'badge-success',
+      'Recommended': 'badge-warning',
+      'Borderline': 'badge-secondary',
+      'Not Recommended': 'badge-danger',
+    };
+
     filtered.forEach(c => {
       const score = c.score !== undefined ? c.score : c.total_score;
       const total = c.total_marks || 100;
       const status = c.selection_status || c.status || 'pending';
-      const statusClass = status === 'selected' ? 'badge-success' : status === 'shortlisted' ? 'badge-warning' : status === 'rejected' ? 'badge-danger' : 'badge-secondary';
+      const statusClass = {
+        selected: 'badge-success',
+        waitlisted: 'badge-warning',
+        rejected: 'badge-danger',
+        disqualified: 'badge-danger',
+        pending: 'badge-secondary',
+      }[status] || 'badge-secondary';
+
+      const aiRec = c.ai_recommendation || '—';
+      const aiClass = AI_REC_CLASS[aiRec] || 'badge-secondary';
+
+      const attemptBadge = c.attempt_status === 'disqualified'
+        ? '<span class="badge badge-danger" style="font-size:0.6rem;margin-left:4px">DQ</span>'
+        : c.attempt_status === 'completed'
+        ? '<span class="badge badge-success" style="font-size:0.6rem;margin-left:4px">Done</span>'
+        : '';
+
+      const violations = c.violation_count || 0;
+      let secBadge = '';
+      if (c.attempt_status === 'disqualified') {
+        secBadge = '<span class="badge badge-danger" style="font-size:0.65rem">🚫 DQ</span>';
+      } else if (violations > 0) {
+        secBadge = `<span class="badge badge-warning" style="font-size:0.65rem">⚠️ ${violations} Alert</span>`;
+      } else if (c.attempt_status === 'completed') {
+        secBadge = '<span class="badge badge-success" style="font-size:0.65rem">🛡️ Clean</span>';
+      } else {
+        secBadge = '<span class="badge badge-secondary" style="font-size:0.65rem">⏳ Pending</span>';
+      }
 
       html += `
         <tr data-id="${c.id || c._id}">
-          <td class="candidate-name">${escapeHtml(c.name || 'N/A')}</td>
+          <td class="candidate-name">${escapeHtml(c.name || 'N/A')}${attemptBadge}</td>
           <td>${escapeHtml(c.email || 'N/A')}</td>
           <td><code>${escapeHtml(c.candidate_id || c.id || '')}</code></td>
           <td>${score !== undefined && score !== null ? `${score}/${total}` : 'N/A'}</td>
+          <td>${secBadge}</td>
+          <td><span class="badge ${aiClass}" style="font-size:0.65rem">${aiRec}</span></td>
           <td><span class="badge ${statusClass}">${capitalize(status)}</span></td>
-          <td>
+          <td style="display:flex;gap:6px;align-items:center">
             <button class="btn btn-sm btn-ghost view-btn" data-id="${c.id || c._id}" title="View Details">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
-            <button class="btn btn-sm btn-ghost shortlist-btn" data-id="${c.id || c._id}" title="Shortlist">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            </button>
+            <select class="status-select" data-id="${c.id || c._id}" style="font-size:0.75rem;padding:2px 6px;border-radius:6px;border:1px solid var(--border-default);background:var(--bg-secondary);color:var(--text-primary);cursor:pointer">
+              <option value="selected" ${status === 'selected' ? 'selected' : ''}>✅ Selected</option>
+              <option value="waitlisted" ${status === 'waitlisted' ? 'selected' : ''}>⏳ Waitlisted</option>
+              <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
+              <option value="disqualified" ${status === 'disqualified' ? 'selected' : ''}>🚫 Disqualified</option>
+              <option value="pending" ${status === 'pending' ? 'selected' : ''}>⬜ Pending</option>
+            </select>
           </td>
         </tr>
       `;
@@ -185,8 +227,19 @@
       btn.addEventListener('click', () => viewCandidateDetail(btn.dataset.id));
     });
 
-    container.querySelectorAll('.shortlist-btn').forEach(btn => {
-      btn.addEventListener('click', () => shortlistCandidate(btn.dataset.id));
+    container.querySelectorAll('.status-select').forEach(sel => {
+      sel.addEventListener('change', async () => {
+        const candidateId = sel.dataset.id;
+        const newStatus = sel.value;
+        try {
+          await API.post(`/api/admin/candidates/${candidateId}/status`, { status: newStatus });
+          Toast.success('Updated', `Candidate status set to ${capitalize(newStatus)}`);
+          await loadCandidates();
+        } catch (err) {
+          Toast.error('Error', err.message || 'Failed to update status');
+          await loadCandidates();
+        }
+      });
     });
   }
 
@@ -260,6 +313,18 @@
     const candidate = allCandidates.find(c => String(c.id || c._id) === String(id));
     if (!candidate) return;
 
+    const aiRec = candidate.ai_recommendation || '—';
+    const aiScores = candidate.ai_scores || {};
+    const violations = candidate.violation_count || 0;
+    const timeTaken = candidate.time_taken ? `${Math.floor(candidate.time_taken / 60)}m ${candidate.time_taken % 60}s` : 'N/A';
+
+    const aiRecColor = {
+      'Highly Recommended': '#10b981',
+      'Recommended': '#f59e0b',
+      'Borderline': '#6366f1',
+      'Not Recommended': '#ef4444',
+    }[aiRec] || '#6b7280';
+
     const overlay = document.createElement('div');
     overlay.className = 'overlay candidate-detail-overlay';
     overlay.innerHTML = `
@@ -275,14 +340,43 @@
             <div class="detail-item"><label>Email</label><span>${escapeHtml(candidate.email || 'N/A')}</span></div>
             <div class="detail-item"><label>Candidate ID</label><span><code>${escapeHtml(candidate.candidate_id || candidate.id || '')}</code></span></div>
             <div class="detail-item"><label>Phone</label><span>${escapeHtml(candidate.phone || 'N/A')}</span></div>
-            <div class="detail-item"><label>Score</label><span>${candidate.score !== undefined ? `${candidate.score}/${candidate.total_marks || 100}` : 'N/A'}</span></div>
-            <div class="detail-item"><label>Status</label><span class="badge badge-${candidate.selection_status === 'selected' ? 'success' : 'secondary'}">${capitalize(candidate.selection_status || 'pending')}</span></div>
-            ${candidate.test_results ? `<div class="detail-item full-width"><label>Test Results</label><pre>${JSON.stringify(candidate.test_results, null, 2)}</pre></div>` : ''}
+            <div class="detail-item"><label>College</label><span>${escapeHtml(candidate.college || 'N/A')}</span></div>
+            <div class="detail-item"><label>Department</label><span>${escapeHtml(candidate.department || 'N/A')}</span></div>
+            <div class="detail-item"><label>Score</label><span style="font-size:1.1rem;font-weight:700;color:var(--accent-primary)">${candidate.score !== undefined ? `${candidate.score}/${candidate.total_marks || 100}` : 'N/A'}</span></div>
+            <div class="detail-item"><label>Time Taken</label><span>${timeTaken}</span></div>
+            <div class="detail-item"><label>Security Violations</label><span style="color:${violations > 0 ? '#ef4444' : '#10b981'}">${violations}</span></div>
+            <div class="detail-item"><label>Attempt Status</label><span>${capitalize(candidate.attempt_status || 'not_started')}</span></div>
+            <div class="detail-item full-width" style="background:${aiRecColor}15;border:1px solid ${aiRecColor}40;border-radius:10px;padding:1rem">
+              <label style="color:${aiRecColor}">🤖 AI Recommendation</label>
+              <span style="font-size:1rem;font-weight:700;color:${aiRecColor}">${aiRec}</span>
+            </div>
+            ${Object.keys(aiScores).some(k => aiScores[k] > 0) ? `
+            <div class="detail-item full-width">
+              <label>AI Score Breakdown</label>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-top:0.5rem">
+                ${Object.entries(aiScores).map(([k, v]) => `
+                  <div style="text-align:center;background:var(--bg-primary);border-radius:8px;padding:0.5rem">
+                    <div style="font-size:1.1rem;font-weight:700;color:var(--accent-primary)">${Math.round(v)}%</div>
+                    <div style="font-size:0.65rem;color:var(--text-tertiary);text-transform:uppercase">${k.replace('_', ' ')}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>` : ''}
+            <div class="detail-item full-width">
+              <label>Current Status</label>
+              <select id="modal-status-select" style="font-size:0.85rem;padding:6px 12px;border-radius:8px;border:1px solid var(--border-default);background:var(--bg-secondary);color:var(--text-primary);width:100%">
+                <option value="selected" ${candidate.selection_status === 'selected' ? 'selected' : ''}>✅ Selected</option>
+                <option value="waitlisted" ${candidate.selection_status === 'waitlisted' ? 'selected' : ''}>⏳ Waitlisted</option>
+                <option value="rejected" ${candidate.selection_status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
+                <option value="disqualified" ${candidate.selection_status === 'disqualified' ? 'selected' : ''}>🚫 Disqualified</option>
+                <option value="pending" ${(candidate.selection_status || 'pending') === 'pending' ? 'selected' : ''}>⬜ Pending</option>
+              </select>
+            </div>
           </div>
         </div>
         <div class="overlay-footer">
           <button class="btn btn-secondary overlay-close-btn">Close</button>
-          <button class="btn btn-primary shortlist-action-btn" data-id="${id}">Shortlist</button>
+          <button class="btn btn-primary save-status-btn" data-id="${id}">Save Status</button>
         </div>
       </div>
     `;
@@ -298,9 +392,16 @@
     overlay.querySelector('.overlay-backdrop').addEventListener('click', close);
     overlay.querySelector('.overlay-close').addEventListener('click', close);
     overlay.querySelector('.overlay-close-btn').addEventListener('click', close);
-    overlay.querySelector('.shortlist-action-btn').addEventListener('click', async () => {
-      await shortlistCandidate(id);
-      close();
+    overlay.querySelector('.save-status-btn').addEventListener('click', async () => {
+      const newStatus = overlay.querySelector('#modal-status-select').value;
+      try {
+        await API.post(`/api/admin/candidates/${id}/status`, { status: newStatus });
+        Toast.success('Updated', `Status set to ${capitalize(newStatus)}`);
+        await loadCandidates();
+        close();
+      } catch (err) {
+        Toast.error('Error', err.message || 'Failed to update status');
+      }
     });
   }
 
@@ -308,10 +409,10 @@
     const btn = $('auto-shortlist') || document.querySelector('.auto-shortlist-btn');
     if (btn) {
       btn.addEventListener('click', async () => {
-        if (!confirm('Auto-shortlist candidates who scored above the threshold?')) return;
+        if (!confirm('Run AI Auto-Shortlist?\n\n• Score ≥ 80% → Selected\n• Score ≥ 60% → Waitlisted\n• Score < 60% → Rejected\n• Disqualified candidates remain unchanged')) return;
         try {
           const data = await API.post('/api/admin/auto-shortlist');
-          Toast.success('Done', data.message || 'Auto-shortlist completed');
+          Toast.success('AI Shortlisting Done', data.message || 'Completed');
           await loadCandidates();
         } catch (err) {
           Toast.error('Error', err.message || 'Auto-shortlist failed');

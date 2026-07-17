@@ -27,8 +27,9 @@ def api_leaderboard():
     ]
     valid.sort(key=lambda c: (-c.get("score_final", 0), c.get("time_taken", 99999)))
 
+    limit = int(get_setting("leaderboard_limit", 10))
     results = []
-    for c in valid[:10]:
+    for c in valid[:limit]:
         entry = {
             "name": c.get("name"),
             "college": c.get("college"),

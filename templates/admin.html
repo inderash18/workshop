@@ -3,125 +3,426 @@
 
 {% block head %}
 <style>
-    body{background:var(--bg-primary)}
-    .admin-layout{display:flex;min-height:calc(100vh - 60px);margin-top:60px}
-    .admin-sidebar{width:240px;background:rgba(255,255,255,.02);border-right:1px solid rgba(255,255,255,.06);padding:1.5rem 0;position:sticky;top:60px;height:calc(100vh - 60px);flex-shrink:0;display:flex;flex-direction:column}
-    .sidebar-nav{flex:1;display:flex;flex-direction:column;gap:.25rem;padding:0 .75rem}
-    .sidebar-link{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:10px;color:var(--text-secondary);font-size:.9rem;font-weight:500;text-decoration:none;transition:all .2s}
-    .sidebar-link:hover{color:var(--text-primary);background:rgba(255,255,255,.04)}
-    .sidebar-link.active{color:var(--accent-primary);background:rgba(99,102,241,.1)}
-    .sidebar-link .icon{font-size:1.1rem;width:22px;text-align:center}
-    .sidebar-divider{height:1px;background:rgba(255,255,255,.06);margin:.75rem .75rem}
-    .admin-main{flex:1;padding:2rem 2.5rem;max-width:calc(100% - 240px)}
-    .admin-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem}
-    .admin-topbar h1{font-size:1.75rem;font-weight:700;color:var(--text-primary)}
-    .admin-topbar .admin-info{display:flex;align-items:center;gap:1rem}
-    .admin-topbar .admin-name{font-size:.9rem;color:var(--text-secondary);font-weight:500}
-    .btn-logout{padding:.5rem 1rem;border-radius:8px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#fca5a5;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s}
-    .btn-logout:hover{background:rgba(239,68,68,.2)}
-    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem}
-    .stat-card{padding:1.5rem;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);transition:all .3s}
-    .stat-card:hover{border-color:rgba(99,102,241,.2)}
-    .stat-card .label{font-size:.8rem;color:var(--text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
-    .stat-card .value{font-size:2rem;font-weight:700;color:var(--text-primary);line-height:1}
-    .stat-card .change{font-size:.75rem;color:#22c55e;margin-top:.35rem;font-weight:500}
-    .panel-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:1.25rem}
-    .panel{border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);overflow:hidden}
-    .panel-header{padding:1.25rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
-    .panel-header h3{font-size:1rem;font-weight:600;color:var(--text-primary)}
-    .panel-body{padding:1.5rem}
-    .activity-list{display:flex;flex-direction:column;gap:.75rem}
-    .activity-item{display:flex;align-items:flex-start;gap:.75rem;padding:.75rem;border-radius:10px;background:rgba(255,255,255,.02)}
-    .activity-dot{width:8px;height:8px;border-radius:50%;margin-top:.35rem;flex-shrink:0}
-    .activity-dot.blue{background:#3b82f6}
-    .activity-dot.green{background:#22c55e}
-    .activity-dot.yellow{background:#eab308}
-    .activity-dot.red{background:#ef4444}
-    .activity-text{font-size:.85rem;color:var(--text-secondary);line-height:1.5}
-    .activity-text strong{color:var(--text-primary);font-weight:600}
-    .activity-time{font-size:.75rem;color:var(--text-muted);margin-top:.25rem}
-    .quick-links{display:flex;flex-direction:column;gap:.5rem}
-    .quick-link{display:flex;align-items:center;gap:.75rem;padding:.85rem 1rem;border-radius:10px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.1);color:var(--text-primary);text-decoration:none;font-size:.9rem;font-weight:500;transition:all .2s}
-    .quick-link:hover{background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.2)}
-    .quick-link .ql-icon{font-size:1.2rem}
-    @media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}.panel-grid{grid-template-columns:1fr}}
-    @media(max-width:768px){.admin-sidebar{display:none}.admin-main{max-width:100%;padding:1.5rem}}
+    body { background: var(--bg-primary); }
+    
+    .admin-layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+      margin-top: 60px;
+    }
+    
+    .admin-sidebar {
+      width: 240px;
+      background: var(--bg-tertiary);
+      border-right: 1px solid var(--border-default);
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0 0.75rem;
+    }
+    
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    
+    .sidebar-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-primary);
+    }
+    
+    .sidebar-link.active {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      font-weight: 600;
+    }
+    
+    .sidebar-link .icon {
+      font-size: 1.1rem;
+      width: 22px;
+      text-align: center;
+    }
+    
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 0.75rem;
+    }
+    
+    .admin-main {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      max-width: calc(100% - 240px);
+      overflow-y: auto;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    
+    /* Stats Row */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-mini-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    
+    .stat-mini-card .label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .stat-mini-card .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Test Access Banner */
+    .access-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-default);
+      font-size: 0.85rem;
+    }
+    .access-banner.open {
+      background: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.25);
+    }
+    .access-banner.closed {
+      background: rgba(239, 68, 68, 0.06);
+      border-color: rgba(239, 68, 68, 0.25);
+    }
+    .access-banner-left { display: flex; align-items: center; gap: 0.75rem; }
+    .access-banner-icon { font-size: 1.2rem; }
+    .access-banner-text strong { color: var(--text-primary); }
+    .access-banner-text p { color: var(--text-secondary); margin: 0; font-size: 0.78rem; }
+    
+    .access-toggle-btn {
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .access-toggle-btn.open-state { background: var(--color-danger); color: white; }
+    .access-toggle-btn.closed-state { background: var(--color-success); color: white; }
+    
+    /* Search & Filters */
+    .search-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .search-input {
+      flex: 1;
+      padding: 0.55rem 0.85rem;
+      border-radius: 8px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--accent-primary);
+    }
+    
+    /* Table styling */
+    .table-container {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+    
+    .data-table th, .data-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .data-table th {
+      background: var(--bg-secondary);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .data-table tr:hover td {
+      background: var(--bg-primary);
+    }
+    
+    .candidate-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .badge-success { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success-border); }
+    .badge-warning { background: var(--color-warning-bg); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
+    .badge-danger { background: var(--color-danger-bg); color: var(--color-danger); border: 1px solid var(--color-danger-border); }
+    .badge-secondary { background: var(--border-subtle); color: var(--text-secondary); border: 1px solid var(--border-default); }
+
+    /* Modals & Detail Drawers */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .overlay-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 15, 15, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    .overlay-content {
+      position: relative;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      z-index: 1;
+      transform: scale(0.95);
+      transition: transform 0.25s ease;
+    }
+    .overlay.active .overlay-content {
+      transform: scale(1);
+    }
+    .overlay-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .overlay-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .overlay-close {
+      font-size: 1.25rem;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .overlay-body {
+      padding: 1.25rem;
+      overflow-y: auto;
+    }
+    .overlay-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .detail-item { display: flex; flex-direction: column; gap: 0.2rem; }
+    .detail-item.full-width { grid-column: 1 / -1; }
+    .detail-item label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .detail-item span {
+      font-size: 0.88rem;
+      color: var(--text-primary);
+    }
+    
+    .btn {
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .btn-secondary {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-default);
+    }
+    .btn-secondary:hover { background: var(--border-default); }
+    .btn-primary { background: var(--gradient-brand); color: var(--text-inverse); }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-ghost { background: none; border: none; color: var(--text-secondary); padding: 0.35rem; }
+    .btn-ghost:hover { color: var(--text-primary); background: var(--bg-primary); }
+
+    @media (max-width: 768px) {
+      .admin-sidebar { display: none; }
+      .admin-main { max-width: 100%; padding: 1rem; }
+      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="admin-layout">
+    <!-- Sidebar navigation -->
     <aside class="admin-sidebar">
         <nav class="sidebar-nav">
             <a href="/admin" class="sidebar-link active"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/analytics" class="sidebar-link"><span class="icon">📈</span> Analytics</a>
             <a href="/admin/tests" class="sidebar-link"><span class="icon">📝</span> Tests</a>
             <a href="/admin/candidates" class="sidebar-link"><span class="icon">👥</span> Candidates</a>
+            <a href="/admin/security" class="sidebar-link"><span class="icon">🔐</span> Security</a>
+            <a href="/admin/questions" class="sidebar-link"><span class="icon">❓</span> Question Bank</a>
             <div class="sidebar-divider"></div>
             <a href="/admin/settings" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
             <a href="/admin/logs" class="sidebar-link"><span class="icon">📋</span> Logs</a>
         </nav>
     </aside>
+    
     <main class="admin-main">
-        <div class="admin-topbar">
-            <h1>Dashboard</h1>
-            <div class="admin-info">
-                <span class="admin-name" id="adminName">Admin</span>
-                <button class="btn-logout" onclick="Auth.adminLogout()">Logout</button>
+        <!-- Header -->
+        <div class="page-header">
+            <h1>Candidates Evaluation</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="export-csv">📥 Export CSV</button>
+                <button class="btn btn-primary" id="auto-shortlist">✨ Auto Shortlist</button>
             </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="label">Total Tests</div>
-                <div class="value" id="statTotalTests">0</div>
-                <div class="change">All time</div>
+        <!-- Access Banner -->
+        <div class="access-banner closed" id="accessBanner">
+            <div class="access-banner-left">
+                <div class="access-banner-icon" id="accessIcon">🔒</div>
+                <div class="access-banner-text">
+                    <span id="accessTitle"><strong>Test Access: CLOSED</strong></span>
+                    <p id="accessDesc">Students cannot join or attempt the test.</p>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="label">Active Tests</div>
-                <div class="value" id="statActiveTests">0</div>
-                <div class="change">Currently running</div>
+            <button class="access-toggle-btn closed-state" id="accessToggleBtn" onclick="toggleTestAccess()">
+                Open Test
+            </button>
+        </div>
+        
+        <!-- Stats Strip -->
+        <div class="stats-strip">
+            <div class="stat-mini-card">
+                <span class="label">Total Registered</span>
+                <span class="value" id="statTotalCandidates">0</span>
             </div>
-            <div class="stat-card">
-                <div class="label">Total Candidates</div>
-                <div class="value" id="statTotalCandidates">0</div>
-                <div class="change">Registered</div>
+            <div class="stat-mini-card">
+                <span class="label">Completed attempts</span>
+                <span class="value" id="statCompleted">0</span>
             </div>
-            <div class="stat-card">
-                <div class="label">Completion Rate</div>
-                <div class="value" id="statCompletion">0%</div>
-                <div class="change">Overall</div>
+            <div class="stat-mini-card">
+                <span class="label">AI Shortlisted</span>
+                <span class="value" id="statShortlisted">0</span>
+            </div>
+            <div class="stat-mini-card">
+                <span class="label">Disqualified (DQ)</span>
+                <span class="value" id="statDisqualified">0</span>
             </div>
         </div>
 
-        <div class="panel-grid">
-            <div class="panel">
-                <div class="panel-header">
-                    <h3>Recent Activity</h3>
-                </div>
-                <div class="panel-body">
-                    <div class="activity-list" id="activityList">
-                        <div class="activity-item">
-                            <div class="activity-dot blue"></div>
-                            <div>
-                                <div class="activity-text">Loading recent activity...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="panel">
-                <div class="panel-header">
-                    <h3>Quick Actions</h3>
-                </div>
-                <div class="panel-body">
-                    <div class="quick-links">
-                        <a href="/admin/tests/create" class="quick-link"><span class="ql-icon">➕</span> Create New Test</a>
-                        <a href="/admin/tests" class="quick-link"><span class="ql-icon">📝</span> Manage Tests</a>
-                        <a href="/admin/candidates" class="quick-link"><span class="ql-icon">👥</span> View Candidates</a>
-                        <a href="/admin/logs" class="quick-link"><span class="ql-icon">📋</span> Security Logs</a>
-                    </div>
-                </div>
-            </div>
+        <!-- Search Bar -->
+        <div class="search-row">
+            <input type="text" class="search-input" id="candidate-search" placeholder="Search candidate by name, email, or ID...">
+        </div>
+        
+        <!-- Data Table Container -->
+        <div class="table-container" id="candidates-table">
+            <div style="padding:2rem; text-align:center; color:var(--text-secondary);">Loading candidates...</div>
         </div>
     </main>
 </div>
@@ -129,33 +430,360 @@
 
 {% block scripts %}
 <script>
-(async function() {
-    const admin = JSON.parse(localStorage.getItem('admin') || '{}');
-    document.getElementById('adminName').textContent = admin.username || 'Admin';
+let allCandidates = [];
+let filterText = '';
+
+async function init() {
+    const ok = await Auth.requireAdmin();
+    if (!ok) return;
+    Auth.updateNav();
+
+    await loadStats();
+    await loadCandidates();
+    initSearch();
+    initExport();
+    initAutoShortlist();
+    await loadTestAccess();
+}
+
+async function loadStats() {
     try {
-        const stats = await API.get('/api/admin/stats', localStorage.getItem('admin_token'));
+        const stats = await API.get('/api/admin/stats');
         if (stats) {
-            document.getElementById('statTotalTests').textContent = stats.total_tests || 0;
-            document.getElementById('statActiveTests').textContent = stats.active_tests || 0;
-            document.getElementById('statTotalCandidates').textContent = stats.total_candidates || 0;
-            document.getElementById('statCompletion').textContent = (stats.completion_rate || 0) + '%';
+            document.getElementById('statTotalCandidates').textContent = stats.total_candidates || stats.total || 0;
+            document.getElementById('statCompleted').textContent = stats.completed_tests || stats.completed || 0;
+            document.getElementById('statShortlisted').textContent = stats.shortlisted || stats.selected || 0;
+            document.getElementById('statDisqualified').textContent = stats.disqualified || 0;
         }
-    } catch(e) { console.error('Failed to load stats:', e); }
+    } catch (e) {
+        console.error('Failed to load stats:', e);
+    }
+}
+
+async function loadTestAccess() {
     try {
-        const activity = await API.get('/api/admin/activity', localStorage.getItem('admin_token'));
-        if (activity && activity.length) {
-            const list = document.getElementById('activityList');
-            list.innerHTML = activity.map(a => `
-                <div class="activity-item">
-                    <div class="activity-dot ${a.color || 'blue'}"></div>
-                    <div>
-                        <div class="activity-text">${a.text}</div>
-                        <div class="activity-time">${a.time}</div>
-                    </div>
-                </div>
-            `).join('');
+        const access = await API.get('/api/admin/test-access');
+        if (access !== null && access !== undefined) {
+            updateAccessBanner(access.test_open);
         }
-    } catch(e) { console.error('Failed to load activity:', e); }
-})();
+    } catch(e) { console.error('Failed to load test access state:', e); }
+}
+
+async function toggleTestAccess() {
+    const btn = document.getElementById('accessToggleBtn');
+    btn.disabled = true;
+    try {
+        const res = await API.post('/api/admin/test-access/toggle');
+        if (res && res.success) {
+            updateAccessBanner(res.test_open);
+            Toast.success(res.test_open ? '✅ Test Opened' : '🔒 Test Closed', res.message);
+        } else {
+            Toast.error('Error', (res && res.error) || 'Failed to toggle');
+        }
+    } catch(e) {
+        Toast.error('Error', e.message || 'Failed to toggle');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function updateAccessBanner(isOpen) {
+    const banner = document.getElementById('accessBanner');
+    const icon = document.getElementById('accessIcon');
+    const title = document.getElementById('accessTitle');
+    const desc = document.getElementById('accessDesc');
+    const btn = document.getElementById('accessToggleBtn');
+
+    if (isOpen) {
+        banner.className = 'access-banner open';
+        icon.textContent = '✅';
+        title.innerHTML = '<strong>Test Access: OPEN</strong>';
+        desc.textContent = 'Students can now register and attempt the test.';
+        btn.className = 'access-toggle-btn open-state';
+        btn.textContent = 'Close Test';
+    } else {
+        banner.className = 'access-banner closed';
+        icon.textContent = '🔒';
+        title.innerHTML = '<strong>Test Access: CLOSED</strong>';
+        desc.textContent = 'Students cannot join or attempt the test.';
+        btn.className = 'access-toggle-btn closed-state';
+        btn.textContent = 'Open Test';
+    }
+}
+
+async function loadCandidates() {
+    const container = document.getElementById('candidates-table');
+    if (!container) return;
+
+    try {
+        const data = await API.get('/api/admin/candidates');
+        allCandidates = data.candidates || data.data || data || [];
+        renderCandidates(allCandidates);
+    } catch (err) {
+        container.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">Failed to load candidates: ${err.message}</div>`;
+    }
+}
+
+function renderCandidates(candidates) {
+    const container = document.getElementById('candidates-table');
+    if (!container) return;
+
+    let filtered = candidates.filter(c => {
+        if (!filterText) return true;
+        const search = filterText.toLowerCase();
+        return (c.name || '').toLowerCase().includes(search) ||
+               (c.email || '').toLowerCase().includes(search) ||
+               (c.candidate_id || '').toLowerCase().includes(search);
+    });
+
+    if (!filtered.length) {
+        container.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">No candidates found.</div>';
+        return;
+    }
+
+    let html = `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>ID</th>
+            <th>Final Score</th>
+            <th>Security</th>
+            <th>AI Verdict</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    const AI_REC_CLASS = {
+      'Highly Recommended': 'badge-success',
+      'Recommended': 'badge-warning',
+      'Borderline': 'badge-secondary',
+      'Not Recommended': 'badge-danger',
+    };
+
+    filtered.forEach(c => {
+        const score = c.score !== undefined ? c.score : c.total_score;
+        const total = c.total_marks || 100;
+        const status = c.selection_status || c.status || 'pending';
+        const statusClass = {
+            selected: 'badge-success',
+            waitlisted: 'badge-warning',
+            rejected: 'badge-danger',
+            disqualified: 'badge-danger',
+            pending: 'badge-secondary',
+        }[status] || 'badge-secondary';
+
+        const aiRec = c.ai_recommendation || '—';
+        const aiClass = AI_REC_CLASS[aiRec] || 'badge-secondary';
+
+        const violations = c.violation_count || 0;
+        let secBadge = '';
+        if (c.attempt_status === 'disqualified') {
+            secBadge = '<span class="badge badge-danger">🚫 DQ</span>';
+        } else if (violations > 0) {
+            secBadge = `<span class="badge badge-warning">⚠️ ${violations} Alert</span>`;
+        } else if (c.attempt_status === 'completed') {
+            secBadge = '<span class="badge badge-success">🛡️ Clean</span>';
+        } else {
+            secBadge = '<span class="badge badge-secondary">⏳ Pending</span>';
+        }
+
+        html += `
+          <tr data-id="${c.id || c._id}">
+            <td class="candidate-name">${escapeHtml(c.name || 'N/A')}</td>
+            <td>${escapeHtml(c.email || 'N/A')}</td>
+            <td><code>${escapeHtml(c.candidate_id || c.id || '')}</code></td>
+            <td><strong>${score !== undefined && score !== null ? `${score}/${total}` : 'N/A'}</strong></td>
+            <td>${secBadge}</td>
+            <td><span class="badge ${aiClass}">${aiRec}</span></td>
+            <td><span class="badge ${statusClass}">${capitalize(status)}</span></td>
+            <td style="display:flex;gap:6px;align-items:center">
+              <button class="btn btn-sm btn-ghost view-btn" data-id="${c.id || c._id}" title="View Details">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+              <select class="status-select" data-id="${c.id || c._id}" style="font-size:0.75rem;padding:2px 6px;border-radius:6px;border:1px solid var(--border-default);background:var(--bg-secondary);color:var(--text-primary);cursor:pointer">
+                <option value="selected" ${status === 'selected' ? 'selected' : ''}>✅ Selected</option>
+                <option value="waitlisted" ${status === 'waitlisted' ? 'selected' : ''}>⏳ Waitlisted</option>
+                <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
+                <option value="disqualified" ${status === 'disqualified' ? 'selected' : ''}>🚫 Disqualified</option>
+                <option value="pending" ${status === 'pending' ? 'selected' : ''}>⬜ Pending</option>
+              </select>
+            </td>
+          </tr>
+        `;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('.view-btn').forEach(btn => {
+        btn.addEventListener('click', () => viewCandidateDetail(btn.dataset.id));
+    });
+
+    container.querySelectorAll('.status-select').forEach(sel => {
+        sel.addEventListener('change', async () => {
+            const candidateId = sel.dataset.id;
+            const newStatus = sel.value;
+            try {
+                await API.post(`/api/admin/candidates/${candidateId}/status`, { status: newStatus });
+                Toast.success('Updated', `Candidate status set to ${capitalize(newStatus)}`);
+                await loadStats();
+                await loadCandidates();
+            } catch (err) {
+                Toast.error('Error', err.message || 'Failed to update status');
+                await loadCandidates();
+            }
+        });
+    });
+}
+
+function initSearch() {
+    const search = document.getElementById('candidate-search');
+    if (!search) return;
+
+    let debounce;
+    search.addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+            filterText = search.value.trim();
+            renderCandidates(allCandidates);
+        }, 200);
+    });
+}
+
+function initExport() {
+    const btn = document.getElementById('export-csv');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            if (!allCandidates.length) {
+                Toast.warning('No Data', 'No candidates to export');
+                return;
+            }
+            const headers = ['Name', 'Email', 'Candidate ID', 'Score', 'Status'];
+            const rows = allCandidates.map(c => [
+                c.name || '',
+                c.email || '',
+                c.candidate_id || c.id || '',
+                c.score !== undefined ? `${c.score}/${c.total_marks || 100}` : 'N/A',
+                c.selection_status || c.status || 'pending',
+            ]);
+            let csv = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `candidates_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            Toast.success('Exported', 'CSV file downloaded');
+        });
+    }
+}
+
+function initAutoShortlist() {
+    const btn = document.getElementById('auto-shortlist');
+    if (btn) {
+        btn.addEventListener('click', async () => {
+            if (!confirm('Run AI Auto-Shortlist?\n\n• Score ≥ 80% → Selected\n• Score ≥ 60% → Waitlisted\n• Score < 60% → Rejected\n• Disqualified candidates remain unchanged')) return;
+            try {
+                const data = await API.post('/api/admin/auto-shortlist');
+                Toast.success('AI Shortlisting Done', data.message || 'Completed');
+                await loadStats();
+                await loadCandidates();
+            } catch (err) {
+                Toast.error('Error', err.message || 'Auto-shortlist failed');
+            }
+        });
+    }
+}
+
+async function viewCandidateDetail(id) {
+    const candidate = allCandidates.find(c => String(c.id || c._id) === String(id));
+    if (!candidate) return;
+
+    const aiRec = candidate.ai_recommendation || '—';
+    const aiScores = candidate.ai_scores || {};
+    const violations = candidate.violation_count || 0;
+    const timeTaken = candidate.time_taken ? `${Math.floor(candidate.time_taken / 60)}m ${candidate.time_taken % 60}s` : 'N/A';
+
+    const aiRecColor = {
+      'Highly Recommended': '#10b981',
+      'Recommended': '#6366f1',
+      'Borderline': '#f59e0b',
+      'Not Recommended': '#ef4444',
+    }[aiRec] || '#6b7280';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay candidate-detail-overlay';
+    overlay.innerHTML = `
+      <div class="overlay-backdrop"></div>
+      <div class="overlay-content">
+        <div class="overlay-header">
+          <h3>${escapeHtml(candidate.name || 'Candidate Detail')}</h3>
+          <button class="overlay-close">&times;</button>
+        </div>
+        <div class="overlay-body">
+          <div class="detail-grid">
+            <div class="detail-item"><label>Name</label><span>${escapeHtml(candidate.name || 'N/A')}</span></div>
+            <div class="detail-item"><label>Email</label><span>${escapeHtml(candidate.email || 'N/A')}</span></div>
+            <div class="detail-item"><label>Candidate ID</label><span><code>${escapeHtml(candidate.candidate_id || candidate.id || '')}</code></span></div>
+            <div class="detail-item"><label>Score</label><span style="font-size:1.1rem;font-weight:700;color:var(--accent-primary)">${candidate.score !== undefined ? `${candidate.score}/${candidate.total_marks || 100}` : 'N/A'}</span></div>
+            <div class="detail-item"><label>Time Taken</label><span>${timeTaken}</span></div>
+            <div class="detail-item"><label>Security Violations</label><span style="color:${violations > 0 ? '#ef4444' : '#10b981'}">${violations}</span></div>
+            <div class="detail-item full-width" style="background:${aiRecColor}15;border:1px solid ${aiRecColor}40;border-radius:8px;padding:0.75rem">
+              <label style="color:${aiRecColor}">🤖 AI Recommendation</label>
+              <span style="font-size:0.95rem;font-weight:700;color:${aiRecColor}">${aiRec}</span>
+            </div>
+            ${Object.keys(aiScores).some(k => aiScores[k] > 0) ? `
+            <div class="detail-item full-width">
+              <label>AI Score Breakdown</label>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.4rem;margin-top:0.4rem">
+                ${Object.entries(aiScores).map(([k, v]) => `
+                  <div style="text-align:center;background:var(--bg-primary);border-radius:6px;padding:0.4rem">
+                    <div style="font-size:0.95rem;font-weight:700;color:var(--accent-primary)">${Math.round(v)}%</div>
+                    <div style="font-size:0.6rem;color:var(--text-tertiary);text-transform:uppercase">${k.replace('_', ' ')}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>` : ''}
+          </div>
+        </div>
+        <div class="overlay-footer">
+          <button class="btn btn-secondary overlay-close-btn">Close</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('active'));
+
+    const close = () => {
+      overlay.classList.remove('active');
+      setTimeout(() => overlay.remove(), 250);
+    };
+
+    overlay.querySelector('.overlay-backdrop').addEventListener('click', close);
+    overlay.querySelector('.overlay-close').addEventListener('click', close);
+    overlay.querySelector('.overlay-close-btn').addEventListener('click', close);
+}
+
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
 {% endblock %}

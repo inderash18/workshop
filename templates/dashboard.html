@@ -14,22 +14,26 @@
     .test-card:hover{border-color:rgba(99,102,241,.2);transform:translateY(-2px)}
     .test-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
     .test-card.upcoming::before{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
-    .test-card.in-progress::before{background:linear-gradient(90deg,#22c55e,#4ade80)}
+    .test-card.available::before{background:linear-gradient(90deg,#22c55e,#4ade80)}
+    .test-card.in-progress::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
     .test-card.completed::before{background:linear-gradient(90deg,#818cf8,#6366f1)}
-    .test-card.disqualified::before{background:linear-gradient(90deg,#ef4444,#f87171)}
+    .test-card.disqualified::before,.test-card.locked::before{background:linear-gradient(90deg,#ef4444,#f87171)}
     .test-card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem}
     .test-card-name{font-size:1.05rem;font-weight:600;color:var(--text-primary)}
     .test-status{padding:.25rem .7rem;border-radius:999px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
     .test-status.upcoming{background:rgba(59,130,246,.12);color:#60a5fa}
-    .test-status.in-progress{background:rgba(34,197,94,.12);color:#22c55e}
+    .test-status.available{background:rgba(34,197,94,.15);color:#22c55e}
+    .test-status.in-progress{background:rgba(245,158,11,.12);color:#f59e0b}
     .test-status.completed{background:rgba(99,102,241,.12);color:#818cf8}
-    .test-status.disqualified{background:rgba(239,68,68,.12);color:#fca5a5}
+    .test-status.disqualified,.test-status.locked{background:rgba(239,68,68,.12);color:#fca5a5}
     .test-card-details{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1.25rem}
     .detail{font-size:.8rem;color:var(--text-secondary);display:flex;align-items:center;gap:.3rem}
     .test-card-score{font-size:.9rem;color:var(--text-primary);margin-bottom:1rem}
     .test-card-score strong{color:#818cf8}
-    .btn-start{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.5rem;border-radius:10px;background:linear-gradient(135deg,var(--accent-primary),#8b5cf6);color:#fff;font-size:.85rem;font-weight:600;border:none;cursor:pointer;transition:all .3s;text-decoration:none}
-    .btn-start:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(99,102,241,.3)}
+    .btn-start{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.5rem;border-radius:10px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:.85rem;font-weight:600;border:none;cursor:pointer;transition:all .3s;text-decoration:none}
+    .btn-start:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(34,197,94,.35)}
+    .btn-resume{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.5rem;border-radius:10px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:.85rem;font-weight:600;border:none;cursor:pointer;transition:all .3s;text-decoration:none}
+    .btn-resume:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(245,158,11,.35)}
     .btn-view{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.25rem;border-radius:10px;background:rgba(99,102,241,.08);color:#818cf8;font-size:.82rem;font-weight:600;border:1px solid rgba(99,102,241,.15);text-decoration:none;transition:all .2s}
     .btn-view:hover{background:rgba(99,102,241,.15)}
     .btn-disabled{opacity:.5;pointer-events:none;padding:.6rem 1.25rem;border-radius:10px;background:rgba(255,255,255,.05);color:var(--text-muted);font-size:.82rem;font-weight:600;border:1px solid rgba(255,255,255,.06)}
@@ -45,6 +49,7 @@
     .score-bar-track{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden}
     .score-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent-primary),#8b5cf6);transition:width 1s cubic-bezier(.4,0,.2,1)}
     .score-bar-value{font-size:.82rem;color:var(--text-primary);font-weight:600;width:40px;text-align:right}
+
 </style>
 {% endblock %}
 
@@ -74,52 +79,83 @@
 
 {% block scripts %}
 <script>
-(async function() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    document.getElementById('userName').textContent = user.name || 'User';
-    document.getElementById('userCollege').textContent = '📚 ' + (user.college || 'Not specified');
+async function loadDashboardData() {
     try {
         const res = await API.get('/api/student/tests');
         const grid = document.getElementById('testsGrid');
         const empty = document.getElementById('emptyState');
         const tests = (res && res.tests) || res || [];
-        if (!tests || !tests.length) { empty.style.display = 'block'; return; }
-        grid.innerHTML = tests.map(t => `
+        if (!tests || !tests.length) { 
+            grid.innerHTML = '';
+            empty.style.display = 'block'; 
+            return; 
+        }
+        empty.style.display = 'none';
+        const newHTML = tests.map(t => `
             <div class="test-card ${t.status}">
                 <div class="test-card-header">
                     <div class="test-card-name">${t.name}</div>
-                    <span class="test-status ${t.status}">${t.status.replace('-', ' ')}</span>
+                    <span class="test-status ${t.status}">${statusLabel(t.status)}</span>
                 </div>
                 <div class="test-card-details">
                     <span class="detail">📅 ${t.date || 'TBD'}</span>
                     <span class="detail">⏱ ${t.duration} min</span>
-                    <span class="detail">❓ ${t.question_count} Q</span>
+                    <span class="detail">❓ ${t.question_count || 15} Q</span>
                 </div>
                 ${t.start_time && t.end_time ? `<div class="detail" style="margin-bottom:1rem">⏰ ${t.start_time} — ${t.end_time}</div>` : ''}
                 ${t.score !== undefined && t.score !== null ? `<div class="test-card-score">Score: <strong>${t.score}</strong></div>` : ''}
                 <div>
-                    ${t.status === 'upcoming' ? `<span class="btn-disabled">Not yet available</span>` : ''}
-                    ${t.status === 'in-progress' ? `<a href="/test/${t.id}" class="btn-start">▶ Start Test</a>` : ''}
+                    ${t.status === 'upcoming' ? `<span class="btn-disabled">⏳ Not Open Yet</span>` : ''}
+                    ${t.status === 'available' ? `<a href="/test/${t.id}" class="btn-start">▶ Start Test</a>` : ''}
+                    ${t.status === 'in-progress' ? `<a href="/test/${t.id}" class="btn-resume">↩ Resume Test</a>` : ''}
                     ${t.status === 'completed' ? `<a href="/report/${t.id}" class="btn-view">📊 View Results</a>` : ''}
-                    ${t.status === 'disqualified' ? `<span class="btn-disabled">Disqualified</span>` : ''}
+                    ${t.status === 'locked' ? `<span class="btn-disabled">🔒 Test Closed</span>` : ''}
+                    ${t.status === 'disqualified' ? `<span class="btn-disabled">❌ Disqualified</span>` : ''}
                 </div>
             </div>
         `).join('');
+        
+        if (grid.innerHTML !== newHTML) {
+            grid.innerHTML = newHTML;
+        }
+
         const completed = tests.filter(t => t.status === 'completed' && t.score !== undefined);
         if (completed.length) {
             document.getElementById('profileSummary').style.display = 'block';
-            document.getElementById('scoreBars').innerHTML = completed.map(t => `
+            const newScoresHTML = completed.map(t => `
                 <div class="score-bar-row">
                     <span class="score-bar-label">${t.name}</span>
                     <div class="score-bar-track"><div class="score-bar-fill" style="width:${Math.min(t.score, 100)}%"></div></div>
                     <span class="score-bar-value">${t.score}%</span>
                 </div>
             `).join('');
+            const scoreBars = document.getElementById('scoreBars');
+            if (scoreBars.innerHTML !== newScoresHTML) {
+                scoreBars.innerHTML = newScoresHTML;
+            }
         }
     } catch(e) {
         console.error('Dashboard load error:', e);
-        Toast.show('Failed to load dashboard', 'error');
     }
+}
+
+(async function() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    document.getElementById('userName').textContent = user.name || 'User';
+    document.getElementById('userCollege').textContent = '📚 ' + (user.college || 'Not specified');
+    
+    await loadDashboardData();
+    setInterval(loadDashboardData, 5000);
 })();
+function statusLabel(s) {
+    return {
+        'available': '✅ Open',
+        'upcoming': '⏳ Coming Soon',
+        'in-progress': '⏱ In Progress',
+        'completed': '✔ Completed',
+        'locked': '🔒 Closed',
+        'disqualified': '❌ Disqualified',
+    }[s] || s;
+}
 </script>
 {% endblock %}

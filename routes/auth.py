@@ -33,6 +33,33 @@ def login_page():
 @auth_bp.route("/api/auth/register", methods=["POST"])
 @auth_bp.route("/api/auth/signup", methods=["POST"])
 def api_signup():
+    from models.database import get_setting
+    from datetime import datetime
+
+    reg_status = get_setting("registration_status", "open")
+    if reg_status != "open":
+        return jsonify({"error": "Registration is currently closed by admin."}), 403
+
+    now = datetime.now()
+    start_str = get_setting("registration_start_date")
+    end_str = get_setting("registration_end_date")
+
+    if start_str:
+        try:
+            start_dt = datetime.fromisoformat(start_str)
+            if now < start_dt:
+                return jsonify({"error": f"Registration opens at {start_dt.strftime('%Y-%m-%d %H:%M:%S')}"}), 403
+        except Exception:
+            pass
+
+    if end_str:
+        try:
+            end_dt = datetime.fromisoformat(end_str)
+            if now > end_dt:
+                return jsonify({"error": "Registration period has ended."}), 403
+        except Exception:
+            pass
+
     data = request.json or {}
 
     name = sanitize_input(data.get("name", ""))
@@ -211,6 +238,7 @@ def get_session():
 
     c_data = dict(candidate)
     c_data.pop("password_hash", None)
+    c_data.pop("_id", None)
 
     for field in ["badges", "violation_logs"]:
         try:
