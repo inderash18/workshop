@@ -55,7 +55,12 @@ def create_app():
     return app
 
 
+# Top-level app instance for Vercel and other WSGI hosts
+app = create_app()
+
+
 if __name__ == "__main__":
+
     app = create_app()
 
     from models.database import load_db, save_db

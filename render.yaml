@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ai-next-gen
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()" --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: MONGODB_URI
+        sync: false          # Set this manually in Render dashboard
+      - key: SECRET_KEY
+        generateValue: true  # Render auto-generates a secure random key
+      - key: PASSWORD_SALT
+        generateValue: true
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
