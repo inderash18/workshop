@@ -319,24 +319,69 @@ def api_assign_test(test_id):
 
     assigned = 0
     skipped = 0
-    for cid in candidate_ids:
-        cid = sanitize_input(str(cid))
-        candidate = get_candidate_by_id(cid)
-        if not candidate:
-            skipped += 1
-            continue
-        existing = get_assignment(test_id, cid)
-        if existing:
-            skipped += 1
-            continue
-        create_assignment(test_id, cid)
-        assigned += 1
+    skipped_reasons = []
 
-    audit_log("test_assigned", session.get("admin_username"), {
-        "test_id": test_id, "assigned": assigned, "skipped": skipped,
+    for cid in candidate_ids:
+        try:
+            cid = sanitize_input(str(cid))
+            
+            if not cid:
+                skipped += 1
+                skipped_reasons.append("Invalid candidate ID format")
+                continue
+
+            candidate = get_candidate_by_id(cid)
+            if not candidate:
+                skipped += 1
+                skipped_reasons.append(f"Candidate {cid} not found")
+                continue
+
+            existing = get_assignment(test_id, cid)
+            if existing:
+                skipped += 1
+                if existing.get("status") == "completed":
+                    skipped_reasons.append(f"Candidate {cid} already completed test")
+                elif existing.get("status") == "disqualified":
+                    skipped_reasons.append(f"Candidate {cid} disqualified from this test")
+                elif existing.get("is_locked"):
+                    skipped_reasons.append(f"Candidate {cid} test session locked")
+                else:
+                    skipped_reasons.append(f"Candidate {cid} already assigned")
+                continue
+
+            try:
+                create_assignment(test_id, cid)
+                assigned += 1
+                audit_log("assignment_created", session.get("admin_username"), {
+                    "test_id": test_id,
+                    "candidate_id": cid,
+                    "candidate_name": candidate.get("name", ""),
+                }, ip=request.remote_addr)
+            except Exception as e:
+                skipped += 1
+                skipped_reasons.append(f"Failed to create assignment for candidate {cid}: {str(e)}")
+                continue
+
+        except Exception as e:
+            skipped += 1
+            skipped_reasons.append(f"Error processing candidate {cid}: {str(e)}")
+            continue
+
+    audit_log("test_assigned_bulk", session.get("admin_username"), {
+        "test_id": test_id,
+        "assigned": assigned,
+        "skipped": skipped,
+        "skipped_reasons": skipped_reasons[:5],  # Limit to first 5 reasons to avoid large log
+        "test_status": test.get("status", "draft"),
     }, ip=request.remote_addr)
 
-    return jsonify({"success": True, "assigned": assigned, "skipped": skipped})
+    response = {"success": True, "assigned": assigned, "skipped": skipped}
+    if skipped_reasons:
+        response["skipped_reasons_samples"] = skipped_reasons[:5]
+    if skipped > 10:
+        response["note"] = f"Skipped {skipped - 10} candidates due to various validation failures. See skipped_reasons_samples for details."
+
+    return jsonify(response)
 
 
 @test_management_bp.route("/api/admin/tests/<test_id>/assign-all", methods=["POST"])

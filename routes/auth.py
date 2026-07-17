@@ -254,7 +254,8 @@ def update_profile():
     if github and not github.startswith(("https://", "http://")):
         return jsonify({"error": "Invalid GitHub URL"}), 400
 
-    candidate = get_candidate_by_email(session["user_email"])
+    db = load_db()
+    candidate = next((c for c in db["candidates"] if c.get("email") == session["user_email"]), None)
     if not candidate:
         return jsonify({"error": "Candidate not found"}), 404
 
@@ -268,7 +269,7 @@ def update_profile():
     candidate["bio"] = bio
     candidate["updated_at"] = datetime.now().isoformat()
 
-    save_db(load_db())
+    save_db(db)
     audit_log("profile_update", session["user_email"], {"fields": list(data.keys())}, ip=request.remote_addr)
 
     return jsonify({"success": True, "message": "Profile updated successfully"})
@@ -284,7 +285,7 @@ def update_avatar():
         return jsonify({"error": "No avatar data provided"}), 400
 
     db = load_db()
-    candidate = get_candidate_by_email(session["user_email"])
+    candidate = next((c for c in db["candidates"] if c.get("email") == session["user_email"]), None)
     if not candidate:
         return jsonify({"error": "Candidate not found"}), 404
 

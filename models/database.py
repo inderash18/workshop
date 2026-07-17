@@ -24,16 +24,51 @@ def _get_db():
 
 def _ensure_indexes(db):
     try:
+        # Tests collection indexes
         db["tests"].create_index([("status", ASCENDING)])
         db["tests"].create_index([("created_at", DESCENDING)])
+        db["tests"].create_index([("date", ASCENDING)])
+        db["tests"].create_index([("start_time", ASCENDING)])
+        db["tests"].create_index([("end_time", ASCENDING)])
+        
+        # Candidates collection indexes
+        db["candidates"].create_index([("candidate_id", ASCENDING)], unique=True)
+        db["candidates"].create_index([("email", ASCENDING)], unique=True)
+        
+        # Assignments collection indexes
         db["test_assignments"].create_index([("test_id", ASCENDING), ("candidate_id", ASCENDING)], unique=True)
         db["test_assignments"].create_index([("candidate_id", ASCENDING)])
         db["test_assignments"].create_index([("test_id", ASCENDING), ("status", ASCENDING)])
-        db["security_events"].create_index([("test_assignment_id", ASCENDING)])
+        db["test_assignments"].create_index([("candidate_id", ASCENDING), ("status", ASCENDING)])
+        
+        # Security Events collection indexes (SINGLE SOURCE OF TRUTH)
+        db["security_events"].create_index([("assignment_id", ASCENDING)])
+        db["security_events"].create_index([("test_assignment_id", ASCENDING)])  # Legacy support
         db["security_events"].create_index([("candidate_id", ASCENDING)])
+        db["security_events"].create_index([("test_id", ASCENDING)])
         db["security_events"].create_index([("timestamp", DESCENDING)])
-    except Exception:
-        pass
+        db["security_events"].create_index([("processed", ASCENDING)])
+        db["security_events"].create_index([("violation_type", ASCENDING)])
+        
+        # Activity Logs collection indexes
+        db["activity_logs"].create_index([("assignment_id", ASCENDING)])
+        db["activity_logs"].create_index([("timestamp", DESCENDING)])
+        db["activity_logs"].create_index([("event_type", ASCENDING)])
+        
+        # Test Reports collection indexes
+        db["test_reports"].create_index([("test_id", ASCENDING)])
+        db["test_reports"].create_index([("assignment_id", ASCENDING)])
+        db["test_reports"].create_index([("candidate_id", ASCENDING)])
+        
+        # Admin Audit collection indexes
+        db["admin_audit"].create_index([("timestamp", DESCENDING)])
+        db["admin_audit"].create_index([("action", ASCENDING)])
+        
+        # Legacy compatibility - ensure old collections still work
+        if "test_assignments" in db:
+            db["test_assignments"].create_index([("test_id", ASCENDING), ("candidate_id", ASCENDING)], unique=True)
+    except Exception as e:
+        print(f"[DB] Index creation error: {e}")
 
 
 def _col(name):

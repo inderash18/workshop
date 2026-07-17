@@ -99,33 +99,43 @@ def start_test(test_id):
     if assignment.get("is_locked"):
         return jsonify({"error": "Test session is locked"}), 403
 
-    if assignment.get("status") != "assigned":
-        return jsonify({
-            "success": True,
-            "message": "Resuming test session",
-            "started_at": assignment.get("started_at"),
-        })
-
     if not is_test_window_active(test):
         return jsonify({"error": "Test is not currently active"}), 400
+
+    if assignment.get("status") not in ("assigned", "in_progress", "in-progress"):
+        if assignment.get("status") == "in_progress" or assignment.get("status") == "in-progress":
+            return jsonify({
+                "success": True,
+                "message": "Test session active",
+                "started_at": assignment.get("started_at"),
+                "status": "in_progress",
+                "time_remaining": test.get("duration_minutes", 60) * 60 - (assignment.get("time_taken", 0) or 0),
+            })
 
     ip_address = request.remote_addr
     user_agent = request.headers.get("User-Agent", "")
 
-    update_assignment(test_id, candidate_id, {
+    update_fields = {
         "status": "in_progress",
         "started_at": datetime.now().isoformat(),
         "ip_address": ip_address,
-    })
+        "violation_count": 0,
+        "tab_switch_count": 0,
+    }
+    update_assignment(test_id, candidate_id, update_fields)
 
     audit_log("test_started", session["user_email"], {
         "test_id": test_id,
+        "ip_address": ip_address,
+        "user_agent": user_agent,
     }, ip=ip_address)
 
     return jsonify({
         "success": True,
         "message": "Test started",
         "started_at": datetime.now().isoformat(),
+        "status": "in_progress",
+        "time_remaining": test.get("duration_minutes", 60) * 60,
     })
 
 
@@ -170,13 +180,6 @@ def submit_test(test_id):
     scores = scores_result["scores"]
     selected_status = scores_result["selected_status"]
 
-    candidate_violations = assignment.get("violations", [])
-    violation_count = len(candidate_violations)
-
-    if violation_count >= 3:
-        selected_status = 3
-        scores["score_final"] = 0.0
-
     update_fields = {
         "status": "completed",
         "completed_at": datetime.now().isoformat(),
@@ -184,12 +187,34 @@ def submit_test(test_id):
         "time_taken": time_taken,
         "scores": scores,
         "selected": selected_status,
+        "is_locked": False,
     }
 
     if assignment.get("status") == "disqualified":
         update_fields["status"] = "disqualified"
         update_fields["scores"] = {"score_final": 0.0}
         update_fields["selected"] = 3
+
+    from models.database import save_db
+    db = load_db()
+    candidate_data = next((c for c in db["candidates"] if c.get("candidate_id") == candidate_id), None)
+    if candidate_data:
+        candidate_data.update({
+            "score_logic": scores.get("score_logic", 0),
+            "score_creativity": scores.get("score_creativity", 0),
+            "score_ai_knowledge": scores.get("score_ai_knowledge", 0),
+            "score_problem_solving": scores.get("score_problem_solving", 0),
+            "score_research": scores.get("score_research", 0),
+            "score_ai_potential": scores.get("score_ai_potential", 0),
+            "score_workshop_compat": scores.get("score_workshop_compat", 0),
+            "score_selection_prob": scores.get("score_selection_prob", 0),
+            "score_time": scores.get("score_time", 0),
+            "score_final": scores.get("score_final", 0),
+            "selected": selected_status,
+            "completed": True,
+            "completed_at": datetime.now().isoformat(),
+        })
+        save_db(db)
 
     update_assignment(test_id, candidate_id, update_fields)
 
@@ -200,7 +225,7 @@ def submit_test(test_id):
         "test_id": test_id,
         "score": scores.get("score_final", 0),
         "time_taken": time_taken,
-        "violations": violation_count,
+        "violations": assignment.get("violation_count", 0),
     }, ip=request.remote_addr)
 
     return jsonify({
@@ -209,7 +234,7 @@ def submit_test(test_id):
         "scores": scores,
         "badges": badges,
         "selected_status": selected_status,
-        "violation_count": violation_count,
+        "violation_count": assignment.get("violation_count", 0),
         "status": "Disqualified" if selected_status == 3 else "Completed",
     })
 
