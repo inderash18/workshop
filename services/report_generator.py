@@ -1,11 +1,10 @@
 import json
 from datetime import datetime
 from models.database import get_candidate_by_id
-from services.challenge_engine import LEVELS
 from services.achievement_engine import get_badge_details
 
 
-def generate_report_data(candidate_id):
+def generate_report_data(candidate_id, test_id=None):
     candidate = get_candidate_by_id(candidate_id)
     if not candidate:
         return None
@@ -52,6 +51,7 @@ def generate_report_data(candidate_id):
     candidate.setdefault("github", "")
 
     level_results = []
+    from services.challenge_engine import LEVELS
     for level in LEVELS:
         lid = level["id"]
         level_answers = answers.get(str(lid), {})
@@ -84,6 +84,78 @@ def generate_report_data(candidate_id):
         "candidate": candidate,
         "levels": level_results,
         "badge_details": badge_details,
+        "generated_at": datetime.now().isoformat(),
+    }
+
+
+def generate_test_report(candidate_id, test_id):
+    from models.database import get_assignment, get_test_by_id_str
+    candidate = get_candidate_by_id(candidate_id)
+    if not candidate:
+        return None
+
+    test = get_test_by_id_str(test_id)
+    if not test:
+        return None
+
+    assignment = get_assignment(test_id, candidate_id)
+    if not assignment:
+        return None
+
+    answers = assignment.get("answers", {})
+    questions = test.get("questions", [])
+    violations = assignment.get("violations", [])
+
+    questions_detail = []
+    for q in questions:
+        q_id = q.get("id", "")
+        user_answer = str(answers.get(q_id, "")).strip()
+        correct = None
+        is_correct = None
+        if q.get("type") in ("mcq", "text"):
+            correct = str(q.get("correct", ""))
+            is_correct = user_answer.lower() == correct.lower()
+        questions_detail.append({
+            "text": q.get("text", ""),
+            "type": q.get("type", "mcq"),
+            "user_answer": user_answer or "(no answer)",
+            "correct_answer": correct,
+            "is_correct": is_correct,
+            "category": q.get("category", "general"),
+        })
+
+    answered = sum(1 for qd in questions_detail if qd["user_answer"] != "(no answer)")
+
+    return {
+        "candidate": {
+            "name": candidate.get("name", ""),
+            "email": candidate.get("email", ""),
+            "phone": candidate.get("phone", ""),
+            "college": candidate.get("college", ""),
+            "department": candidate.get("department", ""),
+            "year": candidate.get("year", 0),
+            "candidate_id": candidate.get("candidate_id", ""),
+            "linkedin": candidate.get("linkedin", ""),
+            "github": candidate.get("github", ""),
+        },
+        "test": {
+            "name": test.get("name", ""),
+            "date": test.get("date", ""),
+            "difficulty": test.get("difficulty", "medium"),
+        },
+        "assignment": {
+            "status": assignment.get("status", ""),
+            "time_taken": assignment.get("time_taken", 0),
+            "violation_count": assignment.get("violation_count", 0),
+            "tab_switch_count": assignment.get("tab_switch_count", 0),
+            "started_at": assignment.get("started_at"),
+            "completed_at": assignment.get("completed_at"),
+            "scores": assignment.get("scores", {}),
+        },
+        "questions": questions_detail,
+        "answered": answered,
+        "total_questions": len(questions_detail),
+        "violations": violations,
         "generated_at": datetime.now().isoformat(),
     }
 

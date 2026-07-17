@@ -1,107 +1,566 @@
 {% extends "base.html" %}
-{% block title %}Profile — AI Next Gen{% endblock %}
+{% block title %}Account Settings — AI Next Gen{% endblock %}
 
-{% block head_extra %}
+{% block head %}
 <style>
-  .profile-layout { padding: calc(var(--nav-height) + var(--space-8)) 0 var(--space-12); }
-  .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
-  .profile-avatar { width: 72px; height: 72px; border-radius: var(--radius-full); background: var(--gradient-primary); display: flex; align-items: center; justify-content: center; font-size: var(--text-2xl); font-weight: 700; color: #fff; margin-bottom: var(--space-4); }
-  .profile-name { font-size: var(--text-2xl); font-weight: 700; margin-bottom: var(--space-1); }
-  .profile-email { font-size: var(--text-sm); color: var(--text-tertiary); }
-  .profile-id { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--text-muted); margin-top: var(--space-2); }
-  .profile-section { margin-bottom: var(--space-6); }
-  .profile-section-title { font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-5); }
-  .result-bar { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
-  .result-bar-label { width: 140px; font-size: var(--text-sm); color: var(--text-secondary); flex-shrink: 0; }
-  .result-bar-track { flex: 1; height: 8px; background: var(--bg-secondary); border-radius: var(--radius-full); overflow: hidden; }
-  .result-bar-fill { height: 100%; border-radius: var(--radius-full); transition: width 1s var(--ease-out); }
-  .result-bar-value { width: 50px; text-align: right; font-family: var(--font-mono); font-size: var(--text-sm); font-weight: 600; }
-  @media (max-width: 768px) { .profile-grid { grid-template-columns: 1fr; } }
+    .profile-page {
+      padding: 6rem 2rem 3rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 120px);
+    }
+    
+    /* Account Setting Card (Mockup Style) */
+    .settings-card {
+      width: 100%;
+      max-width: 850px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .settings-header {
+      padding: 2.2rem 2.5rem 1.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .settings-header h1 {
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-family: var(--font-display);
+      letter-spacing: -0.01em;
+    }
+    
+    .close-btn {
+      font-size: 1.4rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+    .close-btn:hover {
+      color: var(--text-primary);
+    }
+    
+    /* Tabs Control */
+    .tabs-nav {
+      display: flex;
+      padding: 0 2.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .tab-btn {
+      padding: 1rem 1.5rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+    
+    .tab-btn.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+    
+    /* Tab Contents */
+    .tab-content {
+      display: none;
+      padding: 2.5rem;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Profile Grid layout */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    
+    /* Left column: Avatar details */
+    .avatar-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    .profile-avatar {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    
+    .btn-change-avatar {
+      width: 100%;
+      max-width: 140px;
+      padding: 0.55rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .btn-change-avatar:hover {
+      background: var(--bg-secondary);
+      border-color: var(--border-strong);
+    }
+    
+    /* Right column: Form Fields (Mockup style lines) */
+    .profile-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .field-row {
+      display: grid;
+      grid-template-columns: 140px 1fr 24px;
+      align-items: center;
+      gap: 1rem;
+      padding-bottom: 0.55rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .field-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    
+    .field-input {
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.92rem;
+      padding: 0.25rem 0;
+      outline: none;
+      width: 100%;
+    }
+    
+    .field-input:disabled {
+      color: var(--text-secondary);
+      cursor: not-allowed;
+    }
+    
+    .field-status {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--color-success);
+      font-weight: 700;
+    }
+    
+    .btn-save-settings {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 2.2rem;
+      background: var(--gradient-brand);
+      color: var(--text-inverse);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      align-self: flex-start;
+      margin-top: 1rem;
+    }
+    .btn-save-settings:hover {
+      box-shadow: 0 4px 16px rgba(30, 34, 11, 0.18);
+      transform: translateY(-1px);
+    }
+    
+    /* History tab content */
+    .history-header {
+      margin-bottom: 1.5rem;
+    }
+    
+    .history-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+    .history-header p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+    
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .history-item {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      align-items: center;
+      gap: 2rem;
+      padding: 1.1rem 1.5rem;
+      border-radius: 8px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      transition: all 0.2s;
+    }
+    .history-item:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+    
+    .hist-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .hist-meta {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .hist-score {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      text-align: right;
+      min-width: 60px;
+    }
+    .hist-status {
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .hist-status.upcoming { background: rgba(59,130,246,0.08); color: #1565c0; border: 1px solid rgba(59,130,246,0.15); }
+    .hist-status.in-progress { background: rgba(34,197,94,0.08); color: #2e7d32; border: 1px solid rgba(34,197,94,0.15); }
+    .hist-status.completed { background: rgba(139,92,246,0.08); color: #6d28d9; border: 1px solid rgba(139,92,246,0.15); }
+    .hist-status.disqualified { background: rgba(239,68,68,0.08); color: #c62828; border: 1px solid rgba(239,68,68,0.15); }
+    
+    .empty-history {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      border: 1px dashed var(--border-default);
+      border-radius: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+      .field-row {
+        grid-template-columns: 1fr 24px;
+        gap: 0.5rem;
+      }
+      .field-label {
+        grid-column: 1 / -1;
+      }
+      .history-item {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .hist-score {
+        text-align: left;
+      }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="profile-layout">
-  <div class="container">
-    <div class="profile-grid">
-      <div>
-        <div class="glass-card glass-card-lg" style="margin-bottom:var(--space-6);">
-          <div class="profile-avatar" id="profileAvatar">?</div>
-          <div class="profile-name" id="profileName">Loading...</div>
-          <div class="profile-email" id="profileEmail"></div>
-          <div class="profile-id" id="profileId"></div>
-        </div>
-
-        <div class="glass-card glass-card-lg">
-          <div class="profile-section-title">Edit Profile</div>
-          <form id="profileForm" style="display:flex;flex-direction:column;gap:var(--space-4);">
-            <div class="form-group">
-              <label class="form-label">Full Name</label>
-              <input class="form-input" type="text" id="pName" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Phone</label>
-              <input class="form-input" type="tel" id="pPhone" required>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);">
-              <div class="form-group">
-                <label class="form-label">College</label>
-                <input class="form-input" type="text" id="pCollege" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Department</label>
-                <input class="form-input" type="text" id="pDept" required>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Year</label>
-              <select class="form-select" id="pYear" required>
-                <option value="1">1st Year</option>
-                <option value="2">2nd Year</option>
-                <option value="3">3rd Year</option>
-                <option value="4">4th Year</option>
-              </select>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);">
-              <div class="form-group">
-                <label class="form-label">LinkedIn</label>
-                <input class="form-input" type="url" id="pLinkedin">
-              </div>
-              <div class="form-group">
-                <label class="form-label">GitHub</label>
-                <input class="form-input" type="url" id="pGithub">
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary" id="saveBtn">Save Changes</button>
-          </form>
-        </div>
-      </div>
-
-      <div>
-        <div class="glass-card glass-card-lg" id="resultsCard" style="display:none;">
-          <div class="profile-section-title">Challenge Results</div>
-          <div id="resultsBars"></div>
-          <div style="margin-top:var(--space-6);padding-top:var(--space-5);border-top:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:var(--text-sm);color:var(--text-secondary);">Final Score</span>
-            <span style="font-family:var(--font-display);font-size:var(--text-3xl);font-weight:700;color:var(--accent-light);" id="finalScore">0</span>
+<div class="profile-page">
+  <div class="settings-card">
+    
+    <!-- Title Bar -->
+    <div class="settings-header">
+      <h1>Account Setting</h1>
+      <a href="/dashboard" class="close-btn" aria-label="Close settings">×</a>
+    </div>
+    
+    <!-- Tab list header -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('profile')">Profile</button>
+      <button class="tab-btn" onclick="switchTab('history')">History</button>
+    </div>
+    
+    <!-- PROFILE TAB CONTENT -->
+    <div class="tab-content active" id="tab-profile">
+      <form class="profile-grid" id="editForm" onsubmit="return saveProfile(event)">
+        
+        <!-- Left details: Avatar -->
+        <div class="avatar-wrapper">
+          <div class="profile-avatar" id="avatar" style="cursor:pointer;" onclick="triggerAvatarUpload()">
+            <img id="avatarImg" src="/static/img/avatar.png" alt="Avatar" style="width:100%; height:100%; object-fit:cover;">
           </div>
+          <button type="button" class="btn-change-avatar" onclick="triggerAvatarUpload()">Change</button>
+          <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)">
         </div>
+        
+        <!-- Right details: Form Rows -->
+        <div class="profile-fields">
+          
+          <div class="field-row">
+            <span class="field-label">Name</span>
+            <input type="text" id="editName" class="field-input" required placeholder="Your Name">
+            <span class="field-status">✓</span>
+          </div>
+          
+          <div class="field-row">
+            <span class="field-label">Email</span>
+            <input type="email" id="editEmail" class="field-input" disabled placeholder="your.email@example.com">
+            <span class="field-status">✓</span>
+          </div>
+          
+          <div class="field-row">
+            <span class="field-label">Phone</span>
+            <input type="tel" id="editPhone" class="field-input" required placeholder="+1 234 56 67">
+            <span class="field-status">✓</span>
+          </div>
+          
+          <div class="field-row">
+            <span class="field-label">College</span>
+            <input type="text" id="editCollege" class="field-input" required placeholder="University name">
+            <span class="field-status">✓</span>
+          </div>
+          
+          <div class="field-row">
+            <span class="field-label">Department</span>
+            <input type="text" id="editDept" class="field-input" required placeholder="Computer Science">
+            <span class="field-status">✓</span>
+          </div>
 
-        <div class="glass-card glass-card-lg" style="margin-top:var(--space-6);">
-          <div class="profile-section-title">Achievements</div>
-          <div id="profileBadges" style="display:flex;flex-wrap:wrap;gap:var(--space-3);"></div>
-        </div>
+          <div class="field-row">
+            <span class="field-label">LinkedIn</span>
+            <input type="url" id="editLinkedin" class="field-input" placeholder="https://linkedin.com/in/you">
+            <span class="field-status">✓</span>
+          </div>
 
-        <div class="glass-card glass-card-lg" style="margin-top:var(--space-6);" id="selectionCard">
-          <div class="profile-section-title">Selection Status</div>
-          <div id="selectionStatus"></div>
+          <div class="field-row">
+            <span class="field-label">GitHub</span>
+            <input type="url" id="editGithub" class="field-input" placeholder="https://github.com/you">
+            <span class="field-status">✓</span>
+          </div>
+          
+          <div class="field-row">
+            <span class="field-label">Password</span>
+            <input type="password" id="editPassword" class="field-input" placeholder="••••••••••••" autocomplete="new-password">
+            <span class="field-status">✓</span>
+          </div>
+          
+          <button type="submit" class="btn-save-settings">Save Settings</button>
         </div>
+      </form>
+    </div>
+    
+    <!-- HISTORY TAB CONTENT -->
+    <div class="tab-content" id="tab-history">
+      <div class="history-header">
+        <h2>Your Test History</h2>
+        <p>Review the status and scores of all your assigned diagnostic tests.</p>
+      </div>
+      
+      <div class="history-list" id="historyList">
+        <div class="empty-history">Loading history...</div>
       </div>
     </div>
+    
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/pages/profile.js"></script>
+<script>
+// Tab Switching
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase() === tabId);
+    });
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === 'tab-' + tabId);
+    });
+}
+
+function triggerAvatarUpload() {
+    document.getElementById('avatarInput').click();
+}
+
+async function uploadAvatar(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 1.5 * 1024 * 1024) {
+        Toast.show('Image size must be less than 1.5 MB', 'warning');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function(evt) {
+        const base64Data = evt.target.result;
+        try {
+            const res = await API.post('/api/profile/avatar', { avatar: base64Data });
+            if (res.success) {
+                document.getElementById('avatarImg').src = base64Data;
+                const headerAv = document.querySelector('.nav-avatar-img');
+                if (headerAv) headerAv.src = base64Data;
+
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                user.avatar = base64Data;
+                localStorage.setItem('user', JSON.stringify(user));
+
+                Toast.show('Profile picture updated!', 'success');
+            } else {
+                throw new Error(res.error || 'Upload failed');
+            }
+        } catch(err) {
+            console.error(err);
+            Toast.show(err.message || 'Failed to upload profile picture', 'error');
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+// Fetch Profile and Test History on load
+(async function() {
+    try {
+        const session = await API.get('/api/session');
+        if (session && session.logged_in && session.candidate) {
+            const profile = session.candidate;
+            
+            if (profile.avatar) {
+                document.getElementById('avatarImg').src = profile.avatar;
+            }
+                
+            document.getElementById('editName').value = profile.name || '';
+            document.getElementById('editEmail').value = profile.email || '';
+            document.getElementById('editPhone').value = profile.phone || '';
+            document.getElementById('editCollege').value = profile.college || '';
+            document.getElementById('editDept').value = profile.department || '';
+            document.getElementById('editLinkedin').value = profile.linkedin || '';
+            document.getElementById('editGithub').value = profile.github || '';
+        }
+    } catch(e) {
+        console.error('Failed to load profile data:', e);
+    }
+    
+    try {
+        const data = await API.get('/api/student/tests');
+        const historyList = document.getElementById('historyList');
+        
+        if (!data || !data.tests || !data.tests.length) {
+            historyList.innerHTML = '<div class="empty-history">No diagnostic tests assigned yet.</div>';
+            return;
+        }
+        
+        historyList.innerHTML = data.tests.map(t => {
+            const hasScore = t.scores && t.scores.final !== undefined;
+            const scoreVal = hasScore ? `${Math.round(t.scores.final)}%` : '—';
+            
+            return `
+                <div class="history-item">
+                    <div>
+                        <div class="hist-name">${t.test_name}</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;">⏱ Duration: ${t.test_duration_minutes} min</div>
+                    </div>
+                    <div class="hist-meta">📅 ${t.test_date || 'TBD'}</div>
+                    <div class="hist-score">${scoreVal}</div>
+                    <div>
+                        <span class="hist-status ${t.assignment_status}">${t.assignment_status.replace('-', ' ')}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+    } catch(e) {
+        console.error('Failed to load test history:', e);
+        document.getElementById('historyList').innerHTML = '<div class="empty-history" style="color:var(--color-danger)">Failed to load test history records.</div>';
+    }
+})();
+
+// Save Profile form data
+async function saveProfile(e) {
+    e.preventDefault();
+    const saveBtn = document.querySelector('.btn-save-settings');
+    saveBtn.disabled = true;
+    
+    const payload = {
+        name: document.getElementById('editName').value,
+        phone: document.getElementById('editPhone').value,
+        college: document.getElementById('editCollege').value,
+        department: document.getElementById('editDept').value,
+        linkedin: document.getElementById('editLinkedin').value,
+        github: document.getElementById('editGithub').value
+    };
+    
+    const newPass = document.getElementById('editPassword').value;
+    if (newPass) {
+        payload.password = newPass;
+    }
+    
+    try {
+        const res = await API.post('/api/profile/update', payload);
+        if (res.success) {
+            Toast.show('Settings saved successfully!', 'success');
+        } else {
+            throw new Error(res.error || 'Update failed');
+        }
+    } catch(err) {
+        console.error(err);
+        Toast.show(err.message || 'Failed to update settings', 'error');
+    } finally {
+        saveBtn.disabled = false;
+    }
+    return false;
+}
+</script>
 {% endblock %}

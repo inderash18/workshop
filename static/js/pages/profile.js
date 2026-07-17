@@ -1,132 +1,192 @@
-/* ============================================
-   PROFILE — Profile editor + results display
-   ============================================ */
-
-(function() {
-  const $ = id => document.getElementById(id);
-
-  const SCORE_DIMS = [
-    { key: 'score_logic', label: 'Logic', max: 40, color: '#6366f1' },
-    { key: 'score_creativity', label: 'Creativity', max: 20, color: '#ec4899' },
-    { key: 'score_ai_knowledge', label: 'AI Knowledge', max: 20, color: '#3b82f6' },
-    { key: 'score_problem_solving', label: 'Problem Solving', max: 10, color: '#22c55e' },
-    { key: 'score_research', label: 'Research', max: 10, color: '#a855f7' },
-    { key: 'score_ai_potential', label: 'AI Potential', max: 10, color: '#f97316' },
-    { key: 'score_workshop_compat', label: 'Workshop Fit', max: 10, color: '#22d3ee' },
-    { key: 'score_selection_prob', label: 'Selection Prob.', max: 100, color: '#eab308', unit: '%' },
-  ];
-
-  let candidate = null;
+(function () {
+  const $ = (id) => document.getElementById(id);
 
   async function init() {
+    const session = await Auth.getSession();
+    if (!session.logged_in) {
+      window.location.href = '/login';
+      return;
+    }
+
+    const user = session.candidate || session.user || {};
+    renderProfile(user);
+    await loadResults();
+    renderSelectionStatus(user);
+    initEditForm(user);
+    Auth.updateNav();
+  }
+
+  function renderProfile(user) {
+    const avatarEl = $('profile-avatar') || document.querySelector('.profile-avatar-img');
+    const nameEl = $('profile-name') || document.querySelector('.profile-name');
+    const emailEl = $('profile-email') || document.querySelector('.profile-email');
+    const idEl = $('profile-id') || document.querySelector('.profile-id');
+    const roleEl = $('profile-role') || document.querySelector('.profile-role');
+
+    if (avatarEl) {
+      const initials = getInitials(user.name || user.email || '?');
+      if (user.avatar || user.photo) {
+        avatarEl.innerHTML = `<img src="${user.avatar || user.photo}" alt="Avatar">`;
+      } else {
+        avatarEl.innerHTML = `<div class="avatar-initials">${initials}</div>`;
+      }
+    }
+    if (nameEl) nameEl.textContent = user.name || 'N/A';
+    if (emailEl) emailEl.textContent = user.email || 'N/A';
+    if (idEl) idEl.textContent = user.candidate_id || user.student_id || user.id || 'N/A';
+    if (roleEl) roleEl.textContent = user.role || 'student';
+  }
+
+  function getInitials(name) {
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().substring(0, 2);
+  }
+
+  async function loadResults() {
+    const container = $('results-container') || document.querySelector('.results-section');
+    if (!container) return;
+
     try {
-      const res = await API.get('/api/session');
-      if (!res.logged_in) { window.location.href = '/login'; return; }
-      candidate = res.candidate;
-      renderHeader(candidate);
-      renderForm(candidate);
-      if (candidate.completed) renderResults(candidate);
-      renderBadges(candidate);
-      renderSelection(candidate);
+      const data = await API.get('/api/student/results');
+      const results = data.results || data.data || data || [];
+
+      if (!results.length) {
+        container.innerHTML = `
+          <div class="empty-state-small">
+            <p>No test results yet.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '<div class="results-list">';
+      results.forEach(r => {
+        const score = r.score !== undefined ? r.score : r.marks_obtained;
+        const total = r.total_marks || r.max_score || r.out_of || 100;
+        const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+        const barColor = pct >= 70 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#ef4444';
+
+        html += `
+          <div class="result-item">
+            <div class="result-header">
+              <span class="result-title">${escapeHtml(r.test_title || r.title || 'Test')}</span>
+              <span class="result-score" style="color: ${barColor}">${score}/${total}</span>
+            </div>
+            <div class="result-bar">
+              <div class="result-bar-fill" style="width: ${pct}%; background: ${barColor};"></div>
+            </div>
+            <div class="result-meta">
+              <span>${pct}%</span>
+              <span>${r.completed_at ? formatDate(r.completed_at) : ''}</span>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+
+      setTimeout(() => {
+        container.querySelectorAll('.result-bar-fill').forEach(bar => {
+          const w = bar.style.width;
+          bar.style.width = '0';
+          requestAnimationFrame(() => {
+            bar.style.transition = 'width 1s ease';
+            bar.style.width = w;
+          });
+        });
+      }, 100);
     } catch (err) {
-      Toast.error('Error', 'Failed to load profile');
+      container.innerHTML = `<p class="error-text">Failed to load results.</p>`;
     }
   }
 
-  function renderHeader(c) {
-    const initials = (c.name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-    $('profileAvatar').textContent = initials;
-    $('profileName').textContent = c.name || 'Student';
-    $('profileEmail').textContent = c.email || '';
-    $('profileId').textContent = `ID: ${c.candidate_id || 'N/A'}`;
+  function renderSelectionStatus(user) {
+    const container = $('selection-status') || document.querySelector('.selection-status');
+    if (!container) return;
+
+    const status = user.selection_status || user.status || 'pending';
+    const statusMap = {
+      selected: { label: 'Selected', icon: 'check', color: '#10b981' },
+      shortlisted: { label: 'Shortlisted', icon: 'star', color: '#f59e0b' },
+      pending: { label: 'Pending Review', icon: 'clock', color: '#3b82f6' },
+      rejected: { label: 'Not Selected', icon: 'x', color: '#ef4444' },
+    };
+
+    const s = statusMap[status] || statusMap.pending;
+    const badges = user.badges || [];
+
+    let html = `
+      <div class="selection-card" style="border-left-color: ${s.color}">
+        <div class="selection-info">
+          <h4>Selection Status</h4>
+          <span class="selection-badge" style="background: ${s.color}20; color: ${s.color}">${s.label}</span>
+        </div>
+      </div>
+    `;
+
+    if (badges.length > 0) {
+      html += '<div class="badges-section"><h4>Badges</h4><div class="badges-list">';
+      badges.forEach(b => {
+        html += `
+          <div class="badge-item" data-tooltip="${escapeHtml(b.description || b.name)}">
+            <span class="badge-icon">${b.icon || '🏅'}</span>
+            <span class="badge-name">${escapeHtml(b.name || 'Badge')}</span>
+          </div>
+        `;
+      });
+      html += '</div></div>';
+    }
+
+    container.innerHTML = html;
   }
 
-  function renderForm(c) {
-    $('pName').value = c.name || '';
-    $('pPhone').value = c.phone || '';
-    $('pCollege').value = c.college || '';
-    $('pDept').value = c.department || '';
-    $('pYear').value = c.year || '1';
-    $('pLinkedin').value = c.linkedin || '';
-    $('pGithub').value = c.github || '';
+  function initEditForm(user) {
+    const form = $('edit-profile-form') || document.querySelector('.edit-profile-form');
+    if (!form) return;
 
-    $('profileForm').addEventListener('submit', async (e) => {
+    const nameInput = form.querySelector('[name="name"], #edit-name');
+    const emailInput = form.querySelector('[name="email"], #edit-email');
+    const phoneInput = form.querySelector('[name="phone"], #edit-phone');
+
+    if (nameInput) nameInput.value = user.name || '';
+    if (emailInput) emailInput.value = user.email || '';
+    if (phoneInput) phoneInput.value = user.phone || '';
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = $('saveBtn');
-      btn.disabled = true;
-      btn.textContent = 'Saving...';
+      const btn = form.querySelector('[type="submit"]');
+      if (btn) btn.disabled = true;
+
       try {
-        const result = await API.post('/api/profile/update', {
-          name: $('pName').value.trim(),
-          phone: $('pPhone').value.trim(),
-          college: $('pCollege').value.trim(),
-          department: $('pDept').value.trim(),
-          year: $('pYear').value,
-          linkedin: $('pLinkedin').value.trim(),
-          github: $('pGithub').value.trim(),
-        });
-        if (result.success) {
-          Toast.success('Saved', 'Profile updated successfully');
-          $('profileName').textContent = $('pName').value.trim();
-        } else {
-          Toast.error('Error', result.error || 'Failed to save');
-        }
+        const payload = {};
+        if (nameInput) payload.name = nameInput.value.trim();
+        if (emailInput) payload.email = emailInput.value.trim();
+        if (phoneInput) payload.phone = phoneInput.value.trim();
+
+        await API.put('/api/student/profile', payload);
+        Toast.success('Success', 'Profile updated successfully');
+        Auth.reset();
+        await Auth.getSession();
       } catch (err) {
-        Toast.error('Error', err.message || 'Failed to save');
+        Toast.error('Error', err.message || 'Failed to update profile');
       } finally {
-        btn.disabled = false;
-        btn.textContent = 'Save Changes';
+        if (btn) btn.disabled = false;
       }
     });
   }
 
-  function renderResults(c) {
-    $('resultsCard').style.display = '';
-    const bars = $('resultsBars');
-    bars.innerHTML = SCORE_DIMS.map(d => {
-      const val = c[d.key] || 0;
-      const pct = (val / d.max) * 100;
-      return `
-        <div class="result-bar">
-          <span class="result-bar-label">${d.label}</span>
-          <div class="result-bar-track">
-            <div class="result-bar-fill" style="width:${pct}%;background:${d.color};"></div>
-          </div>
-          <span class="result-bar-value" style="color:${d.color};">${d.unit ? val.toFixed(0) + '%' : val.toFixed(1)}</span>
-        </div>
-      `;
-    }).join('');
-
-    $('finalScore').textContent = (c.score_final || 0).toFixed(1) + '%';
-  }
-
-  function renderBadges(c) {
-    const details = c.badge_details || [];
-    const container = $('profileBadges');
-    if (details.length === 0) {
-      container.innerHTML = '<p style="color:var(--text-tertiary);font-size:var(--text-sm);">Complete the challenge to earn badges.</p>';
-      return;
-    }
-    container.innerHTML = details.filter(b => b.earned).map(b => `
-      <div class="badge badge-gradient" style="gap:var(--space-2);padding:0.4rem 0.8rem;" data-tooltip="${b.description}">
-        <span>${b.icon}</span>
-        <span>${b.name}</span>
-      </div>
-    `).join('') || '<p style="color:var(--text-tertiary);font-size:var(--text-sm);">No badges earned yet.</p>';
-  }
-
-  function renderSelection(c) {
-    const el = $('selectionStatus');
-    if (c.selected === 3) {
-      el.innerHTML = `<div class="badge badge-red" style="font-size:var(--text-sm);padding:0.5rem 1rem;">Disqualified — Too many violations</div>`;
-    } else if (c.selected === 1) {
-      el.innerHTML = `<div class="badge badge-green" style="font-size:var(--text-sm);padding:0.5rem 1rem;">Shortlisted for AI Workshop</div>`;
-    } else if (c.completed) {
-      el.innerHTML = `<div class="badge badge-blue" style="font-size:var(--text-sm);padding:0.5rem 1rem;">Awaiting Results</div>`;
-    } else {
-      el.innerHTML = `<div class="badge badge-yellow" style="font-size:var(--text-sm);padding:0.5rem 1rem;">Not Yet Started</div>`;
+  function formatDate(dateStr) {
+    try {
+      return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateStr;
     }
   }
 
-  init();
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
 })();

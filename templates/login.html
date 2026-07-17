@@ -1,82 +1,103 @@
 {% extends "base.html" %}
-
 {% block title %}Log In — AI Next Gen{% endblock %}
 
+{% block head %}
+<style>
+    .auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--bg-primary);position:relative;overflow:hidden}
+    .auth-page::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(30,34,11,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(30,34,11,.015) 1px,transparent 1px);background-size:50px 50px}
+    .auth-page::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(30,34,11,.03),transparent 50%);pointer-events:none}
+    .auth-card{position:relative;z-index:1;width:100%;max-width:420px;padding:2.5rem;border-radius:16px;background:var(--bg-tertiary);border:1px solid var(--border-default);box-shadow:var(--shadow-lg)}
+    .auth-header{text-align:center;margin-bottom:2rem}
+    .auth-logo{width:56px;height:56px;border-radius:12px;object-fit:cover;margin-bottom:1rem;box-shadow:var(--shadow-sm)}
+    .auth-header h1{font-size:1.5rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem}
+    .auth-header p{font-size:.9rem;color:var(--text-secondary)}
+    .auth-form{display:flex;flex-direction:column;gap:1.25rem}
+    .form-group{display:flex;flex-direction:column;gap:.4rem}
+    .form-group label{font-size:.8rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
+    .form-group input{padding:.75rem 1rem;border-radius:8px;background:var(--bg-primary);border:1px solid var(--border-default);color:var(--text-primary);font-size:.95rem;transition:all .2s;outline:none}
+    .form-group input:focus{border-color:var(--accent-primary);box-shadow:0 0 0 3px rgba(30,34,11,.08)}
+    .form-group input::placeholder{color:var(--text-muted)}
+    .btn-login{width:100%;padding:.85rem;border-radius:8px;background:var(--gradient-brand);color:var(--text-inverse);font-size:.95rem;font-weight:600;border:none;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+    .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(30,34,11,.15)}
+    .btn-login:active{transform:translateY(0)}
+    .btn-login.loading{pointer-events:none;opacity:.85}
+    .btn-login .spinner{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin:0 auto}
+    .btn-login.loading .spinner{display:block}
+    .btn-login.loading .btn-text{display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .auth-error{display:none;padding:.75rem 1rem;border-radius:8px;background:var(--color-danger-bg);border:1px solid var(--color-danger-border);color:var(--color-danger);font-size:.85rem;text-align:center}
+    .auth-error.show{display:block}
+    .auth-footer{text-align:center;margin-top:1.5rem;font-size:.9rem;color:var(--text-secondary)}
+    .auth-footer a{color:var(--accent-primary);text-decoration:none;font-weight:600;transition:color .2s}
+    .auth-footer a:hover{color:var(--accent-secondary)}
+    .admin-link{text-align:center;margin-top:1rem}
+    .admin-link a{font-size:.8rem;color:var(--text-muted);text-decoration:none;transition:color .2s}
+    .admin-link a:hover{color:var(--text-secondary)}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="auth-layout grid-bg">
-  <div class="auth-card glass-card glass-card-glow reveal">
-    <div class="auth-header">
-      <div class="auth-logo">
-        <a href="/"><img src="/static/img/logo.jpg" alt="AI Next Gen"></a>
-      </div>
-      <h2 class="auth-title">Welcome Back</h2>
-      <p class="auth-subtitle">Log in to access your challenge dashboard.</p>
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-header">
+            <img src="/static/img/logo.jpg" alt="AI Next Gen" class="auth-logo">
+            <h1>Welcome Back</h1>
+            <p>Sign in to continue to AI Next Gen</p>
+        </div>
+        <div class="auth-error" id="loginError"></div>
+        <form class="auth-form" id="loginForm" onsubmit="return handleLogin(event)">
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn-login" id="loginBtn">
+                <span class="btn-text">Log In</span>
+                <div class="spinner"></div>
+            </button>
+        </form>
+        <div class="auth-footer">
+            Don't have an account? <a href="/signup">Register here</a>
+        </div>
+        <div class="admin-link">
+            <a href="/admin/login">Admin Access</a>
+        </div>
     </div>
-
-    <form class="auth-form" id="loginForm">
-      <div class="form-group">
-        <label class="form-label" for="email">Email</label>
-        <input class="form-input" type="email" id="email" placeholder="you@college.edu" required autocomplete="email">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="password">Password</label>
-        <input class="form-input" type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
-      </div>
-
-      <button type="submit" class="btn btn-primary" style="width:100%;" id="loginBtn">
-        <span id="loginBtnText">Log In</span>
-        <span id="loginBtnSpinner" class="spinner spinner-sm" style="display:none;"></span>
-      </button>
-
-      <div id="loginError" class="form-error" style="text-align:center; display:none;"></div>
-    </form>
-
-    <div class="auth-footer">
-      Don't have an account? <a href="/signup">Register here</a>
-    </div>
-  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-(function() {
-  const form = document.getElementById('loginForm');
-  const btn = document.getElementById('loginBtn');
-  const btnText = document.getElementById('loginBtnText');
-  const btnSpinner = document.getElementById('loginBtnSpinner');
-  const errorEl = document.getElementById('loginError');
-
-  form.addEventListener('submit', async function(e) {
+async function handleLogin(e) {
     e.preventDefault();
-    errorEl.style.display = 'none';
-    btn.disabled = true;
-    btnText.textContent = 'Logging in...';
-    btnSpinner.style.display = 'inline-block';
-
+    const btn = document.getElementById('loginBtn');
+    const errEl = document.getElementById('loginError');
+    errEl.classList.remove('show');
+    btn.classList.add('loading');
     try {
-      const res = await API.post('/api/login', {
-        email: document.getElementById('email').value.trim(),
-        password: document.getElementById('password').value,
-      });
-
-      if (res.success) {
-        Toast.show('Welcome back!', 'Logged in successfully.', 'success');
-        window.location.href = res.redirect || '/profile';
-      } else {
-        errorEl.textContent = res.error || 'Login failed';
-        errorEl.style.display = 'block';
-      }
+        const res = await API.post('/api/auth/login', {
+            email: document.getElementById('loginEmail').value,
+            password: document.getElementById('loginPassword').value
+        });
+        if (res.success) {
+            localStorage.setItem('user', JSON.stringify({ email: document.getElementById('loginEmail').value }));
+            if (document.getElementById('loginEmail').value.toLowerCase().includes('admin')) {
+                window.location.href = '/admin';
+            } else {
+                window.location.href = '/dashboard';
+            }
+        } else {
+            throw new Error(res.error || 'Login failed');
+        }
     } catch (err) {
-      errorEl.textContent = err.message || 'Network error. Please try again.';
-      errorEl.style.display = 'block';
-    } finally {
-      btn.disabled = false;
-      btnText.textContent = 'Log In';
-      btnSpinner.style.display = 'none';
+        errEl.textContent = err.message || 'Invalid credentials. Please try again.';
+        errEl.classList.add('show');
+        btn.classList.remove('loading');
     }
-  });
-})();
+    return false;
+}
 </script>
 {% endblock %}

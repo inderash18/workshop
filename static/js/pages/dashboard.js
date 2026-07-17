@@ -1,192 +1,157 @@
-/* ============================================
-   DASHBOARD — Score visualization + stats
-   ============================================ */
-
-(function() {
-  const $ = id => document.getElementById(id);
+(function () {
+  const $ = (id) => document.getElementById(id);
 
   async function init() {
-    try {
-      const res = await API.get('/api/session');
-      if (!res.logged_in) { window.location.href = '/login'; return; }
-      const c = res.candidate;
-      renderHeader(c);
-
-      if (!c.completed && !c.started) {
-        $('dashPending').style.display = '';
-        $('dashContent').style.display = 'none';
-        return;
-      }
-      if (!c.completed) {
-        $('dashPending').style.display = '';
-        $('dashPending').querySelector('h2').textContent = 'Challenge In Progress';
-        $('dashPending').querySelector('p').textContent = 'Continue where you left off.';
-        $('dashPending').querySelector('a').textContent = 'Continue Challenge';
-        $('dashContent').style.display = 'none';
-        return;
-      }
-
-      $('dashPending').style.display = 'none';
-      $('dashContent').style.display = '';
-      renderStatus(c);
-      renderScores(c);
-      renderStats(c);
-      renderBadges(c);
-      renderRadar(c);
-    } catch (err) {
-      Toast.error('Error', 'Failed to load dashboard');
-    }
-  }
-
-  function renderHeader(c) {
-    $('dashName').textContent = c.name ? c.name.split(' ')[0] : 'Student';
-    $('dashCollege').textContent = [c.college, c.department, c.year ? `Year ${c.year}` : ''].filter(Boolean).join(' · ');
-
-    const actions = $('dashActions');
-    if (c.completed) {
-      actions.innerHTML = `<a href="/profile" class="btn btn-secondary btn-sm">View Profile</a>`;
-    } else {
-      actions.innerHTML = `<a href="/challenge" class="btn btn-primary btn-sm">Start Challenge</a>`;
-    }
-  }
-
-  function renderStatus(c) {
-    const banner = $('statusBanner');
-    if (c.selected === 3) {
-      banner.innerHTML = `<div class="status-banner disqualified"><span class="status-icon">&#x26D4;</span><div class="status-text"><h4>Disqualified</h4><p>Too many violations were recorded during the challenge.</p></div></div>`;
-    } else if (c.selected === 1) {
-      banner.innerHTML = `<div class="status-banner completed"><span class="status-icon">&#x1F3C6;</span><div class="status-text"><h4>Shortlisted!</h4><p>Congratulations! You've been shortlisted for the AI Workshop.</p></div></div>`;
-    } else if (c.completed) {
-      banner.innerHTML = `<div class="status-banner completed"><span class="status-icon">&#x2705;</span><div class="status-text"><h4>Challenge Completed</h4><p>Your results have been scored. Check your ranking on the leaderboard.</p></div></div>`;
-    }
-  }
-
-  function renderScores(c) {
-    const dimensions = [
-      { key: 'score_logic', label: 'Logic', max: 40, color: '#6366f1' },
-      { key: 'score_creativity', label: 'Creativity', max: 20, color: '#ec4899' },
-      { key: 'score_ai_knowledge', label: 'AI Knowledge', max: 20, color: '#3b82f6' },
-      { key: 'score_problem_solving', label: 'Problem Solving', max: 10, color: '#22c55e' },
-      { key: 'score_research', label: 'Research', max: 10, color: '#a855f7' },
-      { key: 'score_time', label: 'Speed', max: 10, color: '#eab308' },
-      { key: 'score_ai_potential', label: 'AI Potential', max: 10, color: '#f97316' },
-      { key: 'score_selection_prob', label: 'Selection %', max: 100, color: '#22d3ee', unit: '%' },
-    ];
-
-    const grid = $('scoreGrid');
-    grid.innerHTML = '';
-
-    dimensions.forEach(d => {
-      const val = c[d.key] || 0;
-      const pct = d.max === 100 ? val : (val / d.max) * 100;
-      const card = document.createElement('div');
-      card.className = 'glass-card score-card';
-      card.innerHTML = `
-        <div style="position:relative;width:80px;height:80px;margin:0 auto;">
-          <svg width="80" height="80" style="transform:rotate(-90deg)">
-            <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="5"/>
-            <circle cx="40" cy="40" r="34" fill="none" stroke="${d.color}" stroke-width="5"
-              stroke-linecap="round" stroke-dasharray="${2 * Math.PI * 34}"
-              stroke-dashoffset="${2 * Math.PI * 34 * (1 - pct / 100)}"
-              style="transition: stroke-dashoffset 1.2s cubic-bezier(0.16,1,0.3,1);"/>
-          </svg>
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
-            <span style="font-family:var(--font-display);font-size:var(--text-lg);font-weight:700;">${d.unit ? val.toFixed(0) + '%' : val.toFixed(1)}</span>
-          </div>
-        </div>
-        <div class="score-card-label">${d.label}</div>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  function renderStats(c) {
-    const stats = [
-      { label: 'Total Time', value: formatTime(c.time_taken || 0) },
-      { label: 'Tab Switches', value: c.tab_switches || 0 },
-      { label: 'Violations', value: c.violation_count || 0 },
-      { label: 'Final Score', value: (c.score_final || 0).toFixed(1) },
-    ];
-    const grid = $('statsGrid');
-    grid.innerHTML = stats.map(s => `
-      <div class="glass-card proctor-stat">
-        <div class="proctor-stat-value">${s.value}</div>
-        <div class="proctor-stat-label">${s.label}</div>
-      </div>
-    `).join('');
-  }
-
-  function renderBadges(c) {
-    const details = c.badge_details || [];
-    const grid = $('badgeGrid');
-    if (details.length === 0) {
-      grid.innerHTML = '<p style="color:var(--text-tertiary);font-size:var(--text-sm);">No badges earned yet.</p>';
+    const session = await Auth.getSession();
+    if (!session.logged_in) {
+      window.location.href = '/login';
       return;
     }
-    grid.innerHTML = details.map(b => `
-      <div class="glass-card badge-card ${b.earned ? '' : 'locked'}">
-        <div class="badge-icon" style="background:${b.color}22;color:${b.color};">${b.icon}</div>
-        <div>
-          <div class="badge-name">${b.name}</div>
-          <div class="badge-desc">${b.description}</div>
+
+    const user = session.candidate || session.user || {};
+    renderUserGreeting(user);
+    await loadTests();
+    Auth.updateNav();
+  }
+
+  function renderUserGreeting(user) {
+    const greetingEl = $('user-greeting') || document.querySelector('.dashboard-greeting');
+    if (greetingEl) {
+      const name = user.name || user.email || 'Student';
+      greetingEl.textContent = `Welcome, ${name}`;
+    }
+  }
+
+  async function loadTests() {
+    const container = $('tests-container') || document.querySelector('.tests-grid') || document.querySelector('.test-cards');
+    if (!container) return;
+
+    container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading tests...</p></div>';
+
+    try {
+      const data = await API.get('/api/student/tests');
+      const tests = data.tests || data.data || data || [];
+
+      if (!tests.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+            <h3>No Tests Assigned</h3>
+            <p>You don't have any tests assigned yet. Check back later.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      tests.forEach(test => {
+        container.appendChild(createTestCard(test));
+      });
+    } catch (err) {
+      container.innerHTML = `
+        <div class="empty-state error">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <h3>Error Loading Tests</h3>
+          <p>${err.message || 'Something went wrong. Please try again.'}</p>
+          <button class="btn btn-secondary" onclick="window.location.reload()">Retry</button>
+        </div>
+      `;
+    }
+  }
+
+  function createTestCard(test) {
+    const card = document.createElement('div');
+    card.className = `test-card status-${test.status || 'pending'}`;
+
+    const statusBadge = getStatusBadge(test.status);
+    const isActive = test.status === 'active' || test.status === 'published' || test.status === 'in_progress';
+    const isCompleted = test.status === 'completed' || test.status === 'submitted';
+    const isLocked = test.status === 'locked' || test.status === 'draft';
+    const isUpcoming = test.status === 'upcoming' || test.status === 'scheduled';
+
+    const startDate = test.start_time || test.start_date || test.scheduled_at;
+    const endDate = test.end_time || test.end_date || test.deadline;
+    const duration = test.duration || test.time_limit || 0;
+    const score = test.score !== undefined ? test.score : null;
+    const totalMarks = test.total_marks || test.marks || test.max_score || 100;
+
+    let buttonHtml = '';
+    if (isActive) {
+      buttonHtml = `<a href="/test/${test.id || test._id}" class="btn btn-primary btn-sm">Start Test</a>`;
+    } else if (isCompleted && test.can_view_results !== false) {
+      buttonHtml = `<a href="/test/${test.id || test._id}/result" class="btn btn-secondary btn-sm">View Results</a>`;
+    } else if (isUpcoming) {
+      buttonHtml = `<button class="btn btn-secondary btn-sm" disabled>Upcoming</button>`;
+    } else if (isLocked) {
+      buttonHtml = `<button class="btn btn-secondary btn-sm" disabled>Locked</button>`;
+    } else {
+      buttonHtml = `<button class="btn btn-secondary btn-sm" disabled>${test.status || 'Unknown'}</button>`;
+    }
+
+    card.innerHTML = `
+      <div class="test-card-header">
+        <div class="test-card-title">
+          <h3>${escapeHtml(test.title || test.name || 'Untitled Test')}</h3>
+          ${statusBadge}
+        </div>
+        <div class="test-card-meta">
+          ${duration ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${duration} min</span>` : ''}
+          ${totalMarks ? `<span class="meta-item"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>${totalMarks} marks</span>` : ''}
         </div>
       </div>
-    `).join('');
+      ${test.description ? `<p class="test-card-desc">${escapeHtml(test.description).substring(0, 150)}${test.description.length > 150 ? '...' : ''}</p>` : ''}
+      <div class="test-card-footer">
+        <div class="test-card-info">
+          ${startDate ? `<span class="info-item">Start: ${formatDate(startDate)}</span>` : ''}
+          ${endDate ? `<span class="info-item">End: ${formatDate(endDate)}</span>` : ''}
+          ${score !== null ? `<span class="info-item score">Score: ${score}/${totalMarks}</span>` : ''}
+        </div>
+        <div class="test-card-actions">${buttonHtml}</div>
+      </div>
+    `;
+
+    return card;
   }
 
-  function renderRadar(c) {
-    const canvas = $('radarChart');
-    if (!canvas || typeof Chart === 'undefined') return;
-
-    const labels = ['Logic', 'Creativity', 'AI Knowledge', 'Problem Solving', 'Research', 'Speed'];
-    const maxVals = [40, 20, 20, 10, 10, 10];
-    const vals = [
-      c.score_logic || 0, c.score_creativity || 0, c.score_ai_knowledge || 0,
-      c.score_problem_solving || 0, c.score_research || 0, c.score_time || 0,
-    ];
-    const normalized = vals.map((v, i) => (v / maxVals[i]) * 100);
-
-    new Chart(canvas, {
-      type: 'radar',
-      data: {
-        labels,
-        datasets: [{
-          data: normalized,
-          backgroundColor: 'rgba(99, 102, 241, 0.15)',
-          borderColor: '#6366f1',
-          borderWidth: 2,
-          pointBackgroundColor: '#6366f1',
-          pointBorderColor: '#fff',
-          pointRadius: 4,
-          pointHoverRadius: 6,
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          r: {
-            beginAtZero: true,
-            max: 100,
-            ticks: { display: false, stepSize: 20 },
-            grid: { color: 'rgba(255,255,255,0.06)' },
-            angleLines: { color: 'rgba(255,255,255,0.06)' },
-            pointLabels: {
-              color: '#94a3b8',
-              font: { family: "'Inter', sans-serif", size: 12 },
-            },
-          },
-        },
-      },
-    });
+  function getStatusBadge(status) {
+    const map = {
+      active: { label: 'Active', class: 'badge-success' },
+      published: { label: 'Active', class: 'badge-success' },
+      in_progress: { label: 'In Progress', class: 'badge-warning' },
+      completed: { label: 'Completed', class: 'badge-info' },
+      submitted: { label: 'Submitted', class: 'badge-info' },
+      pending: { label: 'Pending', class: 'badge-secondary' },
+      upcoming: { label: 'Upcoming', class: 'badge-secondary' },
+      scheduled: { label: 'Scheduled', class: 'badge-secondary' },
+      locked: { label: 'Locked', class: 'badge-danger' },
+      draft: { label: 'Draft', class: 'badge-secondary' },
+    };
+    const s = map[status] || { label: status || 'Unknown', class: 'badge-secondary' };
+    return `<span class="badge ${s.class}">${s.label}</span>`;
   }
 
-  function formatTime(secs) {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}m ${s}s`;
+  function formatDate(dateStr) {
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return dateStr;
+    }
   }
 
-  init();
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
 })();

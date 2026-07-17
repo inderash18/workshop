@@ -1,98 +1,98 @@
-/* ============================================
-   LANDING — Particle animation + hero effects
-   ============================================ */
+/* ================================================================
+   AI NEXT GEN — Quiet Luxury UI Script
+   Editorial · Minimal · High-End Interaction
+   ================================================================ */
+;(function () {
+  'use strict';
 
-(function() {
-  const canvas = document.getElementById('particleCanvas');
-  if (!canvas) return;
+  // DOM Refs
+  const nav = document.querySelector('.g-nav');
+  const bgMark = document.querySelector('.hero-bg-mark');
 
-  const ctx = canvas.getContext('2d');
-  let width, height, particles, animId;
-
-  function resize() {
-    const rect = canvas.parentElement.getBoundingClientRect();
-    width = canvas.width = rect.width;
-    height = canvas.height = rect.height;
-  }
-
-  function createParticles() {
-    const count = Math.min(Math.floor((width * height) / 18000), 80);
-    particles = [];
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        r: Math.random() * 1.5 + 0.5,
-        alpha: Math.random() * 0.4 + 0.1,
-      });
+  /* ── SCROLL HEADER CLASS ── */
+  function handleScroll() {
+    if (!nav) return;
+    if (window.scrollY > 20) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
     }
   }
 
-  function draw() {
-    ctx.clearRect(0, 0, width, height);
+  /* ── SUBTLE PARALLAX ON HERO MARK ── */
+  function handleParallax() {
+    if (!bgMark) return;
+    const scrollY = window.scrollY;
+    // Slow, subtle upward drift
+    bgMark.style.transform = `translateY(${scrollY * 0.12}px)`;
+  }
 
-    /* Draw connections */
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 140) {
-          const alpha = (1 - dist / 140) * 0.12;
-          ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
-          ctx.lineWidth = 0.5;
-          ctx.beginPath();
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.stroke();
+  /* ── INTERSECTION OBSERVER FOR REVEALS ── */
+  function initRevealAnimation() {
+    const reveals = document.querySelectorAll('[data-r]');
+    if (!reveals.length) return;
+
+    const observerOptions = {
+      root: null, // Viewport
+      rootMargin: '0px 0px -8% 0px', // Trigger slightly before full exit
+      threshold: 0.05
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('on');
+          // Once animated, stop observing this item
+          observer.unobserve(entry.target);
         }
-      }
-    }
+      });
+    }, observerOptions);
 
-    /* Draw particles */
-    for (const p of particles) {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(99, 102, 241, ${p.alpha})`;
-      ctx.fill();
-
-      /* Move */
-      p.x += p.vx;
-      p.y += p.vy;
-
-      /* Wrap */
-      if (p.x < 0) p.x = width;
-      if (p.x > width) p.x = 0;
-      if (p.y < 0) p.y = height;
-      if (p.y > height) p.y = 0;
-    }
-
-    animId = requestAnimationFrame(draw);
+    reveals.forEach(el => observer.observe(el));
   }
 
+  /* ── SMOOTH SCROLL FOR ANCHORS ── */
+  function initSmoothScroll() {
+    const links = document.querySelectorAll('a[href^="#"]');
+    links.forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetEl = document.querySelector(targetId);
+        if (targetEl) {
+          const headerOffset = 64; // Adjust based on nav height
+          const elementPosition = targetEl.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth'
+          });
+        }
+      });
+    });
+  }
+
+  /* ── INIT ── */
   function init() {
-    resize();
-    createParticles();
-    draw();
+    // Scroll events
+    window.addEventListener('scroll', () => {
+      handleScroll();
+      handleParallax();
+    }, { passive: true });
+
+    // Initial triggers
+    handleScroll();
+    initRevealAnimation();
+    initSmoothScroll();
   }
 
-  /* Debounced resize */
-  let resizeTimer;
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      cancelAnimationFrame(animId);
-      init();
-    }, 200);
-  });
-
-  /* Reduce motion check */
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    canvas.style.display = 'none';
-    return;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 
-  init();
 })();

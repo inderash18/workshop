@@ -1,75 +1,610 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="{% block meta_description %}AI Next Gen — Premium AI Workshop Selection Portal for College Students{% endblock %}">
-  <title>{% block title %}AI Next Gen{% endblock %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI Next Gen — Premium AI Research Challenge & Workshop. Limited to 30 seats. Apply now.">
+    <meta name="theme-color" content="#0B0B0B">
+    <title>{% block title %}AI Next Gen{% endblock %}</title>
+    <link rel="icon" href="/static/img/logo.jpg" type="image/jpeg">
+    <!-- Premium fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/design-system.css">
+    <link rel="stylesheet" href="/static/css/components.css">
+    <link rel="stylesheet" href="/static/css/layouts.css">
+    <link rel="stylesheet" href="/static/css/animations.css">
+    <link rel="stylesheet" href="/static/css/responsive.css">
+    <style>
+    /* ===== GLOBAL NAV ===== */
+    .g-nav {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 48px);
+      max-width: 1160px;
+      z-index: var(--z-nav);
+      border-radius: 999px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.4s var(--ease-out);
+    }
+    .g-nav.scrolled {
+      background: var(--glass-bg-hover);
+      border-color: var(--glass-border-hover);
+      box-shadow: var(--shadow-md);
+    }
+    .g-nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px 10px 14px;
+      gap: 16px;
+    }
+    .g-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+    .g-nav-brand img {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .g-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+      justify-content: center;
+    }
+    .g-nav-link {
+      padding: 7px 13px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: 999px;
+      transition: color 0.2s ease, background 0.2s ease;
+      white-space: nowrap;
+    }
+    .g-nav-link:hover {
+      color: var(--text-primary);
+      background: var(--glass-bg-hover);
+    }
+    .g-nav-link.active {
+      color: var(--text-primary);
+      background: var(--glass-bg-active);
+    }
+    .g-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .g-btn-ghost {
+      padding: 7px 16px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-radius: 999px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .g-btn-ghost:hover {
+      color: var(--text-primary);
+      border-color: var(--glass-border-hover);
+      background: var(--glass-bg-hover);
+    }
+    .g-btn-primary {
+      padding: 7px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-inverse);
+      background: var(--gradient-brand);
+      border-radius: 999px;
+      border: 1px solid rgba(30,34,11,0.10);
+      box-shadow: 0 2px 8px rgba(30,34,11,0.12);
+      transition: all 0.25s var(--ease-out);
+    }
+    .g-btn-primary:hover {
+      box-shadow: 0 4px 16px rgba(30,34,11,0.22);
+      transform: translateY(-1px);
+      filter: brightness(1.08);
+    }
+    /* Admin badge in nav */
+    .g-admin-badge {
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 999px;
+    }
+    /* Mobile toggle */
+    .g-nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.7);
+    }
+    .g-nav-toggle span {
+      display: block;
+      width: 20px;
+      height: 1.5px;
+      background: currentColor;
+      border-radius: 2px;
+      transition: all 0.25s ease;
+    }
+    /* Mobile menu drawer */
+    .g-nav-mobile {
+      display: none;
+      position: fixed;
+      inset: 0;
+      top: 0;
+      z-index: calc(var(--z-nav) - 1);
+      background: var(--bg-primary);
+      backdrop-filter: var(--glass-blur-heavy);
+      -webkit-backdrop-filter: var(--glass-blur-heavy);
+      padding: 100px 32px 40px;
+      flex-direction: column;
+      gap: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-12px);
+      transition: all 0.35s var(--ease-out);
+    }
+    .g-nav-mobile.open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .g-nav-mobile-link {
+      display: block;
+      padding: 16px 0;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-default);
+      transition: color 0.2s ease;
+    }
+    .g-nav-mobile-link:hover { color: var(--text-primary); }
+    .g-nav-mobile-actions {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-  <link rel="icon" href="/static/img/logo.jpg" type="image/jpeg">
-
-  <link rel="stylesheet" href="/static/css/design-system.css">
-  <link rel="stylesheet" href="/static/css/components.css">
-  <link rel="stylesheet" href="/static/css/layouts.css">
-  <link rel="stylesheet" href="/static/css/animations.css">
-  <link rel="stylesheet" href="/static/css/responsive.css">
-
-  {% block head_extra %}{% endblock %}
+    /* ===== GLOBAL FOOTER ===== */
+    .g-footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-default);
+      padding: 64px 24px 32px;
+    }
+    .g-footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .g-footer-top {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr 1fr 1fr;
+      gap: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid var(--border-default);
+    }
+    .g-footer-brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .g-footer-brand-logo img {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      object-fit: cover;
+    }
+    .g-footer-brand-logo span {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .g-footer-brand-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 260px;
+    }
+    .g-footer-col-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 16px;
+    }
+    .g-footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .g-footer-link {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      transition: color 0.2s ease;
+    }
+    .g-footer-link:hover { color: var(--text-primary); }
+    .g-footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 32px;
+      font-size: 12.5px;
+      color: var(--text-tertiary);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .g-footer-bottom-links {
+      display: flex;
+      gap: 20px;
+    }
+    .g-footer-bottom-links a {
+      color: var(--text-tertiary);
+      transition: color 0.2s ease;
+    }
+    .g-footer-bottom-links a:hover { color: var(--text-secondary); }
+    /* Toast + main area adjustments */
+    .main-content {
+      flex: 1;
+      width: 100%;
+      max-width: var(--container-xl);
+      margin-inline: auto;
+      padding: var(--space-8) var(--space-6);
+    }
+    /* Landing override — remove the main-content padding restriction */
+    /* Landing override — remove the main-content padding restriction */
+    body.landing-page .main-content {
+      max-width: none;
+      padding: 0;
+    }
+    /* Round Avatar Dropdown Style */
+    .nav-avatar-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    }
+    .nav-avatar-img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--border-default);
+      box-shadow: var(--shadow-xs);
+      transition: all 0.2s;
+    }
+    .nav-avatar-img:hover {
+      border-color: var(--border-strong);
+      transform: scale(1.05);
+    }
+    .nav-profile-dropdown {
+      position: relative;
+    }
+    .nav-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      width: 230px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      padding: 0.8rem 0;
+      z-index: 1000;
+    }
+    .nav-dropdown-menu.show {
+      display: block;
+      animation: dropdownFade 0.2s ease-out;
+    }
+    @keyframes dropdownFade {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .dropdown-header {
+      padding: 0.5rem 1.2rem 0.6rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .dropdown-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .dropdown-email {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.15rem;
+    }
+    .dropdown-badge {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #b71c1c;
+      background: rgba(198, 40, 40, 0.08);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 0.35rem;
+      width: fit-content;
+    }
+    .dropdown-divider {
+      border: none;
+      border-top: 1px solid var(--border-subtle);
+      margin: 0.5rem 0;
+    }
+    .dropdown-item {
+      display: block;
+      width: 100%;
+      padding: 0.55rem 1.2rem;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      text-align: left;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .dropdown-item:hover {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+    </style>
+    {% block head %}{% endblock %}
 </head>
-<body>
-  <nav class="nav" id="mainNav">
-    <div class="nav-inner">
-      <a href="/" class="nav-brand">
-        <img src="/static/img/logo.jpg" alt="AI Next Gen">
-        <span class="nav-brand-text">AI Next Gen<span class="nav-brand-dot"></span></span>
-      </a>
+<body class="{% block body_class %}{% endblock %}">
 
-      <ul class="nav-links" id="navLinks">
-        <li><a href="/" class="{% if request.endpoint == 'dashboard.index' %}active{% endif %}">Home</a></li>
-        <li><a href="/leaderboard" class="{% if request.endpoint == 'leaderboard.leaderboard_page' %}active{% endif %}">Leaderboard</a></li>
-        <li id="navChallenge" style="display:none"><a href="/challenge">Challenge</a></li>
-      </ul>
+    <!-- ── FLOATING GLASS NAVBAR ── -->
+    <nav class="g-nav" id="mainNav">
+        <div class="g-nav-inner">
+            <a href="/" class="g-nav-brand">
+                <img src="/static/img/logo.jpg" alt="AI Next Gen">
+                <span>AI Next Gen</span>
+            </a>
 
-      <div class="nav-actions">
-        <div id="navGuest">
-          <a href="/login" class="btn btn-ghost btn-sm">Log In</a>
-          <a href="/signup" class="btn btn-primary btn-sm">Register</a>
+            <div class="g-nav-links" id="navLinks">
+                <a href="/" class="g-nav-link {% if request.endpoint == 'landing' %}active{% endif %}">Home</a>
+                <a href="/leaderboard" class="g-nav-link {% if request.endpoint == 'leaderboard' %}active{% endif %}">Leaderboard</a>
+                <a href="/dashboard" class="g-nav-link nav-user" style="display:none;">Tests</a>
+                <a href="/admin" class="g-nav-link nav-admin" style="display:none;">Admin</a>
+            </div>
+
+            <div class="g-nav-actions">
+                <div class="guest-only nav-guest">
+                    <a href="/login" class="g-btn-ghost">Log In</a>
+                    <a href="/signup" class="g-btn-primary">Register</a>
+                </div>
+                <!-- User avatar & settings dropdown -->
+                <div class="nav-profile-dropdown nav-user" style="display:none;">
+                    <button class="nav-avatar-btn" onclick="toggleDropdown(event)" aria-label="Open settings menu">
+                        <img src="/static/img/avatar.png" alt="Profile" class="nav-avatar-img">
+                    </button>
+                    <div class="nav-dropdown-menu" id="navDropdown">
+                        <div class="dropdown-header">
+                            <span class="dropdown-name" id="dropdownName">User</span>
+                            <span class="dropdown-email" id="dropdownEmail">user@example.com</span>
+                        </div>
+                        <hr class="dropdown-divider">
+                        <a href="/dashboard" class="dropdown-item">📊 Dashboard</a>
+                        <a href="/profile" class="dropdown-item">⚙️ Account Settings</a>
+                        <hr class="dropdown-divider">
+                        <button onclick="Auth.logout()" class="dropdown-item logout-btn">🚪 Logout</button>
+                    </div>
+                </div>
+                <!-- Admin avatar & settings dropdown -->
+                <div class="nav-profile-dropdown nav-admin" style="display:none;">
+                    <button class="nav-avatar-btn" onclick="toggleDropdown(event)" aria-label="Open settings menu">
+                        <img src="/static/img/avatar.png" alt="Admin" class="nav-avatar-img" style="border-color:#b71c1c;">
+                    </button>
+                    <div class="nav-dropdown-menu" id="navDropdownAdmin">
+                        <div class="dropdown-header">
+                            <span class="dropdown-name" id="dropdownAdminName">Admin</span>
+                            <span class="dropdown-badge">System Administrator</span>
+                        </div>
+                        <hr class="dropdown-divider">
+                        <a href="/admin" class="dropdown-item">⚙️ Admin Center</a>
+                        <hr class="dropdown-divider">
+                        <button onclick="Auth.logout()" class="dropdown-item logout-btn">🚪 Logout</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="g-nav-toggle" id="navToggle" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
         </div>
-        <div id="navUser" style="display:none">
-          <a href="/profile" class="btn btn-ghost btn-sm" id="navUserName"></a>
-          <button class="btn btn-secondary btn-sm" id="navLogoutBtn">Logout</button>
+    </nav>
+
+    <!-- Mobile nav drawer -->
+    <div class="g-nav-mobile" id="navMobile">
+        <a href="/" class="g-nav-mobile-link">Home</a>
+        <a href="/#workshop" class="g-nav-mobile-link">Workshop</a>
+        <a href="/#tracks" class="g-nav-mobile-link">Tracks</a>
+        <a href="/#challenge" class="g-nav-mobile-link">Challenge</a>
+        <a href="/#timeline" class="g-nav-mobile-link">Timeline</a>
+        <a href="/#faq" class="g-nav-mobile-link">FAQ</a>
+        <a href="/leaderboard" class="g-nav-mobile-link">Leaderboard</a>
+        <div class="g-nav-mobile-actions">
+            <div class="guest-only nav-guest">
+                <a href="/login" class="g-btn-ghost" style="display:block;text-align:center;padding:14px;">Log In</a>
+                <a href="/signup" class="g-btn-primary" style="display:block;text-align:center;padding:14px;">Register →</a>
+            </div>
+            <div class="nav-user" style="display:none;">
+                <a href="/profile" class="g-btn-ghost" style="display:block;text-align:center;padding:14px;">Profile</a>
+                <a href="/dashboard" class="g-btn-ghost" style="display:block;text-align:center;padding:14px;">Dashboard</a>
+                <button onclick="Auth.logout()" class="g-btn-ghost" style="display:block;width:100%;text-align:center;padding:14px;">Logout</button>
+            </div>
+            <div class="nav-admin" style="display:none;">
+                <a href="/admin" class="g-btn-ghost" style="display:block;text-align:center;padding:14px;">Admin Dashboard</a>
+                <button onclick="Auth.logout()" class="g-btn-ghost" style="display:block;width:100%;text-align:center;padding:14px;">Logout</button>
+            </div>
         </div>
-        <button class="nav-mobile-toggle" id="navToggle" aria-label="Toggle menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <line x1="3" y1="18" x2="21" y2="18"/>
-          </svg>
-        </button>
-      </div>
     </div>
-  </nav>
 
-  <div class="toast-container" id="toastContainer"></div>
+    <div id="toast-container" class="toast-container"></div>
 
-  {% block content %}{% endblock %}
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
 
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-inner">
-        <p class="footer-text">&copy; 2026 AI Next Gen. All rights reserved.</p>
-        <ul class="footer-links">
-          <li><a href="/">Home</a></li>
-          <li><a href="/leaderboard">Leaderboard</a></li>
-        </ul>
-      </div>
-    </div>
-  </footer>
+    <!-- ── PREMIUM FOOTER ── -->
+    <footer class="g-footer">
+        <div class="g-footer-inner">
+            <div class="g-footer-top">
+                <div>
+                    <div class="g-footer-brand-logo">
+                        <img src="/static/img/logo.jpg" alt="AI Next Gen">
+                        <span>AI Next Gen</span>
+                    </div>
+                    <p class="g-footer-brand-desc">An exclusive AI research challenge and workshop for the next generation of innovators. Limited to 30 seats.</p>
+                </div>
+                <div>
+                    <div class="g-footer-col-title">Navigate</div>
+                    <div class="g-footer-links">
+                        <a href="/" class="g-footer-link">Home</a>
+                        <a href="/#workshop" class="g-footer-link">Workshop</a>
+                        <a href="/#tracks" class="g-footer-link">AI Tracks</a>
+                        <a href="/#challenge" class="g-footer-link">Challenge</a>
+                    </div>
+                </div>
+                <div>
+                    <div class="g-footer-col-title">Program</div>
+                    <div class="g-footer-links">
+                        <a href="/#timeline" class="g-footer-link">Timeline</a>
+                        <a href="/#benefits" class="g-footer-link">Benefits</a>
+                        <a href="/leaderboard" class="g-footer-link">Leaderboard</a>
+                        <a href="/#faq" class="g-footer-link">FAQ</a>
+                    </div>
+                </div>
+                <div>
+                    <div class="g-footer-col-title">Apply</div>
+                    <div class="g-footer-links">
+                        <a href="/signup" class="g-footer-link">Register</a>
+                        <a href="/login" class="g-footer-link">Login</a>
+                        <a href="/dashboard" class="g-footer-link">Dashboard</a>
+                    </div>
+                </div>
+            </div>
+            <div class="g-footer-bottom">
+                <span>© 2026 AI Next Gen. All rights reserved.</span>
+                <div class="g-footer-bottom-links">
+                    <a href="#">Privacy</a>
+                    <a href="#">Terms</a>
+                    <a href="#">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-  <script src="/static/js/core/api.js"></script>
-  <script src="/static/js/core/auth.js"></script>
-  <script src="/static/js/core/toast.js"></script>
-  <script src="/static/js/app.js"></script>
-  {% block scripts %}{% endblock %}
+    <script src="/static/js/core/api.js"></script>
+    <script src="/static/js/core/auth.js"></script>
+    <script src="/static/js/core/toast.js"></script>
+    <script src="/static/js/core/security.js"></script>
+    <script src="/static/js/core/test-manager.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+    // Floating nav — scroll state + mobile toggle
+    (function() {
+        const nav = document.getElementById('mainNav');
+        const toggle = document.getElementById('navToggle');
+        const mobile = document.getElementById('navMobile');
+
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 40);
+        }, { passive: true });
+
+        toggle && toggle.addEventListener('click', () => {
+            const isOpen = mobile.classList.toggle('open');
+            mobile.style.display = isOpen ? 'flex' : 'none';
+            toggle.classList.toggle('open', isOpen);
+        });
+
+        // Close mobile nav on link click
+        document.querySelectorAll('.g-nav-mobile-link').forEach(l => {
+            l.addEventListener('click', () => {
+                mobile.classList.remove('open');
+                mobile.style.display = 'none';
+                toggle.classList.remove('open');
+            });
+        });
+
+        // Dropdown toggle function
+        window.toggleDropdown = function(e) {
+            e.stopPropagation();
+            const dropdown = e.currentTarget.nextElementSibling;
+            
+            // Close other dropdowns
+            document.querySelectorAll('.nav-dropdown-menu').forEach(menu => {
+                if (menu !== dropdown) menu.classList.remove('show');
+            });
+            
+            dropdown.classList.toggle('show');
+        };
+
+        // Close dropdowns on document click
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.nav-dropdown-menu').forEach(menu => menu.classList.remove('show'));
+        });
+
+        // Load profile avatar and username
+        async function loadHeaderProfile() {
+            try {
+                const session = await Auth.getSession();
+                if (session && session.logged_in && session.candidate) {
+                    const profile = session.candidate;
+                    const nameEl = document.getElementById('dropdownName');
+                    const emailEl = document.getElementById('dropdownEmail');
+                    if (nameEl) nameEl.textContent = profile.name || 'User';
+                    if (emailEl) emailEl.textContent = profile.email || 'user@example.com';
+                    
+                    if (profile.avatar) {
+                        const avImgs = document.querySelectorAll('.nav-avatar-img');
+                        avImgs.forEach(img => { img.src = profile.avatar; });
+                    }
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+        
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadHeaderProfile);
+        } else {
+            loadHeaderProfile();
+        }
+    })();
+    </script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

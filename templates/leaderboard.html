@@ -1,58 +1,117 @@
 {% extends "base.html" %}
-
 {% block title %}Leaderboard — AI Next Gen{% endblock %}
 
+{% block head %}
+<style>
+    .leaderboard-page{padding:6rem 2rem 3rem;max-width:900px;margin:0 auto}
+    .lb-header{text-align:center;margin-bottom:3rem}
+    .lb-eyebrow{display:inline-flex;padding:.4rem 1rem;border-radius:999px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.12);color:#fde047;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem}
+    .lb-header h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#ffffff,#c7d2fe,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:.5rem}
+    .lb-header p{color:var(--text-secondary);font-size:1rem}
+    .lb-table-card{border-radius:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);overflow:hidden;backdrop-filter:blur(12px)}
+    .lb-table{width:100%;border-collapse:collapse}
+    .lb-table thead th{text-align:left;padding:1rem 1.25rem;font-size:.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid rgba(255,255,255,.06)}
+    .lb-table tbody tr{transition:background .2s}
+    .lb-table tbody tr:hover{background:rgba(255,255,255,.02)}
+    .lb-table tbody td{padding:1rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.03);font-size:.9rem;color:var(--text-primary)}
+    .rank-cell{font-weight:700;font-size:1rem;width:60px}
+    .rank-cell .medal{font-size:1.25rem}
+    .rank-1 .medal{filter:drop-shadow(0 0 6px rgba(255,215,0,.4))}
+    .rank-2 .medal{filter:drop-shadow(0 0 4px rgba(192,192,192,.3))}
+    .rank-3 .medal{filter:drop-shadow(0 0 4px rgba(205,127,50,.3))}
+    .name-cell{font-weight:600}
+    .college-cell{color:var(--text-secondary);font-size:.82rem}
+    .score-cell{font-weight:700;color:#818cf8;font-size:1.05rem}
+    .badges-cell{display:flex;gap:.3rem;flex-wrap:wrap}
+    .mini-badge{padding:.15rem .5rem;border-radius:999px;font-size:.65rem;font-weight:700;text-transform:uppercase}
+    .mini-badge.gold{background:rgba(234,179,8,.1);color:#fde047}
+    .mini-badge.silver{background:rgba(156,163,175,.1);color:#d1d5db}
+    .mini-badge.bronze{background:rgba(205,127,50,.1);color:#fbbf24}
+    .mini-badge.elite{background:rgba(99,102,241,.1);color:#818cf8}
+    .lb-top3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2rem}
+    .top-card{padding:2rem 1.5rem;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);text-align:center;transition:all .3s}
+    .top-card:hover{transform:translateY(-4px)}
+    .top-card.gold{border-color:rgba(234,179,8,.2);background:rgba(234,179,8,.03)}
+    .top-card.silver{border-color:rgba(192,192,192,.15);background:rgba(192,192,192,.02)}
+    .top-card.bronze{border-color:rgba(205,127,50,.15);background:rgba(205,127,50,.02)}
+    .top-medal{font-size:2.5rem;margin-bottom:.75rem}
+    .top-name{font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:.25rem}
+    .top-college{font-size:.8rem;color:var(--text-secondary);margin-bottom:.5rem}
+    .top-score{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#fde047,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .top-card.silver .top-score{background:linear-gradient(135deg,#d1d5db,#9ca3af);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .top-card.bronze .top-score{background:linear-gradient(135deg,#fbbf24,#d97706);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .empty-state{text-align:center;padding:3rem;color:var(--text-muted);font-size:.9rem}
+    @media(max-width:768px){.lb-top3{grid-template-columns:1fr}.lb-table{font-size:.8rem}}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="page" style="padding-top: calc(var(--nav-height) + var(--space-12));">
-  <div class="container">
-    <div class="section-header reveal" style="margin-bottom: var(--space-8);">
-      <div class="section-eyebrow">Leaderboard</div>
-      <h2 class="section-title">Top Performers</h2>
-      <p class="section-subtitle">The most brilliant minds in the AI Next Gen Selection Challenge.</p>
+<div class="leaderboard-page">
+    <div class="lb-header">
+        <div class="lb-eyebrow">Leaderboard</div>
+        <h1>Top Performers</h1>
+        <p>The brightest minds competing for selection into the AI Next Gen workshop.</p>
     </div>
 
-    <div class="glass-card glass-card-lg reveal" id="leaderboardContainer" style="min-height: 200px; display:flex; align-items:center; justify-content:center;">
-      <div class="spinner spinner-lg"></div>
+    <div class="lb-top3" id="top3"></div>
+
+    <div class="lb-table-card">
+        <table class="lb-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>College</th>
+                    <th>Score</th>
+                    <th>Badges</th>
+                </tr>
+            </thead>
+            <tbody id="lbBody">
+                <tr><td colspan="5" class="empty-state">Loading leaderboard...</td></tr>
+            </tbody>
+        </table>
     </div>
-  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
 (async function() {
-  const container = document.getElementById('leaderboardContainer');
-
-  try {
-    const entries = await API.get('/api/leaderboard');
-
-    if (!entries || entries.length === 0) {
-      container.innerHTML = '<p style="color:var(--text-tertiary); text-align:center;">No results yet. Be the first to complete the challenge!</p>';
-      return;
+    try {
+        const data = await API.get('/api/leaderboard');
+        if (!data || !data.length) {
+            document.getElementById('lbBody').innerHTML = '<tr><td colspan="5" class="empty-state">No results available yet.</td></tr>';
+            return;
+        }
+        const medals = ['🥇','🥈','🥉'];
+        const top3 = data.slice(0, 3);
+        const colors = ['gold','silver','bronze'];
+        document.getElementById('top3').innerHTML = top3.map((p, i) => `
+            <div class="top-card ${colors[i]}">
+                <div class="top-medal">${medals[i]}</div>
+                <div class="top-name">${p.name}</div>
+                <div class="top-college">${p.college || '—'}</div>
+                <div class="top-score">${p.score}%</div>
+            </div>
+        `).join('');
+        document.getElementById('lbBody').innerHTML = data.map((p, i) => `
+            <tr class="rank-${i+1}">
+                <td class="rank-cell">${i < 3 ? `<span class="medal">${medals[i]}</span>` : '#' + (i+1)}</td>
+                <td class="name-cell">${p.name}</td>
+                <td class="college-cell">${p.college || '—'}</td>
+                <td class="score-cell">${p.score}%</td>
+                <td class="badges-cell">
+                    ${i === 0 ? '<span class="mini-badge gold">Gold</span>' : ''}
+                    ${i === 1 ? '<span class="mini-badge silver">Silver</span>' : ''}
+                    ${i === 2 ? '<span class="mini-badge bronze">Bronze</span>' : ''}
+                    ${p.score >= 90 ? '<span class="mini-badge elite">Elite</span>' : ''}
+                </td>
+            </tr>
+        `).join('');
+    } catch(e) {
+        console.error('Leaderboard load error:', e);
+        document.getElementById('lbBody').innerHTML = '<tr><td colspan="5" class="empty-state">Failed to load leaderboard.</td></tr>';
     }
-
-    let html = '<table class="data-table" style="width:100%;">';
-    html += '<thead><tr><th>#</th><th>Name</th><th>College</th><th>Score</th><th>Badges</th></tr></thead><tbody>';
-
-    entries.forEach((e, i) => {
-      const medals = ['&#x1F947;', '&#x1F948;', '&#x1F949;'];
-      const rank = i < 3 ? medals[i] : (i + 1);
-      const badges = (e.badges || []).slice(0, 2).map(b => `<span class="badge badge-accent">${b}</span>`).join(' ');
-      html += `<tr>
-        <td style="font-family:var(--font-display); font-weight:600; font-size:var(--text-lg);">${rank}</td>
-        <td style="color:var(--text-primary); font-weight:500;">${e.name || 'Anonymous'}</td>
-        <td>${e.college || '-'}</td>
-        <td style="font-family:var(--font-display); font-weight:600; color:var(--accent-light);">${(e.score_final || 0).toFixed(1)}</td>
-        <td>${badges || '<span style="color:var(--text-muted)">-</span>'}</td>
-      </tr>`;
-    });
-
-    html += '</tbody></table>';
-    container.style.display = 'block';
-    container.innerHTML = html;
-  } catch (err) {
-    container.innerHTML = '<p style="color:var(--red); text-align:center;">Failed to load leaderboard.</p>';
-  }
 })();
 </script>
 {% endblock %}

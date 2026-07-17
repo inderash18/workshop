@@ -1,166 +1,528 @@
 {% extends "base.html" %}
+{% block title %}AI Next Gen — Intelligence Cohort 2026{% endblock %}
+{% block body_class %}lp-quiet{% endblock %}
 
-{% block title %}AI Next Gen — The Future Starts Here{% endblock %}
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,700;0,800;1,300;1,400&display=swap" rel="stylesheet">
+
+<style>
+/* ================================================================
+   AI NEXT GEN — SIMPLIFIED QUIET LUXURY LANDING
+   Minimal · Editorial · Premium · Spacious
+   ================================================================ */
+
+:root {
+  --olive:   #1E220B;
+  --olive-2: rgba(30,34,11,0.52);
+  --olive-3: rgba(30,34,11,0.34);
+  --olive-4: rgba(30,34,11,0.14);
+  --olive-5: rgba(30,34,11,0.055);
+  --cream:   #F5F5F5;
+  --white:   #FFFFFF;
+  --alt:     #E7E7EB;
+  --border:  #CFCFD3;
+}
+
+body.lp-quiet {
+  background: var(--cream);
+  color: var(--olive);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+body.lp-quiet .main-content { padding: 0; max-width: none; }
+body.lp-quiet .g-footer { display: none; }
+
+/* ── NAV OVERRIDE ── */
+body.lp-quiet .g-nav {
+  border-radius: 0;
+  top: 0; left: 0;
+  width: 100%; max-width: none;
+  transform: none;
+  background: rgba(245,245,245,0.96);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  box-shadow: none;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+body.lp-quiet .g-nav.scrolled {
+  background: rgba(255,255,255,0.97);
+  box-shadow: 0 1px 0 var(--border);
+}
+body.lp-quiet .g-nav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 12px clamp(24px,5vw,80px);
+}
+body.lp-quiet .g-nav-brand {
+  color: var(--olive);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.04em;
+}
+body.lp-quiet .g-nav-brand img { display: none; }
+
+/* ── LAYOUT & PAGES ── */
+.wrap {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(24px,5.5vw,80px);
+}
+.lux-sec { padding: clamp(60px,8vw,120px) 0; }
+.on-white { background: var(--white); }
+.on-cream { background: var(--cream); }
+.on-dark  { background: var(--olive); }
+
+/* ── TYPOGRAPHY ── */
+.lbl {
+  font-size: 0.67rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--olive-3);
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+.lbl--light { color: rgba(245,241,234,0.38); }
+
+.h1 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(3rem, 7.5vw, 8.2rem);
+  font-weight: 800;
+  letter-spacing: -0.058em;
+  line-height: 0.90;
+  color: var(--olive);
+}
+.h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2rem, 4.5vw, 4.8rem);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  color: var(--olive);
+}
+.h2--light { color: #F5F1EA; }
+
+.body-t {
+  font-size: clamp(0.92rem, 1.25vw, 1.05rem);
+  line-height: 1.7;
+  color: var(--olive-2);
+  max-width: 48ch;
+}
+
+/* ── BUTTONS ── */
+.btn-p {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 26px;
+  background: var(--olive); color: var(--white);
+  border: 1px solid var(--olive);
+  border-radius: 6px;
+  font: 600 0.85rem/1 'Inter', sans-serif;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.btn-p:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.btn-g {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px;
+  background: transparent; color: var(--olive-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: 500 0.85rem/1 'Inter', sans-serif;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.btn-g:hover { color: var(--olive); border-color: rgba(30,34,11,0.25); background: var(--olive-5); }
+
+/* ================================================================
+   HERO (SIMPLIFIED)
+   ================================================================ */
+.hero {
+  position: relative;
+  background: var(--cream);
+  padding-top: calc(56px + clamp(64px, 8vw, 100px));
+  padding-bottom: clamp(64px, 8vw, 100px);
+}
+.hero-inner {
+  max-width: 850px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 12px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font: 500 0.65rem/1 'Inter', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--olive-3);
+  margin-bottom: 2rem;
+}
+.hero-badge::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: var(--olive-3);
+}
+.hero-ctas {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-top: 2.2rem;
+}
+
+/* ================================================================
+   TRACKS (SIMPLIFIED)
+   ================================================================ */
+.tracks-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 4vw, 48px);
+  margin-top: 3rem;
+}
+.track-item {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.track-num {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--olive-3);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.track-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--olive);
+  margin-bottom: 0.5rem;
+}
+.track-desc {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--olive-2);
+}
+
+/* ================================================================
+   CHALLENGE (SIMPLIFIED)
+   ================================================================ */
+.ch-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(48px, 6vw, 96px);
+  align-items: start;
+}
+.ch-level {
+  display: flex;
+  gap: 20px;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid rgba(245,241,234,0.08);
+}
+.ch-level:first-child { padding-top: 0; border-top: 1px solid rgba(245,241,234,0.08); }
+.cl-num {
+  font-size: 0.72rem;
+  color: rgba(245,241,234,0.25);
+  font-weight: 600;
+}
+.cl-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #F5F1EA;
+  margin-bottom: 0.35rem;
+}
+.cl-desc {
+  font-size: 0.85rem;
+  color: rgba(245,241,234,0.40);
+  line-height: 1.5;
+}
+
+/* ================================================================
+   TIMELINE (SIMPLIFIED)
+   ================================================================ */
+.tl-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+}
+.tl-step {
+  border-top: 2px solid var(--olive);
+  padding-top: 1.2rem;
+}
+.tl-phase {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--olive-3);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.tl-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--olive);
+  margin-bottom: 0.5rem;
+}
+.tl-desc {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--olive-2);
+}
+
+/* ================================================================
+   CTA & FOOTER (SIMPLIFIED)
+   ================================================================ */
+.cta-sec {
+  text-align: center;
+  padding: 6rem 0;
+}
+.cta-sec h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 1.5rem;
+}
+.cta-sec p {
+  color: var(--olive-3);
+  font-size: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.lux-footer {
+  background: var(--olive);
+  padding: 2.5rem 0;
+  font-size: 0.75rem;
+}
+.foot-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: rgba(245,241,234,0.30);
+}
+.foot-inner a {
+  color: rgba(245,241,234,0.30);
+  text-decoration: none;
+}
+.foot-inner a:hover {
+  color: rgba(245,241,234,0.70);
+}
+
+/* ── REVEALS ── */
+[data-r] {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+[data-r].on {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 960px) {
+  .tracks-grid { grid-template-columns: 1fr 1fr; }
+  .ch-grid { grid-template-columns: 1fr; gap: 40px; }
+  .tl-row { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .tracks-grid { grid-template-columns: 1fr; }
+  .tl-row { grid-template-columns: 1fr; }
+  .foot-inner { flex-direction: column; gap: 1rem; text-align: center; }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="hero grid-bg">
-  <canvas class="particle-canvas" id="particleCanvas"></canvas>
 
-  <div class="hero-content">
-    <div class="hero-eyebrow reveal">
-      <span class="hero-eyebrow-dot"></span>
-      Applications Open — Limited Seats
-    </div>
-
-    <h1 class="hero-title reveal reveal-delay-1">
-      Build the Future with<br>
-      <span class="hero-gradient-text">Artificial Intelligence</span>
-    </h1>
-
-    <p class="hero-subtitle reveal reveal-delay-2">
-      An exclusive 2-day intensive workshop on AI, Machine Learning, RAG Systems,
-      AI Agents, Prompt Engineering, and the tools shaping tomorrow.
-      Only 30 seats. One challenge. Your potential is the entry ticket.
-    </p>
-
-    <div class="hero-actions reveal reveal-delay-3">
-      <a href="/signup" class="btn btn-primary btn-lg">Apply Now</a>
-      <a href="#tracks" class="btn btn-secondary btn-lg">Explore Tracks</a>
-    </div>
-
-    <div class="hero-stats reveal reveal-delay-4">
-      <div class="hero-stat">
-        <div class="hero-stat-number" data-count="30">0</div>
-        <div class="hero-stat-label">Seats</div>
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-inner">
+      <div class="hero-badge" data-r>
+        Intelligence Cohort · Cohort One 2026
       </div>
-      <div class="hero-stat">
-        <div class="hero-stat-number" data-count="7">0</div>
-        <div class="hero-stat-label">Challenge Levels</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-number" data-count="2">0</div>
-        <div class="hero-stat-label">Days of Intensity</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-number" data-count="9">0</div>
-        <div class="hero-stat-label">AI Topics</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<section class="section" id="tracks">
-  <div class="container">
-    <div class="section-header reveal">
-      <div class="section-eyebrow">Workshop Tracks</div>
-      <h2 class="section-title">What You'll Master</h2>
-      <p class="section-subtitle">Two days of deep, hands-on learning across the most in-demand areas of modern AI.</p>
-    </div>
-
-    <div class="feature-grid stagger-grid">
-      <div class="glass-card feature-card hover-lift">
-        <div class="feature-icon">&#x1F9E0;</div>
-        <h4 class="feature-title">Artificial Intelligence</h4>
-        <p class="feature-desc">From foundational concepts to cutting-edge architectures powering the next generation of intelligent systems.</p>
-      </div>
-      <div class="glass-card feature-card hover-lift">
-        <div class="feature-icon">&#x1F4CA;</div>
-        <h4 class="feature-title">Machine Learning</h4>
-        <p class="feature-desc">Supervised, unsupervised, and reinforcement learning — hands-on with real datasets and production pipelines.</p>
-      </div>
-      <div class="glass-card feature-card hover-lift">
-        <div class="feature-icon">&#x1F50D;</div>
-        <h4 class="feature-title">RAG Systems</h4>
-        <p class="feature-desc">Retrieval-Augmented Generation — build systems that ground LLM responses in your own data with precision.</p>
-      </div>
-      <div class="glass-card feature-card hover-lift">
-        <div class="feature-icon">&#x1F916;</div>
-        <h4 class="feature-title">AI Agents</h4>
-        <p class="feature-desc">Autonomous agents that reason, plan, and act — orchestrate tools and multi-step workflows.</p>
-      </div>
-      <div class="glass-card feature-card hover-lift">
-        <div class="feature-icon">&#x2728;</div>
-        <h4 class="feature-title">Prompt Engineering</h4>
-        <p class="feature-desc">Master the art and science of crafting prompts that unlock the full potential of any LLM.</p>
-      </div>
-      <div class="glass-card feature-card hover-lift">
-        <div class="feature-icon">&#x1F3A8;</div>
-        <h4 class="feature-title">Generative AI</h4>
-        <p class="feature-desc">Text, image, code, and beyond — understand the models creating the future of content and creativity.</p>
-      </div>
-      <div class="glass-card feature-card hover-lift">
-        <div class="feature-icon">&#x1F4D6;</div>
-        <h4 class="feature-title">Large Language Models</h4>
-        <p class="feature-desc">Transformer architecture, fine-tuning, evaluation, and deployment of LLMs at scale.</p>
-      </div>
-      <div class="glass-card feature-card hover-lift">
-        <div class="feature-icon">&#x1F527;</div>
-        <h4 class="feature-title">Modern AI Tools</h4>
-        <p class="feature-desc">Get hands-on with the tools professionals use — LangChain, Hugging Face, OpenAI APIs, and more.</p>
-      </div>
-      <div class="glass-card feature-card hover-lift">
-        <div class="feature-icon">&#x1F52E;</div>
-        <h4 class="feature-title">Future of AI</h4>
-        <p class="feature-desc">AGI, alignment, AI safety — the ideas and challenges that will define the next decade of technology.</p>
+      <h1 class="h1" data-r>
+        Intelligence<br>
+        is not for<br>
+        everyone.
+      </h1>
+      <div class="gap-24" style="height:24px;"></div>
+      <p class="body-t" data-r>
+        AI Next Gen is a highly selective two-day program for the next generation of AI architects. Limited to 30 participants. Nine disciplines. Zero compromises.
+      </p>
+      <div class="hero-ctas" data-r>
+        <a href="/signup" class="btn-p">Apply for Access →</a>
+        <a href="#tracks" class="btn-g">Explore Curriculum</a>
       </div>
     </div>
   </div>
 </section>
 
-<section class="section grid-bg">
-  <div class="container">
-    <div class="section-header reveal">
-      <div class="section-eyebrow">The Challenge</div>
-      <h2 class="section-title">Prove Your Potential</h2>
-      <p class="section-subtitle">A multi-level AI selection challenge designed to find the most brilliant minds. Not an exam — a proving ground.</p>
+<!-- ── ABOUT ── -->
+<section class="lux-sec on-white">
+  <div class="wrap">
+    <div style="max-width:800px;">
+      <span class="lbl" data-r>About the Cohort</span>
+      <h2 class="h2" style="font-weight:400; font-style:italic;" data-r>
+        We identify the next generation of AI architects.
+      </h2>
+      <div class="gap-32" style="height:32px;"></div>
+      <p class="body-t" style="max-width:650px;" data-r>
+        This is not a beginner's introduction. It's a rigorous applied intelligence experience designed for builders who want to master system level prompts, agents orchestration, vector retrieval systems, and advanced model reasoning loops.
+      </p>
     </div>
+  </div>
+</section>
 
-    <div class="feature-grid" style="grid-template-columns: repeat(2, 1fr);">
-      <div class="glass-card glass-card-lg reveal reveal-delay-1" style="grid-column: span 2;">
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-8); text-align: center;">
+<!-- ── TRACKS ── -->
+<section class="lux-sec on-cream" id="tracks">
+  <div class="wrap">
+    <span class="lbl" data-r>Curriculum</span>
+    <h2 class="h2" style="margin-bottom:1rem;" data-r>Nine Pillars.</h2>
+    <p class="body-t" data-r>Taught entirely through active coding challenges and real-world diagnostics.</p>
+    
+    <div class="tracks-grid">
+      <div class="track-item" data-r>
+        <span class="track-num">01</span>
+        <h3 class="track-name">Artificial Intelligence</h3>
+        <p class="track-desc">Theoretical modeling and systemic paradigms.</p>
+      </div>
+      <div class="track-item" data-r>
+        <span class="track-num">02</span>
+        <h3 class="track-name">Machine Learning</h3>
+        <p class="track-desc">Algorithms, backpropagation, and loss structures.</p>
+      </div>
+      <div class="track-item" data-r>
+        <span class="track-num">03</span>
+        <h3 class="track-name">Large Language Models</h3>
+        <p class="track-desc">Transformers, scaling laws, and context engines.</p>
+      </div>
+      <div class="track-item" data-r>
+        <span class="track-num">04</span>
+        <h3 class="track-name">AI Agents</h3>
+        <p class="track-desc">Autonomous action loops and execution paths.</p>
+      </div>
+      <div class="track-item" data-r>
+        <span class="track-num">05</span>
+        <h3 class="track-name">RAG Pipelines</h3>
+        <p class="track-desc">Vector index databases and rerank systems.</p>
+      </div>
+      <div class="track-item" data-r>
+        <span class="track-num">06</span>
+        <h3 class="track-name">Prompt Engineering</h3>
+        <p class="track-desc">Optimal model guidance and structure crafting.</p>
+      </div>
+      <div class="track-item" data-r>
+        <span class="track-num">07</span>
+        <h3 class="track-name">Generative AI</h3>
+        <p class="track-desc">Diffusion systems and multi-modal models.</p>
+      </div>
+      <div class="track-item" data-r>
+        <span class="track-num">08</span>
+        <h3 class="track-name">Modern AI Tools</h3>
+        <p class="track-desc">LangChain, LlamaIndex, vLLM orchestration.</p>
+      </div>
+      <div class="track-item" data-r>
+        <span class="track-num">09</span>
+        <h3 class="track-name">Future of AI</h3>
+        <p class="track-desc">Reasoning bounds, world models, and inference.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CHALLENGE ── -->
+<section class="lux-sec on-dark" id="challenge">
+  <div class="wrap">
+    <div class="ch-grid">
+      <div>
+        <span class="lbl lbl--light" data-r>Selection Process</span>
+        <h2 class="h2 h2--light" data-r>Can you solve it?</h2>
+        <div class="gap-24" style="height:24px;"></div>
+        <p style="color:rgba(245,241,234,0.45); font-size:0.92rem; line-height:1.6; max-width:360px;" data-r>
+          Every candidate goes through the same diagnostic. Prove your understanding across 4 level parameters to qualify.
+        </p>
+      </div>
+      
+      <div>
+        <div class="ch-level" data-r>
+          <span class="cl-num">01</span>
           <div>
-            <div style="font-size: 2rem; margin-bottom: var(--space-3);">&#x1F9E0;</div>
-            <h5 style="margin-bottom: var(--space-2);">Pattern Intelligence</h5>
-            <p style="font-size: var(--text-sm); color: var(--text-secondary);">Recognize patterns, decode sequences, think visually.</p>
+            <h3 class="cl-name">Pattern Intelligence</h3>
+            <p class="cl-desc">Isolate signals and relationships hidden in noise.</p>
           </div>
+        </div>
+        <div class="ch-level" data-r>
+          <span class="cl-num">02</span>
           <div>
-            <div style="font-size: 2rem; margin-bottom: var(--space-3);">&#x2699;&#xFE0F;</div>
-            <h5 style="margin-bottom: var(--space-2);">Logic Engine</h5>
-            <p style="font-size: var(--text-sm); color: var(--text-secondary);">Deductive reasoning, conditional logic, truth analysis.</p>
+            <h3 class="cl-name">Logic Engine</h3>
+            <p class="cl-desc">Construct optimal execution graphs under strict constraints.</p>
           </div>
+        </div>
+        <div class="ch-level" data-r>
+          <span class="cl-num">03</span>
           <div>
-            <div style="font-size: 2rem; margin-bottom: var(--space-3);">&#x1F4A1;</div>
-            <h5 style="margin-bottom: var(--space-2);">AI Thinking</h5>
-            <p style="font-size: var(--text-sm); color: var(--text-secondary);">Ethics, model selection, scenario-based reasoning.</p>
+            <h3 class="cl-name">AI Thinking</h3>
+            <p class="cl-desc">Model decisions and probability distributions.</p>
           </div>
+        </div>
+        <div class="ch-level" data-r>
+          <span class="cl-num">04</span>
           <div>
-            <div style="font-size: 2rem; margin-bottom: var(--space-3);">&#x270F;&#xFE0F;</div>
-            <h5 style="margin-bottom: var(--space-2);">Prompt Architect</h5>
-            <p style="font-size: var(--text-sm); color: var(--text-secondary);">Design, evaluate, and refine prompts for maximum output.</p>
+            <h3 class="cl-name">Prompt Architect</h3>
+            <p class="cl-desc">Synthesize precise, structured prompt guidelines.</p>
           </div>
         </div>
       </div>
     </div>
-
-    <div style="text-align: center; margin-top: var(--space-12);" class="reveal reveal-delay-2">
-      <a href="/signup" class="btn btn-primary btn-lg">Take the Challenge</a>
-    </div>
   </div>
 </section>
 
-<section class="section">
-  <div class="container">
-    <div class="glass-card glass-card-lg" style="text-align: center; padding: var(--space-16);">
-      <div class="reveal">
-        <h2 style="margin-bottom: var(--space-4);">Ready to Shape the Future?</h2>
-        <p style="font-size: var(--text-lg); color: var(--text-secondary); max-width: 500px; margin: 0 auto var(--space-8);">
-          Only 30 students will be selected. Register now and take the challenge that could change everything.
-        </p>
-        <a href="/signup" class="btn btn-primary btn-lg">Apply for AI Next Gen 2026</a>
+<!-- ── TIMELINE ── -->
+<section class="lux-sec on-white" id="timeline">
+  <div class="wrap">
+    <span class="lbl" data-r>The Pathway</span>
+    <h2 class="h2" data-r>Timeline.</h2>
+    
+    <div class="tl-row">
+      <div class="tl-step" data-r>
+        <div class="tl-phase">Step 01</div>
+        <h3 class="tl-name">Application</h3>
+        <p class="tl-desc">Create your credentials and apply in five minutes.</p>
+      </div>
+      <div class="tl-step" data-r>
+        <div class="tl-phase">Step 02</div>
+        <h3 class="tl-name">Challenge</h3>
+        <p class="tl-desc">Solve all four diagnostic evaluation stages.</p>
+      </div>
+      <div class="tl-step" data-r>
+        <div class="tl-phase">Step 03</div>
+        <h3 class="tl-name">Selection</h3>
+        <p class="tl-desc">Committees audit score criteria and notify accepted candidates.</p>
+      </div>
+      <div class="tl-step" data-r>
+        <div class="tl-phase">Step 04</div>
+        <h3 class="tl-name">Workshop</h3>
+        <p class="tl-desc">Immersive closed-door training session. Cohort One 2026.</p>
       </div>
     </div>
   </div>
 </section>
+
+<!-- ── CTA ── -->
+<section class="lux-sec on-cream cta-sec">
+  <div class="wrap">
+    <h2 class="h2" data-r>Claim your seat.</h2>
+    <div class="gap-24" style="height:24px;"></div>
+    <div data-r>
+      <a href="/signup" class="btn-p" style="font-size:0.92rem; padding:15px 30px;">Apply for Access →</a>
+    </div>
+    <p data-r>Cohort One, 2026. Only 30 seats available.</p>
+  </div>
+</section>
+
 {% endblock %}
 
 {% block scripts %}

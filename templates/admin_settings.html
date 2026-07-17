@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+{% block title %}Settings — AI Next Gen Admin{% endblock %}
+
+{% block head %}
+<style>
+    body { background: var(--bg-primary); }
+    
+    .admin-layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+      margin-top: 60px;
+    }
+    
+    .admin-sidebar {
+      width: 240px;
+      background: var(--bg-tertiary);
+      border-right: 1px solid var(--border-default);
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0 0.75rem;
+    }
+    
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    
+    .sidebar-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-primary);
+    }
+    
+    .sidebar-link.active {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      font-weight: 600;
+    }
+    
+    .sidebar-link .icon {
+      font-size: 1.1rem;
+      width: 22px;
+      text-align: center;
+    }
+    
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 0.75rem;
+    }
+    
+    .admin-main {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      max-width: calc(100% - 240px);
+      overflow-y: auto;
+    }
+    
+    .page-header {
+      margin-bottom: 2rem;
+    }
+    
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    /* Settings panel cards */
+    .settings-panel {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
+      padding: 2rem;
+      max-width: 650px;
+    }
+    
+    .settings-section {
+      margin-bottom: 2rem;
+    }
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+    
+    .settings-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    
+    .settings-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+    }
+    
+    .setting-label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    
+    .setting-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .setting-desc {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Toggle switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      transition: .3s;
+      border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: var(--text-secondary);
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--olive);
+      border-color: var(--olive);
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+      background-color: var(--white);
+    }
+    
+    /* Number input styling */
+    .num-input {
+      width: 100px;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      outline: none;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .num-input:focus {
+      border-color: var(--accent-primary);
+    }
+    
+    .btn-save-settings {
+      padding: 0.75rem 2rem;
+      background: var(--gradient-brand);
+      color: var(--text-inverse);
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 1.5rem;
+      width: 100%;
+    }
+    .btn-save-settings:hover {
+      opacity: 0.9;
+    }
+
+    @media (max-width: 768px) {
+      .admin-sidebar { display: none; }
+      .admin-main { max-width: 100%; padding: 1.5rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <!-- Sidebar navigation -->
+    <aside class="admin-sidebar">
+        <nav class="sidebar-nav">
+            <a href="/admin" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/tests" class="sidebar-link"><span class="icon">📝</span> Tests</a>
+            <a href="/admin/candidates" class="sidebar-link"><span class="icon">👥</span> Candidates</a>
+            <div class="sidebar-divider"></div>
+            <a href="/admin/settings" class="sidebar-link active"><span class="icon">⚙️</span> Settings</a>
+            <a href="/admin/logs" class="sidebar-link"><span class="icon">📋</span> Logs</a>
+        </nav>
+    </aside>
+    
+    <main class="admin-main">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>Platform Settings</h1>
+        </div>
+        
+        <!-- Settings Panel -->
+        <div class="settings-panel">
+            <form onsubmit="return saveSettings(event)">
+                <div class="settings-section">
+                    <h3 class="settings-title">Cohort & Selection</h3>
+                    <div class="settings-group">
+                        
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <span class="setting-name">Auto-Shortlist Count Limit</span>
+                                <span class="setting-desc">The maximum number of top performing candidates to auto-shortlist.</span>
+                            </div>
+                            <input type="number" id="shortlistLimit" class="num-input" min="1" max="500" value="30">
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <span class="setting-name">Public Leaderboard</span>
+                                <span class="setting-desc">Toggle visibility of the student public leaderboard rankings.</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="leaderboardEnabled">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="setting-label">
+                                <span class="setting-name">Publish Final Diagnostic Results</span>
+                                <span class="setting-desc">When enabled, students can see their selection status and results on dashboard.</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="resultsPublished">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-save-settings">Save Config</button>
+            </form>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Fetch current settings on load
+(async function() {
+    try {
+        const stats = await API.get('/api/admin/stats');
+        // Retrieve settings from global stats config
+        const conf = await API.get('/api/admin/publish_status');
+        
+        document.getElementById('resultsPublished').checked = conf.results_published || false;
+        
+        // Populate leaderboard enabled from localStorage or direct query if available
+        // Note: admin endpoint settings retrieves these from DB config
+        const db = await API.get('/api/session'); 
+        // We'll also fetch stats distribution
+        document.getElementById('leaderboardEnabled').checked = stats.leaderboard_enabled || false;
+        document.getElementById('shortlistLimit').value = stats.shortlist_limit || 30;
+    } catch(e) {
+        console.error('Failed to load setting parameters:', e);
+    }
+})();
+
+async function saveSettings(e) {
+    e.preventDefault();
+    const btn = document.querySelector('.btn-save-settings');
+    btn.disabled = true;
+    
+    const payload = {
+        leaderboard_enabled: document.getElementById('leaderboardEnabled').checked,
+        results_published: document.getElementById('resultsPublished').checked,
+        shortlist_top_n: parseInt(document.getElementById('shortlistLimit').value, 10) || 30
+    };
+    
+    try {
+        const res = await API.post('/api/admin/settings', payload);
+        if (res.success) {
+            Toast.show('Settings updated successfully!', 'success');
+        } else {
+            throw new Error(res.error || 'Failed to update settings');
+        }
+    } catch(err) {
+        console.error(err);
+        Toast.show(err.message || 'Error saving config parameters', 'error');
+    } finally {
+        btn.disabled = false;
+    }
+    return false;
+}
+</script>
+{% endblock %}

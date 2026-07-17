@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block title %}System Logs — AI Next Gen Admin{% endblock %}
+
+{% block head %}
+<style>
+    body { background: var(--bg-primary); }
+    
+    .admin-layout {
+      display: flex;
+      min-height: calc(100vh - 60px);
+      margin-top: 60px;
+    }
+    
+    .admin-sidebar {
+      width: 240px;
+      background: var(--bg-tertiary);
+      border-right: 1px solid var(--border-default);
+      padding: 1.5rem 0;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-nav {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0 0.75rem;
+    }
+    
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    
+    .sidebar-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-primary);
+    }
+    
+    .sidebar-link.active {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      font-weight: 600;
+    }
+    
+    .sidebar-link .icon {
+      font-size: 1.1rem;
+      width: 22px;
+      text-align: center;
+    }
+    
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 0.75rem;
+    }
+    
+    .admin-main {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      max-width: calc(100% - 240px);
+      overflow-y: auto;
+    }
+    
+    .page-header {
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    /* Tabs Control */
+    .tabs-nav {
+      display: flex;
+      gap: 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 1.5rem;
+    }
+    
+    .tab-btn {
+      padding: 0.75rem 0.25rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tab-btn:hover {
+      color: var(--text-primary);
+    }
+    
+    .tab-btn.active {
+      color: var(--text-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Log items list */
+    .logs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .log-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      font-size: 0.88rem;
+    }
+    
+    .log-main {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .log-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .log-dot.info { background: #3b82f6; }
+    .log-dot.success { background: #22c55e; }
+    .log-dot.warning { background: #f59e0b; }
+    .log-dot.danger { background: #ef4444; }
+    
+    .log-desc {
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+    .log-desc strong {
+      font-weight: 600;
+    }
+    
+    .log-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    
+    .empty-state {
+      padding: 3rem;
+      text-align: center;
+      color: var(--text-muted);
+      border: 1px dashed var(--border-default);
+      border-radius: 8px;
+      background: var(--bg-tertiary);
+    }
+
+    @media (max-width: 768px) {
+      .admin-sidebar { display: none; }
+      .admin-main { max-width: 100%; padding: 1.5rem; }
+      .log-card { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .log-meta { align-self: flex-end; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <!-- Sidebar navigation -->
+    <aside class="admin-sidebar">
+        <nav class="sidebar-nav">
+            <a href="/admin" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/tests" class="sidebar-link"><span class="icon">📝</span> Tests</a>
+            <a href="/admin/candidates" class="sidebar-link"><span class="icon">👥</span> Candidates</a>
+            <div class="sidebar-divider"></div>
+            <a href="/admin/settings" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+            <a href="/admin/logs" class="sidebar-link active"><span class="icon">📋</span> Logs</a>
+        </nav>
+    </aside>
+    
+    <main class="admin-main">
+        <!-- Header -->
+        <div class="page-header">
+            <h1>Audit & Security Logs</h1>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('admin')">Admin Audit Logs</button>
+            <button class="tab-btn" onclick="switchTab('security')">Security Violations</button>
+        </div>
+        
+        <!-- Admin Audit logs -->
+        <div class="tab-content active" id="tab-admin">
+            <div class="logs-list" id="adminLogsList">
+                <div class="empty-state">Loading audit trail logs...</div>
+            </div>
+        </div>
+        
+        <!-- Proctoring Security logs -->
+        <div class="tab-content" id="tab-security">
+            <div class="logs-list" id="securityLogsList">
+                <div class="empty-state">Loading proctoring security events...</div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tabId));
+    });
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === 'tab-' + tabId);
+    });
+}
+
+// Fetch both logs on load
+(async function() {
+    // 1. Fetch Admin Audit Logs
+    try {
+        const res = await API.get('/api/admin/audit-logs');
+        const list = document.getElementById('adminLogsList');
+        
+        if (!res || !res.logs || !res.logs.length) {
+            list.innerHTML = '<div class="empty-state">No administrative audit events recorded yet.</div>';
+        } else {
+            list.innerHTML = res.logs.map(log => {
+                const dateStr = log.timestamp ? new Date(log.timestamp).toLocaleString() : '—';
+                const action = log.action || 'Event';
+                let dotCls = 'info';
+                
+                if (action.includes('login')) dotCls = 'success';
+                else if (action.includes('delete') || action.includes('disqualify')) dotCls = 'danger';
+                else if (action.includes('update') || action.includes('settings')) dotCls = 'warning';
+                
+                let detailsStr = '';
+                if (log.details) {
+                    detailsStr = `<span style="font-size:0.78rem;color:var(--text-muted);margin-left:0.5rem;">(${JSON.stringify(log.details)})</span>`;
+                }
+                
+                return `
+                    <div class="log-card">
+                        <div class="log-main">
+                            <div class="log-dot ${dotCls}"></div>
+                            <div class="log-desc">
+                                <strong>${log.user || 'system'}</strong> executed action <code>${action}</code> ${detailsStr}
+                            </div>
+                        </div>
+                        <div class="log-meta">
+                            <span>🖥️ IP: ${log.ip || '—'}</span>
+                            <span>📅 ${dateStr}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    } catch(e) {
+        console.error('Failed to load audit logs:', e);
+        document.getElementById('adminLogsList').innerHTML = '<div class="empty-state" style="color:var(--color-danger)">Failed to load audit logs from API.</div>';
+    }
+    
+    // 2. Fetch Security Violations (tab switches etc)
+    try {
+        const res = await API.get('/api/admin/security-logs');
+        const list = document.getElementById('securityLogsList');
+        
+        if (!res || !res.events || !res.events.length) {
+            list.innerHTML = '<div class="empty-state">No security proctoring violations recorded yet.</div>';
+        } else {
+            list.innerHTML = res.events.map(ev => {
+                const dateStr = ev.timestamp ? new Date(ev.timestamp).toLocaleString() : '—';
+                const type = ev.event_type || 'violation';
+                let desc = ev.description || 'Proctoring trigger alert';
+                
+                return `
+                    <div class="log-card">
+                        <div class="log-main">
+                            <div class="log-dot danger"></div>
+                            <div class="log-desc">
+                                <strong>Candidate: ${ev.candidate_id || 'Unknown'}</strong> — <code style="color:var(--color-danger);">${type}</code>: ${desc}
+                            </div>
+                        </div>
+                        <div class="log-meta">
+                            <span>📝 Test ID: ${ev.test_assignment_id || '—'}</span>
+                            <span>📅 ${dateStr}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    } catch(e) {
+        console.error('Failed to load security logs:', e);
+        document.getElementById('securityLogsList').innerHTML = '<div class="empty-state" style="color:var(--color-danger)">Failed to load security proctoring logs.</div>';
+    }
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,577 @@
+{% extends "base.html" %}
+{% block title %}Test Session — AI Next Gen{% endblock %}
+
+{% block head %}
+<style>
+    body {
+        overflow: hidden;
+        background: #09090b !important;
+    }
+    .nav, .site-footer {
+        display: none !important;
+    }
+    .main-content {
+        margin: 0;
+        padding: 0 !important;
+        min-height: 100vh;
+        background: #09090b !important;
+    }
+    .test-session {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        background: #09090b;
+        z-index: 9999;
+        color: #f4f4f5;
+        --text-primary: #f4f4f5;
+        --text-secondary: #a1a1aa;
+        --text-muted: #71717a;
+    }
+    .session-topbar {
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        flex-shrink: 0;
+        z-index: 10;
+    }
+    .session-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .session-topbar-left .test-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #f4f4f5;
+    }
+    .session-topbar-left .test-badge {
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+        background: rgba(139, 92, 246, 0.15);
+        color: #a78bfa;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .timer-display {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 1.25rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #f4f4f5;
+    }
+    .timer-display .timer-icon {
+        font-size: 1rem;
+    }
+    .timer-display .timer-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+        letter-spacing: 0.05em;
+    }
+    .timer-display .timer-value.warning {
+        color: #fbbf24;
+    }
+    .timer-display .timer-value.danger {
+        color: #f87171;
+        animation: pulse 1s infinite;
+    }
+    .session-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .security-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+    .security-indicator.secure {
+        background: rgba(34, 197, 94, 0.12);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .security-indicator.violation {
+        background: rgba(239, 68, 68, 0.12);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .security-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+    .security-indicator.secure .security-dot {
+        background: #4ade80;
+        box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+    }
+    .security-indicator.violation .security-dot {
+        background: #ef4444;
+        box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        animation: pulse 1.5s infinite;
+    }
+    .session-main {
+        flex: 1;
+        overflow-y: auto;
+        padding: 2rem;
+        display: flex;
+        justify-content: center;
+    }
+    .question-container {
+        width: 100%;
+        max-width: 800px;
+        animation: fadeSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes fadeSlideIn {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .question-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .q-number {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        font-weight: 800;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
+    }
+    .q-type {
+        padding: 0.25rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .q-type.mcq {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+    }
+    .q-type.text {
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+    }
+    .q-type.textarea {
+        background: rgba(234, 179, 8, 0.15);
+        color: #fde047;
+    }
+    .q-xp {
+        margin-left: auto;
+        font-size: 0.78rem;
+        color: #a1a1aa;
+        font-weight: 600;
+    }
+    .question-text {
+        font-size: 1.15rem;
+        font-weight: 500;
+        color: #f4f4f5;
+        line-height: 1.7;
+        margin-bottom: 2rem;
+    }
+    .mcq-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .mcq-option {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 2px solid rgba(255, 255, 255, 0.06);
+        cursor: pointer;
+        transition: all 0.25s;
+    }
+    .mcq-option:hover {
+        border-color: rgba(139, 92, 246, 0.3);
+        background: rgba(139, 92, 246, 0.04);
+    }
+    .mcq-option.selected {
+        border-color: #8b5cf6;
+        background: rgba(139, 92, 246, 0.12);
+    }
+    .option-letter {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #a1a1aa;
+        flex-shrink: 0;
+        transition: all 0.25s;
+    }
+    .mcq-option.selected .option-letter {
+        background: #8b5cf6;
+        color: #fff;
+    }
+    .option-text {
+        font-size: 0.95rem;
+        color: #e4e4e7;
+    }
+    .text-input {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 2px solid rgba(255, 255, 255, 0.08);
+        color: #f4f4f5;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.25s;
+        font-family: inherit;
+    }
+    .text-input:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    }
+    .text-input::placeholder {
+        color: #71717a;
+    }
+    .textarea-input {
+        width: 100%;
+        min-height: 180px;
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 2px solid rgba(255, 255, 255, 0.08);
+        color: #f4f4f5;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.25s;
+        font-family: inherit;
+        resize: vertical;
+    }
+    .textarea-input:focus {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    }
+    .textarea-input::placeholder {
+        color: #71717a;
+    }
+    .session-bottombar {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        background: rgba(255, 255, 255, 0.02);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        flex-shrink: 0;
+    }
+    .progress-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+        max-width: 400px;
+    }
+    .progress-text {
+        font-size: 0.8rem;
+        color: #a1a1aa;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    .progress-track {
+        flex: 1;
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%;
+        border-radius: 3px;
+        background: linear-gradient(90deg, #8b5cf6, #ec4899);
+        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nav-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .btn-nav {
+        padding: 0.55rem 1.25rem;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .btn-prev {
+        background: rgba(255, 255, 255, 0.06);
+        color: #a1a1aa;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .btn-prev:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .btn-next {
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        color: #fff;
+    }
+    .btn-next:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+    .btn-submit-test {
+        padding: 0.6rem 1.5rem;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .btn-submit-test:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+    }
+    .btn-submit-test.danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+    .btn-submit-test.danger:hover {
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+    }
+    .btn-disabled {
+        opacity: 0.4;
+        pointer-events: none;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    @keyframes dangerFlash {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+        50% { box-shadow: 0 0 20px 4px rgba(239, 68, 68, 0.15); }
+    }
+    .danger-flash {
+        animation: dangerFlash 2s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="test-session">
+    <div class="session-topbar">
+        <div class="session-topbar-left">
+            <span class="test-name" id="testTitle">Loading...</span>
+            <span class="test-badge" id="testBadge">LIVE</span>
+        </div>
+        <div class="timer-display" id="timerDisplay">
+            <span class="timer-icon">⏱</span>
+            <span class="timer-value" id="timerValue">00:00:00</span>
+        </div>
+        <div class="session-topbar-right">
+            <div class="security-indicator secure" id="securityIndicator">
+                <span class="security-dot"></span>
+                <span id="securityText">Secure</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="session-main" id="sessionMain">
+        <div class="question-container" id="questionContainer">
+            <div class="question-header">
+                <div class="q-number" id="qNumber">1</div>
+                <span class="q-type mcq" id="qType">MCQ</span>
+                <span class="q-xp" id="qXp">10 XP</span>
+            </div>
+            <div class="question-text" id="qText">Loading question...</div>
+            <div id="qAnswer"></div>
+        </div>
+    </div>
+
+    <div class="session-bottombar">
+        <div class="progress-section">
+            <span class="progress-text" id="progressText">1 / 10</span>
+            <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+        </div>
+        <div class="nav-buttons">
+            <button class="btn-nav btn-prev btn-disabled" id="btnPrev" onclick="prevQuestion()">← Previous</button>
+            <button class="btn-nav btn-next" id="btnNext" onclick="nextQuestion()">Next →</button>
+            <button class="btn-submit-test" id="btnSubmit" onclick="submitTest()" style="display:none">Submit Test</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/components/timer.js"></script>
+<script>
+const TEST_ID = '{{ test_id }}';
+let test = null;
+let questions = [];
+let currentQ = 0;
+let answers = {};
+let securityViolations = 0;
+let timerInterval = null;
+let remainingSeconds = 0;
+let isFullscreen = false;
+
+async function initTest() {
+    try {
+        test = await API.get(`/api/student/tests/${TEST_ID}/start`);
+        if (!test || !test.questions) { Toast.show('Failed to load test', 'error'); return; }
+        questions = test.questions;
+        document.getElementById('testTitle').textContent = test.name;
+        remainingSeconds = (test.duration || 60) * 60;
+        startTimer();
+        renderQuestion(0);
+        enableSecurity();
+        tryFullscreen();
+    } catch(e) {
+        Toast.show('Error: ' + e.message, 'error');
+        setTimeout(() => window.location.href = '/dashboard', 2000);
+    }
+}
+
+function renderQuestion(idx) {
+    currentQ = idx;
+    const q = questions[idx];
+    document.getElementById('qNumber').textContent = idx + 1;
+    const typeEl = document.getElementById('qType');
+    typeEl.textContent = q.type.toUpperCase();
+    typeEl.className = 'q-type ' + q.type;
+    document.getElementById('qXp').textContent = (q.xp || 10) + ' XP';
+    document.getElementById('qText').textContent = q.text;
+    const ansEl = document.getElementById('qAnswer');
+    if (q.type === 'mcq') {
+        const letters = ['A','B','C','D','E','F','G','H'];
+        ansEl.innerHTML = `<div class="mcq-options">${(q.options || []).map((opt, i) => `
+            <div class="mcq-option ${answers[q.id] === opt ? 'selected' : ''}" onclick="selectMCQ('${q.id}','${opt.replace(/'/g,"\\'")}',this)">
+                <span class="option-letter">${letters[i]}</span>
+                <span class="option-text">${opt}</span>
+            </div>`).join('')}</div>`;
+    } else if (q.type === 'text') {
+        ansEl.innerHTML = `<input type="text" class="text-input" placeholder="Type your answer..." value="${answers[q.id] || ''}" oninput="answers['${q.id}']=this.value">`;
+    } else {
+        ansEl.innerHTML = `<textarea class="textarea-input" placeholder="Write your detailed answer..." oninput="answers['${q.id}']=this.value">${answers[q.id] || ''}</textarea>`;
+    }
+    document.getElementById('progressText').textContent = `${idx + 1} / ${questions.length}`;
+    document.getElementById('progressFill').style.width = ((idx + 1) / questions.length * 100) + '%';
+    document.getElementById('btnPrev').classList.toggle('btn-disabled', idx === 0);
+    document.getElementById('btnNext').style.display = idx === questions.length - 1 ? 'none' : 'flex';
+    document.getElementById('btnSubmit').style.display = idx === questions.length - 1 ? 'block' : 'none';
+    const container = document.getElementById('questionContainer');
+    container.style.animation = 'none';
+    container.offsetHeight;
+    container.style.animation = 'fadeSlideIn .4s cubic-bezier(.4,0,.2,1)';
+    window.scrollTo(0, 0);
+}
+
+function selectMCQ(qId, value, el) {
+    answers[qId] = value;
+    el.parentElement.querySelectorAll('.mcq-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+}
+
+function nextQuestion() {
+    if (currentQ < questions.length - 1) renderQuestion(currentQ + 1);
+}
+function prevQuestion() {
+    if (currentQ > 0) renderQuestion(currentQ - 1);
+}
+
+function startTimer() {
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+        remainingSeconds--;
+        updateTimerDisplay();
+        if (remainingSeconds <= 0) { clearInterval(timerInterval); autoSubmit(); }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const h = Math.floor(remainingSeconds / 3600);
+    const m = Math.floor((remainingSeconds % 3600) / 60);
+    const s = remainingSeconds % 60;
+    const display = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    const el = document.getElementById('timerValue');
+    el.textContent = display;
+    el.className = 'timer-value';
+    if (remainingSeconds <= 300) el.classList.add('danger');
+    else if (remainingSeconds <= 600) el.classList.add('warning');
+    if (remainingSeconds <= 300) document.getElementById('timerDisplay').classList.add('danger-flash');
+}
+
+function enableSecurity() {
+    document.addEventListener('contextmenu', e => { e.preventDefault(); logViolation('rightclick'); });
+    document.addEventListener('copy', () => logViolation('copy'));
+    document.addEventListener('paste', e => { e.preventDefault(); logViolation('paste'); });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.shiftKey && e.key === 'J')) { e.preventDefault(); logViolation('devtools'); }
+        if (e.ctrlKey && e.key === 'u') { e.preventDefault(); logViolation('viewsource'); }
+    });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) logViolation('tabswitch'); });
+    window.addEventListener('resize', () => logViolation('resize'));
+    window.addEventListener('beforeunload', e => { e.preventDefault(); e.returnValue = ''; });
+}
+
+async function logViolation(type) {
+    securityViolations++;
+    const indicator = document.getElementById('securityIndicator');
+    indicator.className = 'security-indicator violation';
+    document.getElementById('securityText').textContent = `${securityViolations} violation${securityViolations > 1 ? 's' : ''}`;
+    try {
+        await API.post(`/api/student/tests/${TEST_ID}/violation`, { type });
+    } catch(e) {}
+}
+
+function tryFullscreen() {
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+}
+
+async function submitTest() {
+    if (!confirm('Are you sure you want to submit? This cannot be undone.')) return;
+    try {
+        await API.post(`/api/student/tests/${TEST_ID}/submit`, { answers });
+        Toast.show('Test submitted successfully!', 'success');
+        setTimeout(() => window.location.href = '/dashboard', 1000);
+    } catch(e) {
+        Toast.show('Submit failed: ' + e.message, 'error');
+    }
+}
+
+function autoSubmit() {
+    Toast.show('Time expired! Auto-submitting...', 'warning');
+    submitTest();
+}
+
+initTest();
+</script>
+{% endblock %}

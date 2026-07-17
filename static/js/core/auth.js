@@ -1,65 +1,109 @@
-/* ============================================
-   AUTH — Session management
-   ============================================ */
-
 const Auth = {
   _session: null,
+  _fetching: null,
 
   async getSession() {
     if (this._session) return this._session;
-    try {
-      const res = await API.get('/api/session');
-      this._session = res;
-      return res;
-    } catch {
-      this._session = { logged_in: false };
-      return this._session;
-    }
+    if (this._fetching) return this._fetching;
+
+    this._fetching = (async () => {
+      try {
+        const data = await API.get('/api/session');
+        this._session = data;
+        return data;
+      } catch (err) {
+        this._session = { logged_in: false };
+        return this._session;
+      } finally {
+        this._fetching = null;
+      }
+    })();
+
+    return this._fetching;
   },
 
   isLoggedIn() {
-    return this._session && this._session.logged_in;
+    return !!(this._session && this._session.logged_in);
   },
 
   getCandidate() {
-    return this._session && this._session.candidate;
+    if (!this._session || !this._session.logged_in) return null;
+    return this._session.candidate || this._session.user || null;
+  },
+
+  isAdmin() {
+    if (!this._session || !this._session.logged_in) return false;
+    const user = this._session.candidate || this._session.user || {};
+    return user.role === 'admin' || user.is_admin === true;
   },
 
   async logout() {
     try {
       await API.post('/api/logout');
-    } catch {
-      /* ignore */
-    }
+    } catch (e) { /* ignore */ }
     this._session = null;
     window.location.href = '/login';
   },
 
   updateNav() {
-    this.getSession().then(session => {
-      const guestEl = document.getElementById('navGuest');
-      const userEl = document.getElementById('navUser');
-      const challengeEl = document.getElementById('navChallenge');
-      const nameEl = document.getElementById('navUserName');
+    const guestNav = document.querySelectorAll('.nav-guest');
+    const userNav = document.querySelectorAll('.nav-user');
+    const adminNav = document.querySelectorAll('.nav-admin');
+    const loggedIn = this.isLoggedIn();
+    const admin = this.isAdmin();
 
-      if (!guestEl || !userEl) return;
+    if (admin) {
+      guestNav.forEach(el => { el.style.display = 'none'; });
+      userNav.forEach(el => { el.style.display = 'none'; });
+      adminNav.forEach(el => { el.style.display = ''; });
+    } else if (loggedIn) {
+      guestNav.forEach(el => { el.style.display = 'none'; });
+      userNav.forEach(el => { el.style.display = ''; });
+      adminNav.forEach(el => { el.style.display = 'none'; });
+    } else {
+      guestNav.forEach(el => { el.style.display = ''; });
+      userNav.forEach(el => { el.style.display = 'none'; });
+      adminNav.forEach(el => { el.style.display = 'none'; });
+    }
 
-      if (session.logged_in) {
-        guestEl.style.display = 'none';
-        userEl.style.display = 'flex';
-        userEl.style.gap = 'var(--space-3)';
-        if (nameEl) {
-          nameEl.textContent = session.candidate ? session.candidate.name.split(' ')[0] : 'Profile';
-        }
-        if (challengeEl && !session.candidate?.completed) {
-          challengeEl.style.display = '';
-        }
-      } else {
-        guestEl.style.display = 'flex';
-        guestEl.style.gap = 'var(--space-3)';
-        userEl.style.display = 'none';
-        if (challengeEl) challengeEl.style.display = 'none';
-      }
+    const userEl = document.querySelector('.nav-username');
+    if (userEl && loggedIn) {
+      const user = this.getCandidate();
+      userEl.textContent = user ? (user.name || user.email || 'User') : 'User';
+    }
+  },
+
+  updateAdminNav() {
+    const adminItems = document.querySelectorAll('.nav-admin-only');
+    adminItems.forEach(el => {
+      el.style.display = this.isAdmin() ? '' : 'none';
     });
+  },
+
+  async requireAuth() {
+    const session = await this.getSession();
+    if (!session.logged_in) {
+      window.location.href = '/login';
+      return false;
+    }
+    return true;
+  },
+
+  async requireAdmin() {
+    const session = await this.getSession();
+    if (!session.logged_in) {
+      window.location.href = '/login';
+      return false;
+    }
+    const user = session.candidate || session.user || {};
+    if (user.role !== 'admin' && !user.is_admin) {
+      window.location.href = '/dashboard';
+      return false;
+    }
+    return true;
+  },
+
+  reset() {
+    this._session = null;
   },
 };

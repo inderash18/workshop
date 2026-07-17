@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% block title %}Create Test — AI Next Gen Admin{% endblock %}
+
+{% block head %}
+<style>
+    body{background:var(--bg-primary)}
+    .admin-layout{display:flex;min-height:calc(100vh - 60px);margin-top:60px}
+    .admin-sidebar{width:240px;background:rgba(255,255,255,.02);border-right:1px solid rgba(255,255,255,.06);padding:1.5rem 0;position:sticky;top:60px;height:calc(100vh - 60px);flex-shrink:0;display:flex;flex-direction:column}
+    .sidebar-nav{flex:1;display:flex;flex-direction:column;gap:.25rem;padding:0 .75rem}
+    .sidebar-link{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:10px;color:var(--text-secondary);font-size:.9rem;font-weight:500;text-decoration:none;transition:all .2s}
+    .sidebar-link:hover{color:var(--text-primary);background:rgba(255,255,255,.04)}
+    .sidebar-link.active{color:var(--accent-primary);background:rgba(99,102,241,.1)}
+    .sidebar-link .icon{font-size:1.1rem;width:22px;text-align:center}
+    .sidebar-divider{height:1px;background:rgba(255,255,255,.06);margin:.75rem .75rem}
+    .admin-main{flex:1;padding:2rem 2.5rem;max-width:calc(100% - 240px);max-height:calc(100vh - 60px);overflow-y:auto}
+    .page-header{margin-bottom:2rem}
+    .page-header h1{font-size:1.75rem;font-weight:700;color:var(--text-primary)}
+    .page-header p{color:var(--text-secondary);font-size:.9rem;margin-top:.25rem}
+    .form-section{margin-bottom:2rem;padding:1.5rem;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)}
+    .form-section-title{font-size:1rem;font-weight:600;color:var(--text-primary);margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:.5rem}
+    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+    .form-grid-3{grid-template-columns:repeat(3,1fr)}
+    .form-group{display:flex;flex-direction:column;gap:.4rem}
+    .form-group.full{grid-column:1/-1}
+    .form-group label{font-size:.78rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
+    .form-group input,.form-group select,.form-group textarea{padding:.7rem 1rem;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--text-primary);font-size:.88rem;transition:all .2s;outline:none;font-family:inherit}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent-primary);box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+    .form-group textarea{resize:vertical;min-height:80px}
+    .form-group select{-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1rem center;padding-right:2.5rem}
+    .form-group select option{background:#1a1a2e;color:var(--text-primary)}
+    .toggle-group{display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+    .toggle-group:last-child{border-bottom:none}
+    .toggle-label{font-size:.88rem;color:var(--text-primary);font-weight:500}
+    .toggle-desc{font-size:.78rem;color:var(--text-muted);margin-top:.15rem}
+    .toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0}
+    .toggle-switch input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;border-radius:12px;background:rgba(255,255,255,.1);cursor:pointer;transition:.3s}
+    .toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;border-radius:50%;background:#fff;transition:.3s}
+    .toggle-switch input:checked + .toggle-slider{background:var(--accent-primary)}
+    .toggle-switch input:checked + .toggle-slider::before{transform:translateX(20px)}
+    .radio-group{display:flex;gap:1rem;margin-top:.4rem}
+    .radio-option{display:flex;align-items:center;gap:.5rem;padding:.5rem .75rem;border-radius:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:all .2s;font-size:.85rem;color:var(--text-secondary)}
+    .radio-option:has(input:checked){border-color:var(--accent-primary);color:var(--text-primary);background:rgba(99,102,241,.08)}
+    .radio-option input{accent-color:var(--accent-primary)}
+    .questions-list{display:flex;flex-direction:column;gap:1rem}
+    .question-item{padding:1.25rem;border-radius:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);position:relative}
+    .question-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+    .question-num{font-size:.8rem;font-weight:700;color:var(--accent-primary);text-transform:uppercase;letter-spacing:.05em}
+    .btn-remove-q{padding:.3rem .6rem;border-radius:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.15);color:#fca5a5;font-size:.75rem;cursor:pointer;transition:all .2s}
+    .btn-remove-q:hover{background:rgba(239,68,68,.2)}
+    .options-list{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
+    .option-row{display:flex;gap:.5rem;align-items:center}
+    .option-row input{flex:1}
+    .btn-remove-opt{padding:.25rem .5rem;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--text-muted);font-size:.7rem;cursor:pointer}
+    .btn-add-opt{padding:.3rem .6rem;border-radius:6px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.15);color:#22c55e;font-size:.75rem;cursor:pointer;transition:all .2s;margin-top:.4rem}
+    .btn-add-opt:hover{background:rgba(34,197,94,.2)}
+    .btn-add-question{width:100%;padding:.75rem;border-radius:10px;background:rgba(99,102,241,.06);border:1px dashed rgba(99,102,241,.2);color:#818cf8;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:1rem}
+    .btn-add-question:hover{background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3)}
+    .form-actions{display:flex;gap:1rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.06)}
+    .btn-save{padding:.75rem 1.5rem;border-radius:10px;font-size:.9rem;font-weight:600;border:none;cursor:pointer;transition:all .3s}
+    .btn-draft{background:rgba(255,255,255,.06);color:var(--text-primary);border:1px solid rgba(255,255,255,.08)}
+    .btn-draft:hover{background:rgba(255,255,255,.1)}
+    .btn-publish{background:linear-gradient(135deg,var(--accent-primary),#8b5cf6);color:#fff}
+    .btn-publish:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(99,102,241,.3)}
+    @media(max-width:768px){.admin-sidebar{display:none}.admin-main{max-width:100%;padding:1.5rem}.form-grid,.form-grid-3{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <nav class="sidebar-nav">
+            <a href="/admin" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/tests" class="sidebar-link active"><span class="icon">📝</span> Tests</a>
+            <a href="/admin/candidates" class="sidebar-link"><span class="icon">👥</span> Candidates</a>
+            <div class="sidebar-divider"></div>
+            <a href="/admin/settings" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+            <a href="/admin/logs" class="sidebar-link"><span class="icon">📋</span> Logs</a>
+        </nav>
+    </aside>
+    <main class="admin-main">
+        <div class="page-header">
+            <h1>Create New Test</h1>
+            <p>Configure all test parameters, questions, and security rules.</p>
+        </div>
+        <form id="testForm" onsubmit="return false">
+            <div class="form-section">
+                <div class="form-section-title">📋 Basic Information</div>
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Test Name</label>
+                        <input type="text" id="testName" placeholder="e.g. AI Challenge Level 1 — Pattern Intelligence" required>
+                    </div>
+                    <div class="form-group full">
+                        <label>Description</label>
+                        <textarea id="testDescription" placeholder="Describe the purpose and scope of this test..." rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Difficulty</label>
+                        <select id="testDifficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                            <option value="expert">Expert</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">📅 Schedule</div>
+                <div class="form-grid form-grid-3">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="testDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="time" id="testStartTime">
+                    </div>
+                    <div class="form-group">
+                        <label>End Time</label>
+                        <input type="time" id="testEndTime">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration (minutes)</label>
+                        <input type="number" id="testDuration" min="1" placeholder="60">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">👥 Capacity</div>
+                <div class="form-grid form-grid-3">
+                    <div class="form-group">
+                        <label>Maximum Candidates</label>
+                        <input type="number" id="testMaxCandidates" min="1" placeholder="30">
+                    </div>
+                    <div class="form-group">
+                        <label>Selection Count</label>
+                        <input type="number" id="testSelectionCount" min="1" placeholder="10">
+                    </div>
+                    <div class="form-group">
+                        <label>Question Count</label>
+                        <input type="number" id="testQuestionCount" min="1" placeholder="10">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">❓ Questions</div>
+                <div class="questions-list" id="questionsList"></div>
+                <button type="button" class="btn-add-question" onclick="addQuestion()">+ Add Question</button>
+            </div>
+
+            <div class="form-section">
+                <div class="form-section-title">🔒 Security Rules</div>
+                <div class="toggle-group">
+                    <div><div class="toggle-label">Full Screen Mandatory</div><div class="toggle-desc">Require full screen mode during the test</div></div>
+                    <label class="toggle-switch"><input type="checkbox" id="secFullscreen" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-group">
+                    <div><div class="toggle-label">Tab Switch Limit</div><div class="toggle-desc">Number of tab switches allowed before auto-submit</div></div>
+                    <input type="number" id="secTabSwitch" value="3" min="0" max="10" style="width:80px;padding:.4rem .6rem;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--text-primary);font-size:.85rem;outline:none;text-align:center">
+                </div>
+                <div class="toggle-group">
+                    <div><div class="toggle-label">Copy Detection</div><div class="toggle-desc">Detect and log copy attempts</div></div>
+                    <label class="toggle-switch"><input type="checkbox" id="secCopy" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-group">
+                    <div><div class="toggle-label">Paste Detection</div><div class="toggle-desc">Detect and log paste attempts</div></div>
+                    <label class="toggle-switch"><input type="checkbox" id="secPaste" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-group">
+                    <div><div class="toggle-label">Right Click Detection</div><div class="toggle-desc">Block right-click context menu</div></div>
+                    <label class="toggle-switch"><input type="checkbox" id="secRightClick" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-group">
+                    <div><div class="toggle-label">Refresh Detection</div><div class="toggle-desc">Detect page refresh attempts</div></div>
+                    <label class="toggle-switch"><input type="checkbox" id="secRefresh" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-group">
+                    <div><div class="toggle-label">DevTools Detection</div><div class="toggle-desc">Detect browser developer tools</div></div>
+                    <label class="toggle-switch"><input type="checkbox" id="secDevTools" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-group">
+                    <div><div class="toggle-label">Multiple Tabs Detection</div><div class="toggle-desc">Detect multiple browser tabs of the test</div></div>
+                    <label class="toggle-switch"><input type="checkbox" id="secMultiTabs" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="toggle-group">
+                    <div><div class="toggle-label">Screen Resize Action</div><div class="toggle-desc">Action when screen is resized</div></div>
+                    <div class="radio-group">
+                        <label class="radio-option"><input type="radio" name="secResize" value="warning" checked> Warning</label>
+                        <label class="radio-option"><input type="radio" name="secResize" value="auto_submit"> Auto Submit</label>
+                    </div>
+                </div>
+                <div class="toggle-group">
+                    <div><div class="toggle-label">Idle Detection</div><div class="toggle-desc">Auto-submit after inactivity</div></div>
+                    <div style="display:flex;align-items:center;gap:.75rem">
+                        <label class="toggle-switch"><input type="checkbox" id="secIdle"><span class="toggle-slider"></span></label>
+                        <input type="number" id="secIdleTimeout" value="300" min="60" placeholder="seconds" style="width:90px;padding:.4rem .6rem;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--text-primary);font-size:.85rem;outline:none;text-align:center">
+                        <span style="font-size:.75rem;color:var(--text-muted)">sec</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-save btn-draft" onclick="saveTest('draft')">Save as Draft</button>
+                <button type="button" class="btn-save btn-publish" onclick="saveTest('published')">Publish Now</button>
+            </div>
+        </form>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let questionCount = 0;
+function addQuestion() {
+    questionCount++;
+    const qId = questionCount;
+    const html = `
+    <div class="question-item" id="question-${qId}">
+        <div class="question-header">
+            <span class="question-num">Question ${qId}</span>
+            <button type="button" class="btn-remove-q" onclick="removeQuestion(${qId})">✕ Remove</button>
+        </div>
+        <div class="form-grid" style="margin-bottom:.75rem">
+            <div class="form-group">
+                <label>Type</label>
+                <select id="qType-${qId}" onchange="toggleOptions(${qId})">
+                    <option value="mcq">MCQ</option>
+                    <option value="text">Short Text</option>
+                    <option value="textarea">Long Text</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <input type="text" id="qCategory-${qId}" placeholder="e.g. Pattern Recognition">
+            </div>
+            <div class="form-group">
+                <label>XP Points</label>
+                <input type="number" id="qXp-${qId}" value="10" min="1">
+            </div>
+            <div class="form-group" style="flex-direction:row;align-items:flex-end;gap:.5rem;padding-bottom:.1rem">
+                <label class="toggle-switch" style="margin-bottom:.5rem"><input type="checkbox" id="qSecret-${qId}"><span class="toggle-slider"></span></label>
+                <span style="font-size:.8rem;color:var(--text-secondary)">Secret Question</span>
+            </div>
+        </div>
+        <div class="form-group full" style="margin-bottom:.75rem">
+            <label>Question Text</label>
+            <textarea id="qText-${qId}" placeholder="Enter the question..." rows="2" required></textarea>
+        </div>
+        <div id="qOptions-${qId}">
+            <label style="font-size:.78rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em">Options (MCQ)</label>
+            <div class="options-list" id="optsList-${qId}">
+                <div class="option-row"><input type="text" placeholder="Option A" required><button type="button" class="btn-remove-opt" onclick="this.parentElement.remove()">✕</button></div>
+                <div class="option-row"><input type="text" placeholder="Option B" required><button type="button" class="btn-remove-opt" onclick="this.parentElement.remove()">✕</button></div>
+            </div>
+            <button type="button" class="btn-add-opt" onclick="addOption(${qId})">+ Add Option</button>
+        </div>
+        <div class="form-group full" style="margin-top:.75rem">
+            <label>Correct Answer</label>
+            <input type="text" id="qAnswer-${qId}" placeholder="Correct option text or answer">
+        </div>
+    </div>`;
+    document.getElementById('questionsList').insertAdjacentHTML('beforeend', html);
+}
+function removeQuestion(id) {
+    document.getElementById('question-' + id)?.remove();
+}
+function toggleOptions(id) {
+    const type = document.getElementById('qType-' + id).value;
+    document.getElementById('qOptions-' + id).style.display = type === 'mcq' ? 'block' : 'none';
+}
+function addOption(qId) {
+    const list = document.getElementById('optsList-' + qId);
+    const count = list.children.length;
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const row = document.createElement('div');
+    row.className = 'option-row';
+    row.innerHTML = `<input type="text" placeholder="Option ${letters[count] || count+1}" required><button type="button" class="btn-remove-opt" onclick="this.parentElement.remove()">✕</button>`;
+    list.appendChild(row);
+}
+function collectQuestions() {
+    const questions = [];
+    document.querySelectorAll('.question-item').forEach(el => {
+        const id = el.id.split('-')[1];
+        const options = [];
+        el.querySelectorAll('.option-row input').forEach(i => { if(i.value.trim()) options.push(i.value.trim()); });
+        questions.push({
+            type: document.getElementById('qType-' + id)?.value || 'mcq',
+            text: document.getElementById('qText-' + id)?.value || '',
+            options: options,
+            answer: document.getElementById('qAnswer-' + id)?.value || '',
+            category: document.getElementById('qCategory-' + id)?.value || '',
+            xp: parseInt(document.getElementById('qXp-' + id)?.value) || 10,
+            is_secret: document.getElementById('qSecret-' + id)?.checked || false
+        });
+    });
+    return questions;
+}
+async function saveTest(status) {
+    try {
+        const data = {
+            name: document.getElementById('testName').value,
+            description: document.getElementById('testDescription').value,
+            difficulty: document.getElementById('testDifficulty').value,
+            date: document.getElementById('testDate').value,
+            start_time: document.getElementById('testStartTime').value,
+            end_time: document.getElementById('testEndTime').value,
+            duration: parseInt(document.getElementById('testDuration').value) || 60,
+            max_candidates: parseInt(document.getElementById('testMaxCandidates').value) || 30,
+            selection_count: parseInt(document.getElementById('testSelectionCount').value) || 10,
+            question_count: parseInt(document.getElementById('testQuestionCount').value) || 10,
+            questions: collectQuestions(),
+            status: status,
+            security: {
+                fullscreen: document.getElementById('secFullscreen').checked,
+                tab_switch_limit: parseInt(document.getElementById('secTabSwitch').value) || 3,
+                copy_detection: document.getElementById('secCopy').checked,
+                paste_detection: document.getElementById('secPaste').checked,
+                rightclick_detection: document.getElementById('secRightClick').checked,
+                refresh_detection: document.getElementById('secRefresh').checked,
+                devtools_detection: document.getElementById('secDevTools').checked,
+                multitabs_detection: document.getElementById('secMultiTabs').checked,
+                resize_action: document.querySelector('input[name="secResize"]:checked')?.value || 'warning',
+                idle_detection: document.getElementById('secIdle').checked,
+                idle_timeout: parseInt(document.getElementById('secIdleTimeout').value) || 300
+            }
+        };
+        const res = await API.post('/api/admin/tests', data, localStorage.getItem('admin_token'));
+        Toast.show('Test created successfully!', 'success');
+        setTimeout(() => window.location.href = '/admin/tests', 800);
+    } catch(e) {
+        Toast.show('Failed to create test: ' + e.message, 'error');
+    }
+}
+</script>
+{% endblock %}

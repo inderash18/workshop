@@ -6,7 +6,8 @@ from flask import Blueprint, request, jsonify, session, redirect, url_for, rende
 
 from config.settings import Config
 from models.database import (
-    load_db, save_db, get_candidate_by_id, audit_log,
+    load_db, save_db, get_candidate_by_id, get_candidate_by_email, audit_log,
+    get_setting, update_setting, get_security_events_for_test, get_all_tests,
 )
 from middleware.security import sanitize_input, verify_password
 from middleware.rate_limiter import is_rate_limited, record_login_attempt
@@ -23,10 +24,29 @@ def admin():
 
 
 @admin_bp.route("/admin-login")
+@admin_bp.route("/admin/login")
 def admin_login_page():
     if "admin_logged_in" in session:
         return redirect(url_for("admin.admin"))
     return render_template("admin_login.html")
+
+
+@admin_bp.route("/admin/candidates")
+@admin_required
+def admin_candidates_page():
+    return render_template("admin_candidates.html")
+
+
+@admin_bp.route("/admin/settings")
+@admin_required
+def admin_settings_page():
+    return render_template("admin_settings.html")
+
+
+@admin_bp.route("/admin/logs")
+@admin_required
+def admin_logs_page():
+    return render_template("admin_logs.html")
 
 
 @admin_bp.route("/api/admin/login", methods=["POST"])
@@ -113,10 +133,18 @@ def get_candidates():
     }
     candidates.sort(key=sort_map.get(sort_by, sort_map["score"]))
 
+    status_map_rev = {0: "pending", 1: "shortlisted", 2: "rejected", 3: "disqualified"}
     result = []
     for c in candidates:
         c_data = dict(c)
         c_data.pop("password_hash", None)
+        
+        # Map fields to match static/js/pages/admin.js expectations
+        c_data["id"] = c.get("candidate_id") or c.get("email") or str(c.get("_id", ""))
+        c_data["score"] = c.get("score_final", 0)
+        c_data["total_marks"] = 100
+        c_data["selection_status"] = status_map_rev.get(c.get("selected", 0), "pending")
+        
         for field in ["badges", "violation_logs"]:
             try:
                 c_data[field] = json.loads(c_data[field]) if c_data.get(field) else []
@@ -128,6 +156,7 @@ def get_candidates():
 
 
 @admin_bp.route("/api/admin/auto_shortlist", methods=["POST"])
+@admin_bp.route("/api/admin/auto-shortlist", methods=["POST"])
 @admin_required
 def auto_shortlist():
     db = load_db()
@@ -192,6 +221,11 @@ def admin_stats():
         college = c.get("college", "Unknown")
         college_dist[college] = college_dist.get(college, 0) + 1
 
+    from models.database import get_all_tests
+    tests = get_all_tests()
+    total_tests = len(tests)
+    published_tests = sum(1 for t in tests if t.get("status") == "published")
+
     return jsonify({
         "total": total,
         "completed": completed,
@@ -199,6 +233,8 @@ def admin_stats():
         "disqualified": disqualified,
         "avg_score": round(avg_score, 2),
         "college_distribution": college_dist,
+        "total_tests": total_tests,
+        "published_tests": published_tests,
     })
 
 
@@ -279,3 +315,107 @@ def candidate_report_api(candidate_id):
         "badge_details": data["badge_details"],
         "generated_at": data["generated_at"],
     })
+
+
+@admin_bp.route("/api/admin/security-logs", methods=["GET"])
+@admin_required
+def admin_security_logs():
+    from models.database import get_security_events_for_candidate
+    candidate_id = sanitize_input(request.args.get("candidate_id", ""))
+    limit = request.args.get("limit", 100, type=int)
+
+    events = get_security_events_for_candidate(candidate_id)
+    results = []
+    for event in events[:limit]:
+        ev = dict(event)
+        if "_id" in ev:
+            ev["_id"] = str(ev["_id"])
+        results.append(ev)
+
+    return jsonify({"events": results, "total": len(events)})
+
+
+@admin_bp.route("/api/admin/settings", methods=["POST"])
+@admin_required
+def update_platform_settings():
+    data = request.json or {}
+    allowed_keys = ["leaderboard_enabled", "results_published", "shortlist_top_n"]
+
+    updated = {}
+    for key in allowed_keys:
+        if key in data:
+            update_setting(key, data[key])
+            updated[key] = data[key]
+
+    audit_log("settings_update", session.get("admin_username"), {"updated": updated}, ip=request.remote_addr)
+
+    return jsonify({"success": True, "updated": updated})
+
+
+@admin_bp.route("/api/admin/audit-logs", methods=["GET"])
+@admin_required
+def get_audit_logs():
+    db = load_db()
+    logs = list(db.get("audit_log", []))
+    logs.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    return jsonify({"logs": logs})
+
+
+@admin_bp.route("/api/admin/candidates/<candidate_id>/shortlist", methods=["POST"])
+@admin_required
+def shortlist_candidate_direct(candidate_id):
+    db = load_db()
+    candidate = None
+    for c in db["candidates"]:
+        if c.get("candidate_id") == candidate_id or c.get("email") == candidate_id:
+            candidate = c
+            break
+
+    if not candidate:
+        return jsonify({"error": "Candidate not found"}), 404
+
+    candidate["selected"] = 1 # 1 is shortlisted
+    save_db(db)
+
+    audit_log("shortlist_candidate", session.get("admin_username"), {"candidate": candidate_id}, ip=request.remote_addr)
+    return jsonify({"success": True})
+
+
+@admin_bp.route("/api/admin/activity", methods=["GET"])
+@admin_required
+def get_admin_activity():
+    db = load_db()
+    logs = list(db.get("audit_log", []))
+    logs.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+
+    activity = []
+    for log in logs[:10]:
+        action = log.get("action", "action")
+        user = log.get("user", "System")
+        timestamp = log.get("timestamp", "")
+
+        color = "blue"
+        if "login" in action:
+            color = "green"
+        elif "delete" in action or "disqualify" in action:
+            color = "red"
+        elif "update" in action or "settings" in action:
+            color = "yellow"
+
+        time_str = "Recent"
+        if timestamp:
+            try:
+                dt = datetime.fromisoformat(timestamp)
+                time_str = dt.strftime("%b %d, %H:%M")
+            except Exception:
+                time_str = timestamp
+
+        activity.append({
+            "text": f"<strong>{user}</strong> completed <code>{action}</code>",
+            "time": time_str,
+            "color": color
+        })
+
+    return jsonify(activity)
+
+

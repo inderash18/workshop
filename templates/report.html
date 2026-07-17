@@ -1,178 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Candidate Report — {{ data.candidate.name }}</title>
-  <style>
-    :root {
-      --bg: #09090b; --surface: #18181b; --border: #27272a;
-      --text: #fafafa; --text-secondary: #a1a1aa; --text-muted: #71717a;
-      --accent: #c084fc; --accent-dim: #9333ea; --green: #4ade80; --red: #f87171;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; font-size: 13px; line-height: 1.5; padding: 40px; }
-    .header { text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid var(--border); }
-    .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-    .header .subtitle { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; }
-    .header .id { font-family: monospace; color: var(--accent); font-size: 11px; margin-top: 6px; }
-    .section { margin-bottom: 24px; }
-    .section-title { font-size: 14px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
-    .info-item { display: flex; justify-content: space-between; padding: 4px 0; }
-    .info-label { color: var(--text-muted); }
-    .info-value { font-weight: 500; }
-    .scores-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .score-item { display: flex; flex-direction: column; gap: 4px; }
-    .score-header { display: flex; justify-content: space-between; }
-    .score-name { color: var(--text-secondary); font-size: 12px; }
-    .score-val { font-family: monospace; font-weight: 700; color: var(--accent); font-size: 13px; }
-    .score-bar { height: 6px; background: var(--surface); border-radius: 3px; overflow: hidden; }
-    .score-fill { height: 100%; background: var(--accent-dim); border-radius: 3px; }
-    .final-score { text-align: center; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-top: 16px; }
-    .final-score .value { font-size: 36px; font-weight: 800; color: var(--accent); }
-    .final-score .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
-    .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); font-size: 11px; }
-    .badge-icon { font-size: 14px; }
-    .level { margin-bottom: 16px; }
-    .level-header { font-weight: 600; font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .level-meta { font-size: 11px; color: var(--text-muted); }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    th { text-align: left; padding: 6px 8px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
-    td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
-    td.correct { color: var(--green); }
-    td.incorrect { color: var(--red); }
-    td.unanswered { color: var(--text-muted); font-style: italic; }
-    .footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 11px; margin-top: 32px; }
-    .status-badge { display: inline-block; padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .status-shortlisted { background: rgba(74,222,128,0.15); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
-    .status-pending { background: rgba(113,113,122,0.15); color: var(--text-muted); border: 1px solid rgba(113,113,122,0.3); }
-    .status-rejected { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
-    .status-disqualified { background: rgba(250,204,21,0.15); color: #facc15; border: 1px solid rgba(250,204,21,0.3); }
-    @media print {
-      body { background: white; color: #1a1a1a; padding: 20px; }
-      :root { --bg: white; --surface: #f5f5f5; --border: #e5e5e5; --text: #1a1a1a; --text-secondary: #525252; --text-muted: #737373; --accent: #7c3aed; --accent-dim: #6d28d9; --green: #16a34a; --red: #dc2626; }
-      .header { border-bottom-color: #e5e5e5; }
-      .section-title { border-bottom-color: #e5e5e5; }
-      .score-bar { background: #e5e5e5; }
-      .score-fill { background: #6d28d9; }
-      .final-score { background: #f5f5f5; border-color: #e5e5e5; }
-      .badge { border-color: #e5e5e5; background: white; }
-      .footer { border-top-color: #e5e5e5; }
-      .no-print { display: none !important; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report — AI Next Gen</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        :root{--bg:#0a0a0f;--bg-card:rgba(255,255,255,.03);--border:rgba(255,255,255,.06);--text-primary:#f0f0f5;--text-secondary:#9ca3af;--text-muted:#6b7280;--accent:#6366f1;--accent-light:#818cf8}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text-primary);padding:2rem;min-height:100vh}
+        .report{max-width:900px;margin:0 auto}
+        .report-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+        .report-topbar .brand{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:1rem}
+        .report-topbar .brand img{width:28px;height:28px;border-radius:6px}
+        .report-actions{display:flex;gap:.5rem}
+        .btn{padding:.5rem 1rem;border-radius:8px;font-size:.8rem;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+        .btn-print{background:var(--accent);color:#fff}
+        .btn-print:hover{box-shadow:0 4px 12px rgba(99,102,241,.3)}
+        .btn-close{background:rgba(255,255,255,.06);color:var(--text-secondary);border:1px solid var(--border)}
+        .btn-close:hover{background:rgba(255,255,255,.1)}
+        .report-header{padding:2rem;border-radius:16px;background:var(--bg-card);border:1px solid var(--border);margin-bottom:1.5rem;position:relative;overflow:hidden}
+        .report-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#8b5cf6,#a78bfa)}
+        .report-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+        .report-header h1{font-size:1.5rem;font-weight:800}
+        .status-badge{padding:.3rem .75rem;border-radius:999px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+        .status-badge.passed{background:rgba(34,197,94,.12);color:#22c55e}
+        .status-badge.failed{background:rgba(239,68,68,.12);color:#fca5a5}
+        .status-badge.completed{background:rgba(99,102,241,.12);color:#818cf8}
+        .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+        .info-item label{display:block;font-size:.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem}
+        .info-item span{font-size:.9rem;color:var(--text-primary);font-weight:500}
+        .score-section{padding:2rem;border-radius:16px;background:var(--bg-card);border:1px solid var(--border);margin-bottom:1.5rem;text-align:center}
+        .score-section h2{font-size:.85rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem}
+        .final-score{font-size:4rem;font-weight:900;background:linear-gradient(135deg,var(--accent),#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+        .final-score-label{font-size:.9rem;color:var(--text-muted);margin-top:.25rem}
+        .score-breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1.5rem}
+        .breakdown-item{text-align:center;padding:1rem;border-radius:12px;background:rgba(255,255,255,.02)}
+        .breakdown-item .bi-val{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
+        .breakdown-item .bi-label{font-size:.75rem;color:var(--text-muted);margin-top:.2rem}
+        .breakdown-bar{width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,.06);margin-top:.5rem;overflow:hidden}
+        .breakdown-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),#8b5cf6)}
+        .section-card{padding:1.5rem;border-radius:16px;background:var(--bg-card);border:1px solid var(--border);margin-bottom:1.5rem}
+        .section-card h2{font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+        .achievements-list{display:flex;flex-wrap:wrap;gap:.5rem}
+        .achievement-badge{padding:.4rem .75rem;border-radius:8px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.12);font-size:.8rem;color:#fde047;font-weight:500;display:flex;align-items:center;gap:.3rem}
+        .questions-table{width:100%;border-collapse:collapse;font-size:.82rem}
+        .questions-table th{text-align:left;padding:.6rem .75rem;font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+        .questions-table td{padding:.6rem .75rem;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text-primary)}
+        .questions-table tr:hover td{background:rgba(255,255,255,.02)}
+        .correct{color:#22c55e;font-weight:600}
+        .incorrect{color:#fca5a5;font-weight:600}
+        .partial{color:#eab308;font-weight:600}
+        .no-answer{color:var(--text-muted)}
+        .report-footer{text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:1rem}
+        @media print{
+            body{background:#fff;color:#111;padding:1rem}
+            :root{--bg:#fff;--bg-card:#f9fafb;--border:#e5e7eb;--text-primary:#111;--text-secondary:#6b7280;--text-muted:#9ca3af}
+            .report-actions{display:none!important}
+            .btn{display:none!important}
+            .report-header::before{background:#6366f1!important}
+            .final-score{background:none;-webkit-text-fill-color:#6366f1;color:#6366f1}
+            .status-badge.passed{background:#dcfce7;color:#16a34a}
+            .status-badge.failed{background:#fee2e2;color:#dc2626}
+            .section-card,.report-header,.score-section{border:1px solid #e5e7eb;background:#f9fafb}
+        }
+        @media(max-width:768px){.info-grid{grid-template-columns:1fr}.report-topbar{flex-direction:column;gap:1rem}}
+    </style>
 </head>
 <body>
-  <div class="header">
-    <h1>{{ data.candidate.name }}</h1>
-    <div class="subtitle">AI Next Gen Workshop — Selection Report</div>
-    <div class="id">Candidate ID: {{ data.candidate.candidate_id }}</div>
-    <div style="margin-top:10px;">
-      {% set status = data.candidate.get('selected', 0) %}
-      <span class="status-badge status-{{ ['pending','shortlisted','rejected','disqualified'][status] }}">
-        {{ ['Pending','Shortlisted','Rejected','Disqualified'][status] }}
-      </span>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Personal Information</div>
-    <div class="info-grid">
-      <div class="info-item"><span class="info-label">Email</span><span class="info-value">{{ data.candidate.email }}</span></div>
-      <div class="info-item"><span class="info-label">Phone</span><span class="info-value">{{ data.candidate.phone }}</span></div>
-      <div class="info-item"><span class="info-label">College</span><span class="info-value">{{ data.candidate.college }}</span></div>
-      <div class="info-item"><span class="info-label">Department</span><span class="info-value">{{ data.candidate.department }}</span></div>
-      <div class="info-item"><span class="info-label">Year</span><span class="info-value">{{ data.candidate.year or '-' }}</span></div>
-      <div class="info-item"><span class="info-label">Completed</span><span class="info-value">{{ data.candidate.completed_at[:19] if data.candidate.completed_at else 'No' }}</span></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Score Breakdown</div>
-    <div class="scores-grid">
-      {% set scores = [
-        ('Logic', data.candidate.score_logic, 40),
-        ('Creativity', data.candidate.score_creativity, 20),
-        ('AI Knowledge', data.candidate.score_ai_knowledge, 20),
-        ('Problem Solving', data.candidate.score_problem_solving, 10),
-        ('Research', data.candidate.score_research, 10),
-        ('AI Potential', data.candidate.score_ai_potential, 10),
-        ('Workshop Fit', data.candidate.score_workshop_compat, 10),
-        ('Selection Prob.', data.candidate.score_selection_prob, 100),
-      ] %}
-      {% for name, val, max in scores %}
-      {% set pct = (val / max * 100) if max > 0 else 0 %}
-      <div class="score-item">
-        <div class="score-header">
-          <span class="score-name">{{ name }}</span>
-          <span class="score-val">{{ '%.1f' % val }} / {{ max }}</span>
+    <div class="report">
+        <div class="report-topbar">
+            <div class="brand">
+                <img src="/static/img/logo.jpg" alt="AI Next Gen">
+                <span>AI Next Gen — Report</span>
+            </div>
+            <div class="report-actions">
+                <button class="btn btn-print" onclick="window.print()">🖨 Print Report</button>
+                <button class="btn btn-close" onclick="window.close()">✕ Close</button>
+            </div>
         </div>
-        <div class="score-bar"><div class="score-fill" style="width:{{ pct }}%;"></div></div>
-      </div>
-      {% endfor %}
-    </div>
-    <div class="final-score">
-      <div class="value">{{ '%.1f' % data.candidate.score_final }}%</div>
-      <div class="label">Final Score</div>
-    </div>
-  </div>
 
-  <div class="section">
-    <div class="section-title">Achievements</div>
-    {% if data.badge_details %}
-    <div class="badges">
-      {% for b in data.badge_details %}
-      <span class="badge"><span class="badge-icon">{{ b.icon }}</span>{{ b.name }}</span>
-      {% endfor %}
+        <div class="report-header">
+            <div class="report-header-top">
+                <h1 id="candidateName">Loading...</h1>
+                <span class="status-badge completed" id="statusBadge">Completed</span>
+            </div>
+            <div class="info-grid">
+                <div class="info-item"><label>Candidate ID</label><span id="candidateId">—</span></div>
+                <div class="info-item"><label>Email</label><span id="candidateEmail">—</span></div>
+                <div class="info-item"><label>College</label><span id="candidateCollege">—</span></div>
+                <div class="info-item"><label>Department</label><span id="candidateDept">—</span></div>
+                <div class="info-item"><label>Test Name</label><span id="testName">—</span></div>
+                <div class="info-item"><label>Date</label><span id="testDate">—</span></div>
+            </div>
+        </div>
+
+        <div class="score-section">
+            <h2>Final Score</h2>
+            <div class="final-score" id="finalScore">0%</div>
+            <div class="final-score-label" id="scoreLabel">Out of 100</div>
+            <div class="score-breakdown" id="scoreBreakdown"></div>
+        </div>
+
+        <div class="section-card">
+            <h2>🏆 Achievements</h2>
+            <div class="achievements-list" id="achievements">
+                <div class="achievement-badge">🏅 Test Completed</div>
+            </div>
+        </div>
+
+        <div class="section-card" id="challengeSection">
+            <h2>📋 Challenge Details</h2>
+            <div id="challengeDetails"></div>
+        </div>
+
+        <div class="section-card">
+            <h2>📝 Question Breakdown</h2>
+            <table class="questions-table">
+                <thead>
+                    <tr><th>#</th><th>Question</th><th>Your Answer</th><th>Correct Answer</th><th>Result</th><th>XP</th></tr>
+                </thead>
+                <tbody id="questionsBody">
+                    <tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="report-footer">
+            <p>This report is generated by AI Next Gen &mdash; AI Research Challenge & Workshop Selection Platform.</p>
+            <p style="margin-top:.25rem">Generated on <span id="genDate"></span></p>
+        </div>
     </div>
-    {% else %}
-    <p style="color:var(--text-muted);">No badges earned.</p>
-    {% endif %}
-  </div>
 
-  <div class="section">
-    <div class="section-title">Challenge Details</div>
-    <div class="info-grid" style="margin-bottom:16px;">
-      <div class="info-item"><span class="info-label">Time Taken</span><span class="info-value">{{ '%d' % (data.candidate.time_taken // 60) }}m {{ data.candidate.time_taken % 60 }}s</span></div>
-      <div class="info-item"><span class="info-label">Tab Switches</span><span class="info-value">{{ data.candidate.tab_switches or 0 }}</span></div>
-      <div class="info-item"><span class="info-label">Violations</span><span class="info-value">{{ data.candidate.violation_count or 0 }}</span></div>
-      <div class="info-item"><span class="info-label">Typing Speed</span><span class="info-value">{{ data.candidate.typing_speed_avg or 0 }} CPM</span></div>
-    </div>
-
-    {% for level in data.levels %}
-    <div class="level">
-      <div class="level-header">
-        <span>{{ level.icon }}</span>
-        <span>Level {{ level.id }}: {{ level.name }}</span>
-        <span class="level-meta">({{ level.answered }}/{{ level.total }} answered)</span>
-      </div>
-      <table>
-        <thead><tr><th style="width:5%;">#</th><th style="width:45%;">Question</th><th style="width:25%;">Your Answer</th><th style="width:25%;">Correct Answer</th></tr></thead>
-        <tbody>
-          {% for q in level.questions %}
-          <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ q.text[:120] }}{{ '...' if q.text|length > 120 }}</td>
-            <td class="{% if q.is_correct == true %}correct{% elif q.is_correct == false %}incorrect{% else %}unanswered{% endif %}">{{ q.user_answer[:80] }}</td>
-            <td>{{ q.correct_answer if q.correct_answer else '-' }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% endfor %}
-  </div>
-
-  <div class="footer">
-    <p>AI Next Gen — Selection Committee Report</p>
-    <p>Generated: {{ data.generated_at[:19] }}</p>
-  </div>
-
-  <div class="no-print" style="text-align:center;margin-top:24px;">
-    <button onclick="window.print()" style="padding:10px 24px;background:var(--accent-dim);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600;">Print / Save as PDF</button>
-    <button onclick="window.close()" style="padding:10px 24px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;margin-left:8px;">Close</button>
-  </div>
+    <script>
+    document.getElementById('genDate').textContent = new Date().toLocaleString();
+    (async function() {
+        const pathParts = window.location.pathname.split('/');
+        const testId = pathParts[2];
+        const candidateId = pathParts[3];
+        try {
+            const report = await API.get(`/api/report/${testId}/${candidateId || ''}`);
+            if (!report) return;
+            document.getElementById('candidateName').textContent = report.candidate_name || 'Unknown';
+            document.getElementById('candidateId').textContent = report.candidate_id || '—';
+            document.getElementById('candidateEmail').textContent = report.email || '—';
+            document.getElementById('candidateCollege').textContent = report.college || '—';
+            document.getElementById('candidateDept').textContent = report.department || '—';
+            document.getElementById('testName').textContent = report.test_name || '—';
+            document.getElementById('testDate').textContent = report.date || '—';
+            const score = report.score || 0;
+            document.getElementById('finalScore').textContent = score + '%';
+            const badge = document.getElementById('statusBadge');
+            if (score >= 50) { badge.textContent = 'Passed'; badge.className = 'status-badge passed'; }
+            else { badge.textContent = 'Failed'; badge.className = 'status-badge failed'; }
+            if (report.breakdown) {
+                document.getElementById('scoreBreakdown').innerHTML = report.breakdown.map(b => `
+                    <div class="breakdown-item">
+                        <div class="bi-val">${b.score}%</div>
+                        <div class="bi-label">${b.category}</div>
+                        <div class="breakdown-bar"><div class="breakdown-bar-fill" style="width:${b.score}%"></div></div>
+                    </div>
+                `).join('');
+            }
+            if (report.achievements && report.achievements.length) {
+                document.getElementById('achievements').innerHTML = report.achievements.map(a => `<div class="achievement-badge">🏅 ${a}</div>`).join('');
+            }
+            if (report.questions && report.questions.length) {
+                document.getElementById('questionsBody').innerHTML = report.questions.map((q, i) => {
+                    const isCorrect = q.correct === true;
+                    const isPartial = q.partial === true;
+                    const resultClass = q.answered === false ? 'no-answer' : isCorrect ? 'correct' : isPartial ? 'partial' : 'incorrect';
+                    const resultText = q.answered === false ? 'Skipped' : isCorrect ? 'Correct' : isPartial ? 'Partial' : 'Incorrect';
+                    return `<tr>
+                        <td>${i+1}</td>
+                        <td style="max-width:250px">${q.text}</td>
+                        <td>${q.user_answer || '<span class="no-answer">—</span>'}</td>
+                        <td>${q.correct_answer || '—'}</td>
+                        <td class="${resultClass}">${resultText}</td>
+                        <td>${q.xp || 0}</td>
+                    </tr>`;
+                }).join('');
+            }
+        } catch(e) {
+            console.error('Report load error:', e);
+        }
+    })();
+    </script>
 </body>
 </html>

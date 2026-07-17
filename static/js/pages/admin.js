@@ -1,298 +1,350 @@
-/* ============================================
-   ADMIN — Full admin panel logic (no jQuery)
-   ============================================ */
+(function () {
+  const $ = (id) => document.getElementById(id);
 
-(function() {
-  const $ = id => document.getElementById(id);
+  let allCandidates = [];
+  let sortField = 'name';
+  let sortDir = 'asc';
+  let filterText = '';
 
-  const state = {
-    candidates: [],
-    filtered: [],
-    stats: null,
-  };
-
-  const STATUS_MAP = { 0: 'Pending', 1: 'Shortlisted', 2: 'Rejected', 3: 'Disqualified' };
-  const STATUS_COLORS = { 0: 'var(--text-muted)', 1: 'var(--green)', 2: 'var(--red)', 3: 'var(--yellow)' };
-
-  /* --- Init --- */
   async function init() {
-    bindEvents();
-    await Promise.all([loadStats(), loadCandidates()]);
-    loadPublishStatus();
+    const ok = await Auth.requireAdmin();
+    if (!ok) return;
+    Auth.updateNav();
+
+    initLogout();
+    await loadStats();
+    await loadCandidates();
+    initSearch();
+    initExport();
+    initAutoShortlist();
+    initPublishToggle();
   }
 
-  function bindEvents() {
-    $('searchInput').addEventListener('input', applyFilters);
-    $('collegeFilter').addEventListener('change', applyFilters);
-    $('statusFilter').addEventListener('change', applyFilters);
-    $('sortBy').addEventListener('change', applyFilters);
-    $('autoShortlistBtn').addEventListener('click', autoShortlist);
-    $('exportCsvBtn').addEventListener('click', exportCsv);
-    $('refreshBtn').addEventListener('click', () => { loadStats(); loadCandidates(); });
-    $('adminLogoutBtn').addEventListener('click', adminLogout);
-    $('publishToggle').addEventListener('click', togglePublish);
-    $('detailOverlay').addEventListener('click', (e) => {
-      if (e.target === $('detailOverlay')) closeDetail();
+  function initLogout() {
+    const btn = $('admin-logout') || document.querySelector('.admin-logout');
+    if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); Auth.logout(); });
+  }
+
+  async function loadStats() {
+    try {
+      const data = await API.get('/api/admin/stats');
+      renderStats(data.stats || data);
+    } catch (err) {
+      Toast.error('Error', 'Failed to load dashboard stats');
+    }
+  }
+
+  function renderStats(stats) {
+    const container = $('stats-container') || document.querySelector('.stats-grid');
+    if (!container) return;
+
+    const cards = [
+      { label: 'Total Candidates', value: stats.total_candidates || stats.candidates || 0, icon: 'users', color: '#6366f1' },
+      { label: 'Tests Created', value: stats.total_tests || stats.tests || 0, icon: 'file', color: '#10b981' },
+      { label: 'Tests Completed', value: stats.completed_tests || stats.completed || 0, icon: 'check', color: '#3b82f6' },
+      { label: 'Shortlisted', value: stats.shortlisted || stats.selected || 0, icon: 'star', color: '#f59e0b' },
+    ];
+
+    container.innerHTML = cards.map(c => `
+      <div class="stat-card">
+        <div class="stat-card-icon" style="background: ${c.color}15; color: ${c.color}">
+          ${getStatIcon(c.icon)}
+        </div>
+        <div class="stat-card-info">
+          <div class="stat-card-value" data-count="${c.value}">0</div>
+          <div class="stat-card-label">${c.label}</div>
+        </div>
+      </div>
+    `).join('');
+
+    container.querySelectorAll('.stat-card-value').forEach(el => {
+      const target = parseInt(el.dataset.count, 10) || 0;
+      animateValue(el, 0, target, 1500);
     });
   }
 
-  /* --- Load data --- */
-  async function loadStats() {
-    try {
-      state.stats = await API.get('/api/admin/stats');
-      $('statTotal').textContent = state.stats.total;
-      $('statCompleted').textContent = state.stats.completed;
-      $('statShortlisted').textContent = state.stats.shortlisted;
-      $('statAvgScore').textContent = state.stats.avg_score;
-    } catch (err) {
-      Toast.error('Error', 'Failed to load stats');
+  function animateValue(el, start, end, duration) {
+    const startTime = performance.now();
+    function update(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(eased * (end - start) + start).toLocaleString();
+      if (progress < 1) requestAnimationFrame(update);
     }
+    requestAnimationFrame(update);
+  }
+
+  function getStatIcon(type) {
+    const icons = {
+      users: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+      file: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+      check: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+      star: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    };
+    return icons[type] || icons.file;
   }
 
   async function loadCandidates() {
+    const container = $('candidates-table') || document.querySelector('.candidates-table') || document.querySelector('.table-container');
+    if (!container) return;
+
     try {
-      state.candidates = await API.get('/api/admin/candidates');
-      populateCollegeFilter();
-      applyFilters();
+      const data = await API.get('/api/admin/candidates');
+      allCandidates = data.candidates || data.data || data || [];
+      renderCandidates(allCandidates);
     } catch (err) {
-      Toast.error('Error', 'Failed to load candidates');
+      container.innerHTML = `<div class="empty-state"><p>Failed to load candidates: ${err.message}</p></div>`;
     }
   }
 
-  function populateCollegeFilter() {
-    const colleges = [...new Set(state.candidates.map(c => c.college).filter(Boolean))].sort();
-    const sel = $('collegeFilter');
-    const current = sel.value;
-    sel.innerHTML = '<option value="">All Colleges</option>';
-    colleges.forEach(c => {
-      sel.innerHTML += `<option value="${esc(c)}" ${c === current ? 'selected' : ''}>${esc(c)}</option>`;
+  function renderCandidates(candidates) {
+    const container = $('candidates-table') || document.querySelector('.candidates-table') || document.querySelector('.table-container');
+    if (!container) return;
+
+    let filtered = candidates.filter(c => {
+      if (!filterText) return true;
+      const search = filterText.toLowerCase();
+      return (c.name || '').toLowerCase().includes(search) ||
+        (c.email || '').toLowerCase().includes(search) ||
+        (c.candidate_id || '').toLowerCase().includes(search);
+    });
+
+    filtered.sort((a, b) => {
+      let va = a[sortField] || '';
+      let vb = b[sortField] || '';
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    if (!filtered.length) {
+      container.innerHTML = '<div class="empty-state"><p>No candidates found.</p></div>';
+      return;
+    }
+
+    let html = `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="sortable" data-sort="name">Name ${sortIndicator('name')}</th>
+            <th class="sortable" data-sort="email">Email ${sortIndicator('email')}</th>
+            <th>ID</th>
+            <th>Test Score</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    filtered.forEach(c => {
+      const score = c.score !== undefined ? c.score : c.total_score;
+      const total = c.total_marks || 100;
+      const status = c.selection_status || c.status || 'pending';
+      const statusClass = status === 'selected' ? 'badge-success' : status === 'shortlisted' ? 'badge-warning' : status === 'rejected' ? 'badge-danger' : 'badge-secondary';
+
+      html += `
+        <tr data-id="${c.id || c._id}">
+          <td class="candidate-name">${escapeHtml(c.name || 'N/A')}</td>
+          <td>${escapeHtml(c.email || 'N/A')}</td>
+          <td><code>${escapeHtml(c.candidate_id || c.id || '')}</code></td>
+          <td>${score !== undefined && score !== null ? `${score}/${total}` : 'N/A'}</td>
+          <td><span class="badge ${statusClass}">${capitalize(status)}</span></td>
+          <td>
+            <button class="btn btn-sm btn-ghost view-btn" data-id="${c.id || c._id}" title="View Details">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+            <button class="btn btn-sm btn-ghost shortlist-btn" data-id="${c.id || c._id}" title="Shortlist">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += '</tbody></table>';
+    container.innerHTML = html;
+
+    container.querySelectorAll('.sortable').forEach(th => {
+      th.addEventListener('click', () => {
+        const field = th.dataset.sort;
+        if (sortField === field) {
+          sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+        } else {
+          sortField = field;
+          sortDir = 'asc';
+        }
+        renderCandidates(allCandidates);
+      });
+    });
+
+    container.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => viewCandidateDetail(btn.dataset.id));
+    });
+
+    container.querySelectorAll('.shortlist-btn').forEach(btn => {
+      btn.addEventListener('click', () => shortlistCandidate(btn.dataset.id));
     });
   }
 
-  /* --- Filtering + sorting --- */
-  function applyFilters() {
-    const search = $('searchInput').value.toLowerCase().trim();
-    const college = $('collegeFilter').value.toLowerCase();
-    const status = $('statusFilter').value;
-    const sort = $('sortBy').value;
-
-    let list = [...state.candidates];
-
-    if (search) {
-      list = list.filter(c =>
-        (c.name || '').toLowerCase().includes(search) ||
-        (c.email || '').toLowerCase().includes(search) ||
-        (c.candidate_id || '').toLowerCase().includes(search)
-      );
-    }
-    if (college) {
-      list = list.filter(c => (c.college || '').toLowerCase().includes(college));
-    }
-    if (status) {
-      const statusVal = { shortlisted: 1, pending: 0, disqualified: 3 }[status];
-      if (statusVal !== undefined) {
-        list = list.filter(c => c.selected === statusVal);
-      }
-    }
-
-    const sorters = {
-      score: (a, b) => (b.score_final || 0) - (a.score_final || 0) || (a.time_taken || 99999) - (b.time_taken || 99999),
-      name: (a, b) => (a.name || '').localeCompare(b.name || ''),
-      time: (a, b) => (a.time_taken || 99999) - (b.time_taken || 99999),
-      creativity: (a, b) => (b.score_creativity || 0) - (a.score_creativity || 0),
-    };
-    list.sort(sorters[sort] || sorters.score);
-
-    state.filtered = list;
-    renderTable();
+  function sortIndicator(field) {
+    if (sortField !== field) return '';
+    return sortDir === 'asc' ? '↑' : '↓';
   }
 
-  /* --- Render table --- */
-  function renderTable() {
-    const tbody = $('candidateTable');
-    const empty = $('tableEmpty');
+  function initSearch() {
+    const search = $('candidate-search') || document.querySelector('.search-input, input[type="search"]');
+    if (!search) return;
 
-    if (state.filtered.length === 0) {
-      tbody.innerHTML = '';
-      empty.style.display = '';
+    let debounce;
+    search.addEventListener('input', () => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        filterText = search.value.trim();
+        renderCandidates(allCandidates);
+      }, 300);
+    });
+  }
+
+  function initExport() {
+    const btn = $('export-csv') || document.querySelector('.export-btn');
+    if (btn) {
+      btn.addEventListener('click', exportCSV);
+    }
+  }
+
+  function exportCSV() {
+    if (!allCandidates.length) {
+      Toast.warning('No Data', 'No candidates to export');
       return;
     }
-    empty.style.display = 'none';
 
-    tbody.innerHTML = state.filtered.map(c => {
-      const status = c.selected || 0;
-      const statusColor = STATUS_COLORS[status] || 'var(--text-muted)';
-      const completed = c.completed;
-      return `<tr style="opacity:${completed ? 1 : 0.5};">
-        <td style="font-family:var(--font-mono);font-size:var(--text-xs);">${esc(c.candidate_id || '-')}</td>
-        <td class="name-col">${esc(c.name || '-')}</td>
-        <td>${esc(c.college || '-')}</td>
-        <td class="score-col">${completed ? (c.score_final || 0).toFixed(1) : '-'}</td>
-        <td>${completed ? (c.score_logic || 0).toFixed(0) : '-'}</td>
-        <td>${completed ? (c.score_creativity || 0).toFixed(0) : '-'}</td>
-        <td>${completed ? (c.score_ai_knowledge || 0).toFixed(0) : '-'}</td>
-        <td>${completed ? formatTime(c.time_taken || 0) : '-'}</td>
-        <td>${c.violation_count || 0}</td>
-        <td>
-          <select class="status-select" data-id="${esc(c.candidate_id)}" onchange="AdminPanel.setStatus(this)">
-            <option value="0" ${status===0?'selected':''}>Pending</option>
-            <option value="1" ${status===1?'selected':''}>Shortlisted</option>
-            <option value="2" ${status===2?'selected':''}>Rejected</option>
-            <option value="3" ${status===3?'selected':''}>Disqualified</option>
-          </select>
-        </td>
-        <td><button class="btn btn-ghost btn-sm" onclick="AdminPanel.viewDetail('${esc(c.candidate_id)}')">View</button></td>
-      </tr>`;
-    }).join('');
+    const headers = ['Name', 'Email', 'Candidate ID', 'Score', 'Status'];
+    const rows = allCandidates.map(c => [
+      c.name || '',
+      c.email || '',
+      c.candidate_id || c.id || '',
+      c.score !== undefined ? `${c.score}/${c.total_marks || 100}` : 'N/A',
+      c.selection_status || c.status || 'pending',
+    ]);
+
+    let csv = headers.join(',') + '\n';
+    rows.forEach(row => {
+      csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `candidates_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    Toast.success('Exported', 'CSV file downloaded');
   }
 
-  /* --- View detail --- */
-  window.AdminPanel = {
-    async setStatus(sel) {
-      const id = sel.dataset.id;
-      const val = parseInt(sel.value);
-      try {
-        await API.post('/api/admin/toggle_selection', { candidate_id: id, selected: val });
-        const c = state.candidates.find(x => x.candidate_id === id);
-        if (c) c.selected = val;
-        Toast.success('Updated', `${id} → ${STATUS_MAP[val]}`);
-        loadStats();
-      } catch (err) {
-        Toast.error('Error', err.message);
-        applyFilters();
-      }
-    },
-
-    viewDetail(candidateId) {
-      const c = state.candidates.find(x => x.candidate_id === candidateId);
-      if (!c) return;
-
-      const panel = $('detailPanel');
-      const badges = Array.isArray(c.badges) ? c.badges : [];
-      const badgeHtml = badges.length > 0
-        ? badges.map(b => `<span class="badge badge-accent">${esc(b)}</span>`).join(' ')
-        : '<span style="color:var(--text-muted)">None</span>';
-
-      panel.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-6);">
-          <h3 style="font-size:var(--text-xl);">Candidate Details</h3>
-          <div style="display:flex;gap:var(--space-2);">
-            <a href="/admin/report/${esc(candidateId)}" target="_blank" class="btn btn-secondary btn-sm">&#x1F4C4; Print Report</a>
-            <button class="btn btn-ghost btn-sm" onclick="AdminPanel.closeDetail()">&times;</button>
-          </div>
-        <div class="detail-row"><span class="detail-row-label">Name</span><span class="detail-row-value">${esc(c.name)}</span></div>
-        <div class="detail-row"><span class="detail-row-label">Email</span><span class="detail-row-value">${esc(c.email)}</span></div>
-        <div class="detail-row"><span class="detail-row-label">ID</span><span class="detail-row-value" style="font-family:var(--font-mono);">${esc(c.candidate_id)}</span></div>
-        <div class="detail-row"><span class="detail-row-label">College</span><span class="detail-row-value">${esc(c.college)}</span></div>
-        <div class="detail-row"><span class="detail-row-label">Department</span><span class="detail-row-value">${esc(c.department)}</span></div>
-        <div class="detail-row"><span class="detail-row-label">Year</span><span class="detail-row-value">${c.year || '-'}</span></div>
-        <div class="detail-row"><span class="detail-row-label">Phone</span><span class="detail-row-value">${esc(c.phone)}</span></div>
-        ${c.linkedin ? `<div class="detail-row"><span class="detail-row-label">LinkedIn</span><span class="detail-row-value"><a href="${esc(c.linkedin)}" target="_blank">Link</a></span></div>` : ''}
-        ${c.github ? `<div class="detail-row"><span class="detail-row-label">GitHub</span><span class="detail-row-value"><a href="${esc(c.github)}" target="_blank">Link</a></span></div>` : ''}
-
-        <div style="margin:var(--space-6) 0;border-top:1px solid var(--glass-border);padding-top:var(--space-5);">
-          <h4 style="font-size:var(--text-base);margin-bottom:var(--space-4);">Scores</h4>
-          ${renderScoreRow('Logic', c.score_logic, 40)}
-          ${renderScoreRow('Creativity', c.score_creativity, 20)}
-          ${renderScoreRow('AI Knowledge', c.score_ai_knowledge, 20)}
-          ${renderScoreRow('Problem Solving', c.score_problem_solving, 10)}
-          ${renderScoreRow('Research', c.score_research, 10)}
-          ${renderScoreRow('AI Potential', c.score_ai_potential, 10)}
-          ${renderScoreRow('Workshop Fit', c.score_workshop_compat, 10)}
-          ${renderScoreRow('Selection Prob.', c.score_selection_prob, 100, '%')}
-          <div style="margin-top:var(--space-4);padding-top:var(--space-3);border-top:1px solid var(--glass-border);display:flex;justify-content:space-between;">
-            <span style="font-weight:600;">Final Score</span>
-            <span style="font-family:var(--font-display);font-weight:700;color:var(--accent-light);font-size:var(--text-lg);">${(c.score_final || 0).toFixed(1)}%</span>
-          </div>
-        </div>
-
-        <div style="margin:var(--space-5) 0;border-top:1px solid var(--glass-border);padding-top:var(--space-5);">
-          <h4 style="font-size:var(--text-base);margin-bottom:var(--space-3);">Challenge Info</h4>
-          <div class="detail-row"><span class="detail-row-label">Time Taken</span><span class="detail-row-value">${formatTime(c.time_taken || 0)}</span></div>
-          <div class="detail-row"><span class="detail-row-label">Tab Switches</span><span class="detail-row-value">${c.tab_switches || 0}</span></div>
-          <div class="detail-row"><span class="detail-row-label">Violations</span><span class="detail-row-value">${c.violation_count || 0}</span></div>
-          <div class="detail-row"><span class="detail-row-label">Typing Speed</span><span class="detail-row-value">${c.typing_speed_avg || 0} CPM</span></div>
-          <div class="detail-row"><span class="detail-row-label">Completed</span><span class="detail-row-value">${c.completed_at ? new Date(c.completed_at).toLocaleString() : 'No'}</span></div>
-        </div>
-
-        <div style="margin-top:var(--space-5);border-top:1px solid var(--glass-border);padding-top:var(--space-5);">
-          <h4 style="font-size:var(--text-base);margin-bottom:var(--space-3);">Badges</h4>
-          <div style="display:flex;flex-wrap:wrap;gap:var(--space-2);">${badgeHtml}</div>
-        </div>
-      `;
-      $('detailOverlay').classList.add('open');
-    },
-
-    closeDetail() {
-      $('detailOverlay').classList.remove('open');
-    },
-  };
-
-  function renderScoreRow(label, val, max, unit) {
-    val = val || 0;
-    const pct = (val / max) * 100;
-    return `<div style="display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-2);">
-      <span style="width:110px;font-size:var(--text-sm);color:var(--text-secondary);">${label}</span>
-      <div style="flex:1;height:6px;background:var(--bg-primary);border-radius:var(--radius-full);overflow:hidden;">
-        <div style="height:100%;width:${pct}%;background:var(--accent);border-radius:var(--radius-full);"></div>
-      </div>
-      <span style="width:50px;text-align:right;font-family:var(--font-mono);font-size:var(--text-sm);font-weight:600;">${unit ? val.toFixed(0) + unit : val.toFixed(1)}</span>
-    </div>`;
-  }
-
-  /* --- Actions --- */
-  async function autoShortlist() {
-    if (!confirm('Auto-shortlist the top 30 candidates? This will reset all current selections.')) return;
+  async function shortlistCandidate(id) {
     try {
-      const res = await API.post('/api/admin/auto_shortlist');
-      Toast.success('Done', res.message);
-      await loadStats();
+      await API.post(`/api/admin/candidates/${id}/shortlist`);
+      Toast.success('Shortlisted', 'Candidate has been shortlisted');
       await loadCandidates();
     } catch (err) {
-      Toast.error('Error', err.message);
+      Toast.error('Error', err.message || 'Failed to shortlist');
     }
   }
 
-  function exportCsv() {
-    window.location.href = '/api/admin/export_csv';
+  async function viewCandidateDetail(id) {
+    const candidate = allCandidates.find(c => String(c.id || c._id) === String(id));
+    if (!candidate) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay candidate-detail-overlay';
+    overlay.innerHTML = `
+      <div class="overlay-backdrop"></div>
+      <div class="overlay-content modal-lg">
+        <div class="overlay-header">
+          <h3>${escapeHtml(candidate.name || 'Candidate Detail')}</h3>
+          <button class="overlay-close">&times;</button>
+        </div>
+        <div class="overlay-body">
+          <div class="detail-grid">
+            <div class="detail-item"><label>Name</label><span>${escapeHtml(candidate.name || 'N/A')}</span></div>
+            <div class="detail-item"><label>Email</label><span>${escapeHtml(candidate.email || 'N/A')}</span></div>
+            <div class="detail-item"><label>Candidate ID</label><span><code>${escapeHtml(candidate.candidate_id || candidate.id || '')}</code></span></div>
+            <div class="detail-item"><label>Phone</label><span>${escapeHtml(candidate.phone || 'N/A')}</span></div>
+            <div class="detail-item"><label>Score</label><span>${candidate.score !== undefined ? `${candidate.score}/${candidate.total_marks || 100}` : 'N/A'}</span></div>
+            <div class="detail-item"><label>Status</label><span class="badge badge-${candidate.selection_status === 'selected' ? 'success' : 'secondary'}">${capitalize(candidate.selection_status || 'pending')}</span></div>
+            ${candidate.test_results ? `<div class="detail-item full-width"><label>Test Results</label><pre>${JSON.stringify(candidate.test_results, null, 2)}</pre></div>` : ''}
+          </div>
+        </div>
+        <div class="overlay-footer">
+          <button class="btn btn-secondary overlay-close-btn">Close</button>
+          <button class="btn btn-primary shortlist-action-btn" data-id="${id}">Shortlist</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('active'));
+
+    const close = () => {
+      overlay.classList.remove('active');
+      setTimeout(() => overlay.remove(), 300);
+    };
+
+    overlay.querySelector('.overlay-backdrop').addEventListener('click', close);
+    overlay.querySelector('.overlay-close').addEventListener('click', close);
+    overlay.querySelector('.overlay-close-btn').addEventListener('click', close);
+    overlay.querySelector('.shortlist-action-btn').addEventListener('click', async () => {
+      await shortlistCandidate(id);
+      close();
+    });
   }
 
-  async function togglePublish() {
-    try {
-      const res = await API.post('/api/admin/toggle_publish');
-      const published = res.results_published;
-      $('publishToggle').textContent = published ? 'Unpublish Results' : 'Publish Results';
-      Toast.info('Updated', published ? 'Results are now visible to students' : 'Results hidden from students');
-    } catch (err) {
-      Toast.error('Error', err.message);
+  function initAutoShortlist() {
+    const btn = $('auto-shortlist') || document.querySelector('.auto-shortlist-btn');
+    if (btn) {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Auto-shortlist candidates who scored above the threshold?')) return;
+        try {
+          const data = await API.post('/api/admin/auto-shortlist');
+          Toast.success('Done', data.message || 'Auto-shortlist completed');
+          await loadCandidates();
+        } catch (err) {
+          Toast.error('Error', err.message || 'Auto-shortlist failed');
+        }
+      });
     }
   }
 
-  async function loadPublishStatus() {
-    try {
-      const res = await API.get('/api/admin/publish_status');
-      $('publishToggle').textContent = res.results_published ? 'Unpublish Results' : 'Publish Results';
-    } catch {
-      /* ignore */
-    }
+  function initPublishToggle() {
+    document.querySelectorAll('.publish-toggle').forEach(toggle => {
+      toggle.addEventListener('change', async () => {
+        const testId = toggle.dataset.id || toggle.dataset.testId;
+        const published = toggle.checked;
+        try {
+          await API.put(`/api/admin/tests/${testId}/publish`, { published });
+          Toast.success('Updated', `Test ${published ? 'published' : 'unpublished'}`);
+        } catch (err) {
+          toggle.checked = !published;
+          Toast.error('Error', err.message || 'Failed to update');
+        }
+      });
+    });
   }
 
-  async function adminLogout() {
-    try { await API.post('/api/admin/logout'); } catch {}
-    window.location.href = '/admin-login';
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  /* --- Helpers --- */
-  function esc(s) {
-    if (!s) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
   }
 
-  function formatTime(secs) {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}m ${s}s`;
-  }
-
-  init();
+  document.addEventListener('DOMContentLoaded', init);
 })();

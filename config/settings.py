@@ -11,7 +11,6 @@ class Config:
         "fPZJ6C3DeezVr4n4@cluster0.fw4opds.mongodb.net/",
     )
     MONGODB_DB = "ai_next_gen"
-    MONGODB_COLLECTION = "state"
 
     SESSION_LIFETIME_HOURS = 24
     SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "False") == "True"
@@ -25,7 +24,15 @@ class Config:
 
     PASSWORD_SALT = os.environ.get("PASSWORD_SALT", "ai_next_gen_salt")
 
-    CHALLENGE_TIME_LIMIT_SECONDS = 1800
-    MAX_AUDIT_LOG_ENTRIES = 1000
+    MAX_AUDIT_LOG_ENTRIES = 2000
 
+    DEFAULT_TAB_SWITCH_LIMIT = 3
+    DEFAULT_IDLE_TIMEOUT_SECONDS = 300
+    INTERNET_DISCONNECT_PAUSE_SECONDS = 30
+    MAX_RETAKE_ATTEMPTS = 0
     SHORTLIST_TOP_N = 30
+
+    TEST_STATUSES = ["draft", "published", "locked", "completed"]
+    ASSIGNMENT_STATUSES = ["assigned", "in_progress", "completed", "disqualified", "locked"]
+    DIFFICULTY_LEVELS = ["easy", "medium", "hard", "expert"]
+    QUESTION_TYPES = ["mcq", "text", "textarea"]

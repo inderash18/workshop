@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}Manage Test — AI Next Gen Admin{% endblock %}
+
+{% block head %}
+<style>
+    body{background:var(--bg-primary)}
+    .admin-layout{display:flex;min-height:calc(100vh - 60px);margin-top:60px}
+    .admin-sidebar{width:240px;background:rgba(255,255,255,.02);border-right:1px solid rgba(255,255,255,.06);padding:1.5rem 0;position:sticky;top:60px;height:calc(100vh - 60px);flex-shrink:0;display:flex;flex-direction:column}
+    .sidebar-nav{flex:1;display:flex;flex-direction:column;gap:.25rem;padding:0 .75rem}
+    .sidebar-link{display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:10px;color:var(--text-secondary);font-size:.9rem;font-weight:500;text-decoration:none;transition:all .2s}
+    .sidebar-link:hover{color:var(--text-primary);background:rgba(255,255,255,.04)}
+    .sidebar-link.active{color:var(--accent-primary);background:rgba(99,102,241,.1)}
+    .sidebar-link .icon{font-size:1.1rem;width:22px;text-align:center}
+    .sidebar-divider{height:1px;background:rgba(255,255,255,.06);margin:.75rem .75rem}
+    .admin-main{flex:1;padding:2rem 2.5rem;max-width:calc(100% - 240px);max-height:calc(100vh - 60px);overflow-y:auto}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+    .page-header-left h1{font-size:1.5rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.75rem}
+    .page-header-actions{display:flex;gap:.5rem}
+    .btn-action{padding:.5rem 1rem;border-radius:8px;font-size:.8rem;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+    .btn-publish{background:rgba(34,197,94,.1);color:#22c55e;border:1px solid rgba(34,197,94,.15)}
+    .btn-publish:hover{background:rgba(34,197,94,.2)}
+    .btn-lock{background:rgba(234,179,8,.1);color:#fde047;border:1px solid rgba(234,179,8,.15)}
+    .btn-lock:hover{background:rgba(234,179,8,.2)}
+    .btn-unlock{background:rgba(99,102,241,.1);color:#818cf8;border:1px solid rgba(99,102,241,.15)}
+    .btn-unlock:hover{background:rgba(99,102,241,.2)}
+    .tabs{display:flex;gap:.25rem;margin-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:0}
+    .tab{padding:.75rem 1.25rem;font-size:.85rem;font-weight:500;color:var(--text-secondary);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;margin-bottom:-1px}
+    .tab:hover{color:var(--text-primary)}
+    .tab.active{color:var(--accent-primary);border-bottom-color:var(--accent-primary)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+    .mini-stat{padding:1.25rem;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);text-align:center}
+    .mini-stat .val{font-size:1.75rem;font-weight:700;color:var(--text-primary)}
+    .mini-stat .lbl{font-size:.75rem;color:var(--text-secondary);margin-top:.25rem;text-transform:uppercase;letter-spacing:.05em}
+    .data-table{width:100%;border-collapse:collapse;font-size:.85rem}
+    .data-table th{text-align:left;padding:.75rem 1rem;color:var(--text-secondary);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(255,255,255,.06)}
+    .data-table td{padding:.75rem 1rem;color:var(--text-primary);border-bottom:1px solid rgba(255,255,255,.04)}
+    .data-table tr:hover td{background:rgba(255,255,255,.02)}
+    .data-table .status-badge{padding:.2rem .6rem;border-radius:999px;font-size:.7rem;font-weight:700;text-transform:uppercase}
+    .badge-not-started{background:rgba(156,163,175,.15);color:#9ca3af}
+    .badge-in-progress{background:rgba(59,130,246,.15);color:#60a5fa}
+    .badge-completed{background:rgba(34,197,94,.15);color:#22c55e}
+    .badge-disqualified{background:rgba(239,68,68,.15);color:#fca5a5}
+    .question-row{display:flex;align-items:flex-start;gap:1rem;padding:1rem;border-radius:10px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.04);margin-bottom:.5rem}
+    .q-num{width:32px;height:32px;border-radius:8px;background:rgba(99,102,241,.1);color:#818cf8;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0}
+    .q-content{flex:1}
+    .q-content .q-text{font-size:.9rem;color:var(--text-primary);margin-bottom:.25rem}
+    .q-content .q-meta{font-size:.78rem;color:var(--text-muted)}
+    .q-actions{display:flex;gap:.4rem}
+    .log-item{padding:.75rem;border-radius:8px;background:rgba(255,255,255,.02);border-left:3px solid;margin-bottom:.5rem;font-size:.85rem}
+    .log-item.violation{border-color:#ef4444}
+    .log-item.warning{border-color:#eab308}
+    .log-item.info{border-color:#3b82f6}
+    .log-item .log-time{font-size:.75rem;color:var(--text-muted);margin-top:.25rem}
+    .settings-form{max-width:600px}
+    .empty-msg{text-align:center;padding:2rem;color:var(--text-muted);font-size:.9rem}
+    @media(max-width:1024px){.stat-row{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:768px){.admin-sidebar{display:none}.admin-main{max-width:100%;padding:1.5rem}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <nav class="sidebar-nav">
+            <a href="/admin" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="/admin/tests" class="sidebar-link active"><span class="icon">📝</span> Tests</a>
+            <a href="/admin/candidates" class="sidebar-link"><span class="icon">👥</span> Candidates</a>
+            <div class="sidebar-divider"></div>
+            <a href="/admin/settings" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+            <a href="/admin/logs" class="sidebar-link"><span class="icon">📋</span> Logs</a>
+        </nav>
+    </aside>
+    <main class="admin-main">
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1 id="testTitle">Loading... <span class="status-badge" id="testStatus"></span></h1>
+            </div>
+            <div class="page-header-actions" id="actionButtons"></div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('overview')">Overview</div>
+            <div class="tab" onclick="switchTab('questions')">Questions</div>
+            <div class="tab" onclick="switchTab('candidates')">Candidates</div>
+            <div class="tab" onclick="switchTab('logs')">Security Logs</div>
+            <div class="tab" onclick="switchTab('settings')">Settings</div>
+        </div>
+
+        <div class="tab-content active" id="tab-overview">
+            <div class="stat-row" id="overviewStats">
+                <div class="mini-stat"><div class="val" id="oAssigned">0</div><div class="lbl">Assigned</div></div>
+                <div class="mini-stat"><div class="val" id="oStarted">0</div><div class="lbl">Started</div></div>
+                <div class="mini-stat"><div class="val" id="oCompleted">0</div><div class="lbl">Completed</div></div>
+                <div class="mini-stat"><div class="val" id="oAvgScore">0%</div><div class="lbl">Avg Score</div></div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-questions">
+            <div id="questionsList"></div>
+        </div>
+
+        <div class="tab-content" id="tab-candidates">
+            <div style="overflow-x:auto">
+                <table class="data-table" id="candidatesTable">
+                    <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Score</th><th>Started</th><th>Actions</th></tr></thead>
+                    <tbody id="candidatesBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-logs">
+            <div id="securityLogs"></div>
+        </div>
+
+        <div class="tab-content" id="tab-settings">
+            <div class="settings-form">
+                <div class="form-section" style="margin-bottom:1.5rem;padding:1.5rem;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)">
+                    <div style="font-size:1rem;font-weight:600;color:var(--text-primary);margin-bottom:1rem">Test Settings</div>
+                    <div style="display:flex;flex-direction:column;gap:1rem">
+                        <div style="display:flex;flex-direction:column;gap:.3rem">
+                            <label style="font-size:.78rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase">Test Name</label>
+                            <input type="text" id="settingsName" style="padding:.6rem .8rem;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--text-primary);font-size:.88rem;outline:none">
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:.3rem">
+                            <label style="font-size:.78rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase">Duration (min)</label>
+                            <input type="number" id="settingsDuration" style="padding:.6rem .8rem;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--text-primary);font-size:.88rem;outline:none">
+                        </div>
+                    </div>
+                    <button onclick="saveSettings()" style="margin-top:1rem;padding:.6rem 1.25rem;border-radius:8px;background:var(--accent-primary);color:#fff;border:none;font-weight:600;cursor:pointer;font-size:.85rem">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const testId = '{{ test_id }}';
+function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+}
+async function loadData() {
+    try {
+        const test = await API.get(`/api/admin/tests/${testId}`, localStorage.getItem('admin_token'));
+        if (!test) return;
+        document.getElementById('testTitle').innerHTML = test.name + ' <span class="status-badge ' + test.status + '">' + test.status + '</span>';
+        document.getElementById('oAssigned').textContent = test.stats?.assigned || 0;
+        document.getElementById('oStarted').textContent = test.stats?.started || 0;
+        document.getElementById('oCompleted').textContent = test.stats?.completed || 0;
+        document.getElementById('oAvgScore').textContent = (test.stats?.avg_score || 0) + '%';
+        document.getElementById('settingsName').value = test.name;
+        document.getElementById('settingsDuration').value = test.duration;
+        let actions = '';
+        if (test.status === 'draft') actions += `<button class="btn-action btn-publish" onclick="updateStatus('published')">Publish</button>`;
+        if (test.status === 'published') actions += `<button class="btn-action btn-lock" onclick="updateStatus('locked')">Lock</button>`;
+        if (test.status === 'locked') actions += `<button class="btn-action btn-unlock" onclick="updateStatus('published')">Unlock</button>`;
+        document.getElementById('actionButtons').innerHTML = actions;
+        if (test.questions && test.questions.length) {
+            document.getElementById('questionsList').innerHTML = test.questions.map((q, i) => `
+                <div class="question-row">
+                    <div class="q-num">${i+1}</div>
+                    <div class="q-content">
+                        <div class="q-text">${q.text}</div>
+                        <div class="q-meta">${q.type.toUpperCase()} · ${q.category || 'General'} · ${q.xp || 10} XP${q.is_secret ? ' · Secret' : ''}</div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            document.getElementById('questionsList').innerHTML = '<div class="empty-msg">No questions added yet.</div>';
+        }
+    } catch(e) { console.error(e); }
+    try {
+        const candidates = await API.get(`/api/admin/tests/${testId}/candidates`, localStorage.getItem('admin_token'));
+        const tbody = document.getElementById('candidatesBody');
+        if (!candidates || !candidates.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-msg">No candidates assigned.</td></tr>'; return; }
+        tbody.innerHTML = candidates.map(c => `<tr>
+            <td>${c.name}</td><td>${c.email}</td>
+            <td><span class="status-badge badge-${c.status || 'not-started'}">${c.status || 'not started'}</span></td>
+            <td>${c.score ?? '—'}</td><td>${c.started_at || '—'}</td>
+            <td>${c.status === 'completed' ? `<button class="btn-action btn-publish" onclick="window.open('/report/${testId}/${c.id}','_blank')">Report</button>` : ''}</td>
+        </tr>`).join('');
+    } catch(e) { console.error(e); }
+    try {
+        const logs = await API.get(`/api/admin/tests/${testId}/logs`, localStorage.getItem('admin_token'));
+        const el = document.getElementById('securityLogs');
+        if (!logs || !logs.length) { el.innerHTML = '<div class="empty-msg">No security events logged.</div>'; return; }
+        el.innerHTML = logs.map(l => `<div class="log-item ${l.type || 'info'}">
+            <div><strong>${l.candidate || 'Unknown'}</strong> — ${l.event}</div>
+            <div class="log-time">${l.time}</div>
+        </div>`).join('');
+    } catch(e) { console.error(e); }
+}
+async function updateStatus(status) {
+    try {
+        await API.post(`/api/admin/tests/${testId}/${status === 'published' ? 'publish' : 'lock'}`, {}, localStorage.getItem('admin_token'));
+        Toast.show('Status updated', 'success');
+        loadData();
+    } catch(e) { Toast.show('Failed', 'error'); }
+}
+async function saveSettings() {
+    try {
+        await API.put(`/api/admin/tests/${testId}`, { name: document.getElementById('settingsName').value, duration: parseInt(document.getElementById('settingsDuration').value) }, localStorage.getItem('admin_token'));
+        Toast.show('Settings saved', 'success');
+        loadData();
+    } catch(e) { Toast.show('Failed to save', 'error'); }
+}
+loadData();
+</script>
+{% endblock %}

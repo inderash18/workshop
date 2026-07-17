@@ -18,18 +18,20 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/signup")
 def signup_page():
     if "user_email" in session:
-        return redirect(url_for("dashboard.profile_page"))
+        return redirect(url_for("dashboard.dashboard_page"))
     return render_template("signup.html")
 
 
 @auth_bp.route("/login")
 def login_page():
     if "user_email" in session:
-        return redirect(url_for("dashboard.profile_page"))
+        return redirect(url_for("dashboard.dashboard_page"))
     return render_template("login.html")
 
 
 @auth_bp.route("/api/signup", methods=["POST"])
+@auth_bp.route("/api/auth/register", methods=["POST"])
+@auth_bp.route("/api/auth/signup", methods=["POST"])
 def api_signup():
     data = request.json or {}
 
@@ -117,6 +119,16 @@ def api_signup():
     db["candidates"].append(new_candidate)
     save_db(db)
 
+    # Assign all currently published tests to this new student
+    from models.database import get_all_tests, create_assignment
+    try:
+        tests = get_all_tests()
+        for test in tests:
+            if test.get("status") == "published":
+                create_assignment(str(test["_id"]), c_id)
+    except Exception:
+        pass
+
     session["user_email"] = email
     session["candidate_id"] = c_id
     session.permanent = True
@@ -127,6 +139,7 @@ def api_signup():
 
 
 @auth_bp.route("/api/login", methods=["POST"])
+@auth_bp.route("/api/auth/login", methods=["POST"])
 def api_login():
     data = request.json or {}
     email = sanitize_input(data.get("email", "")).lower()
@@ -163,7 +176,7 @@ def api_login():
 
     audit_log("login_success", email, {"candidate_id": candidate["candidate_id"]}, ip=request.remote_addr)
 
-    return jsonify({"success": True, "candidate_id": candidate["candidate_id"], "redirect": "/profile"})
+    return jsonify({"success": True, "candidate_id": candidate["candidate_id"], "redirect": "/dashboard"})
 
 
 @auth_bp.route("/api/logout", methods=["POST"])
@@ -179,24 +192,34 @@ def api_logout():
 @auth_bp.route("/api/session", methods=["GET"])
 def get_session():
     if "user_email" not in session:
-        return jsonify({"logged_in": False}), 401
+        if "admin_logged_in" in session:
+            return jsonify({
+                "logged_in": True,
+                "candidate": {
+                    "name": "Administrator",
+                    "email": "admin@platform.com",
+                    "role": "admin",
+                    "is_admin": True
+                }
+            })
+        return jsonify({"logged_in": False})
 
     candidate = get_candidate_by_email(session["user_email"])
     if not candidate:
         session.pop("user_email", None)
-        return jsonify({"logged_in": False}), 401
+        return jsonify({"logged_in": False})
 
     c_data = dict(candidate)
     c_data.pop("password_hash", None)
 
-    for field in ["badges", "violation_logs", "answers"]:
+    for field in ["badges", "violation_logs"]:
         try:
             if field in c_data and c_data[field]:
                 c_data[field] = json.loads(c_data[field])
             else:
-                c_data[field] = [] if field != "answers" else {}
+                c_data[field] = []
         except Exception:
-            c_data[field] = [] if field != "answers" else {}
+            c_data[field] = []
 
     from services.achievement_engine import get_badge_details
     c_data["badge_details"] = get_badge_details(c_data.get("badges", []))
@@ -231,7 +254,6 @@ def update_profile():
     if github and not github.startswith(("https://", "http://")):
         return jsonify({"error": "Invalid GitHub URL"}), 400
 
-    from models.database import get_candidate_by_email
     candidate = get_candidate_by_email(session["user_email"])
     if not candidate:
         return jsonify({"error": "Candidate not found"}), 404
@@ -250,3 +272,25 @@ def update_profile():
     audit_log("profile_update", session["user_email"], {"fields": list(data.keys())}, ip=request.remote_addr)
 
     return jsonify({"success": True, "message": "Profile updated successfully"})
+
+
+@auth_bp.route("/api/profile/avatar", methods=["POST"])
+@login_required
+def update_avatar():
+    data = request.json or {}
+    avatar_data = data.get("avatar", "")
+
+    if not avatar_data:
+        return jsonify({"error": "No avatar data provided"}), 400
+
+    db = load_db()
+    candidate = get_candidate_by_email(session["user_email"])
+    if not candidate:
+        return jsonify({"error": "Candidate not found"}), 404
+
+    candidate["avatar"] = avatar_data
+    save_db(db)
+
+    audit_log("avatar_update", session["user_email"], ip=request.remote_addr)
+    return jsonify({"success": True, "avatar": avatar_data})
+
