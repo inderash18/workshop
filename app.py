@@ -25,12 +25,14 @@ def _load_env():
 _load_env()
 
 from flask import Flask, jsonify
+from flask_cors import CORS
 from config.settings import Config
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 def create_app():
     app = Flask(__name__)
+    CORS(app, supports_credentials=True)
     app.secret_key = Config.SECRET_KEY
     app.config["PERMANENT_SESSION_LIFETIME"] = __import__("datetime").timedelta(
         hours=Config.SESSION_LIFETIME_HOURS

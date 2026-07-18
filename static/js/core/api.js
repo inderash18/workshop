@@ -1,15 +1,18 @@
+const API_URL = "https://workshop-0mk8.onrender.com";
+
 const API = {
   async request(method, url, body = null) {
     const opts = {
       method,
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
+      credentials: 'include', // Allow cross-domain cookies
     };
     if (body && method !== 'GET') {
       opts.body = JSON.stringify(body);
     }
+    const fullUrl = url.startsWith('http') ? url : `${API_URL}${url.startsWith('/') ? '' : '/'}${url}`;
     try {
-      const res = await fetch(url, opts);
+      const res = await fetch(fullUrl, opts);
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         const err = new Error(data.error || data.message || `Request failed (${res.status})`);

@@ -205,6 +205,7 @@
             pasteAttempts: 0
         };
         let candidateId = 'CAND-12345'; // This would be fetched from session
+        const API_URL = "https://workshop-0mk8.onrender.com";
         let testId = 'test_ai_proof_2026_v1';
 
         // Initialize test
@@ -236,7 +237,7 @@
         // Load question
         async function loadQuestion(questionIndex) {
             try {
-                const response = await fetch(`/api/test/assignments/${testId}/${candidateId}/question/${questionIndex}`);
+                const response = await fetch(`${API_URL}/api/test/assignments/${testId}/${candidateId}/question/${questionIndex}`);
                 const question = await response.json();
 
                 if (!question || !question.id) {
@@ -392,7 +393,7 @@
         // Save answer
         async function saveAnswer(questionIndex, answer) {
             try {
-                const response = await fetch('/api/test/answers', {
+                const response = await fetch(`${API_URL}/api/test/answers`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -448,7 +449,7 @@
         // Log security violation
         async function logSecurityViolation(violationType) {
             try {
-                await fetch('/api/security/log', {
+                await fetch(`${API_URL}/api/security/log`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -496,7 +497,7 @@
             clearInterval(timerInterval);
 
             // Lock test and submit all answers
-            const response = await fetch(`/api/test/assignments/${testId}/${candidateId}/finish?reason=${encodeURIComponent(reason)}`, {
+            const response = await fetch(`${API_URL}/api/test/assignments/${testId}/${candidateId}/finish?reason=${encodeURIComponent(reason)}`, {
                 method: 'POST'
             });
 
