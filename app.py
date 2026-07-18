@@ -32,7 +32,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, supports_credentials=True)
+    CORS(app, supports_credentials=True, origins=["https://workshop-eight-iota.vercel.app", "http://localhost:5000", "http://127.0.0.1:5000"])
     app.secret_key = Config.SECRET_KEY
     app.config["PERMANENT_SESSION_LIFETIME"] = __import__("datetime").timedelta(
         hours=Config.SESSION_LIFETIME_HOURS
