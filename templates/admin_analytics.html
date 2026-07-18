@@ -5,133 +5,141 @@
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    body { background: var(--bg-primary); }
-    
+    body {
+        background: var(--bg-primary);
+    }
+
     .admin-layout {
-      display: flex;
-      min-height: calc(100vh - 60px);
-      margin-top: 60px;
+        display: flex;
+        min-height: calc(100vh - 60px);
+        margin-top: 60px;
     }
-    
+
     .admin-sidebar {
-      width: 240px;
-      background: var(--bg-tertiary);
-      border-right: 1px solid var(--border-default);
-      padding: 1.5rem 0;
-      position: sticky;
-      top: 60px;
-      height: calc(100vh - 60px);
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
+        width: 240px;
+        background: var(--bg-tertiary);
+        border-right: 1px solid var(--border-default);
+        padding: 1.5rem 0;
+        position: sticky;
+        top: 60px;
+        height: calc(100vh - 60px);
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
     }
-    
+
     .sidebar-nav {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      padding: 0 0.75rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: 0 0.75rem;
     }
-    
+
     .sidebar-link {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.7rem 1rem;
-      border-radius: 8px;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.7rem 1rem;
+        border-radius: 8px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
     }
-    
+
     .sidebar-link:hover {
-      color: var(--text-primary);
-      background: var(--bg-primary);
+        color: var(--text-primary);
+        background: var(--bg-primary);
     }
-    
+
     .sidebar-link.active {
-      color: var(--text-primary);
-      background: var(--bg-secondary);
-      font-weight: 600;
+        color: var(--text-primary);
+        background: var(--bg-secondary);
+        font-weight: 600;
     }
-    
+
     .sidebar-link .icon {
-      font-size: 1.1rem;
-      width: 22px;
-      text-align: center;
+        font-size: 1.1rem;
+        width: 22px;
+        text-align: center;
     }
-    
+
     .sidebar-divider {
-      height: 1px;
-      background: var(--border-subtle);
-      margin: 0.75rem;
+        height: 1px;
+        background: var(--border-subtle);
+        margin: 0.75rem;
     }
-    
+
     .admin-main {
-      flex: 1;
-      padding: 2rem 2.5rem;
-      max-width: calc(100% - 240px);
-      overflow-y: auto;
+        flex: 1;
+        padding: 2rem 2.5rem;
+        max-width: calc(100% - 240px);
+        overflow-y: auto;
     }
-    
+
     .page-header {
-      margin-bottom: 2rem;
+        margin-bottom: 2rem;
     }
-    
+
     .page-header h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text-primary);
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
     }
-    
+
     /* Analytics Grid */
     .charts-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-      margin-bottom: 2rem;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
     }
-    
+
     .chart-card {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-default);
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      flex-direction: column;
-      min-height: 380px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-default);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        min-height: 380px;
     }
-    
+
     .chart-card h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
-    
+
     .chart-container {
-      position: relative;
-      flex: 1;
-      width: 100%;
-      height: 100%;
+        position: relative;
+        flex: 1;
+        width: 100%;
+        height: 100%;
     }
 
     @media (max-width: 1024px) {
-      .charts-grid {
-        grid-template-columns: 1fr;
-      }
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     @media (max-width: 768px) {
-      .admin-sidebar { display: none; }
-      .admin-main { max-width: 100%; padding: 1.5rem; }
+        .admin-sidebar {
+            display: none;
+        }
+
+        .admin-main {
+            max-width: 100%;
+            padding: 1.5rem;
+        }
     }
 </style>
 {% endblock %}
@@ -152,14 +160,15 @@
             <a href="/admin/logs" class="sidebar-link"><span class="icon">📋</span> Logs</a>
         </nav>
     </aside>
-    
+
     <main class="admin-main">
         <!-- Header -->
         <div class="page-header">
             <h1>Analytics & Insights</h1>
-            <p style="color:var(--text-secondary); margin-top: 0.25rem; font-size: 0.88rem;">Visual breakdown of student metrics, security performance, and AI evaluations.</p>
+            <p style="color:var(--text-secondary); margin-top: 0.25rem; font-size: 0.88rem;">Visual breakdown of student
+                metrics, security performance, and AI evaluations.</p>
         </div>
-        
+
         <!-- Charts Grid -->
         <div class="charts-grid">
             <!-- Chart 1: Score Distribution -->
@@ -169,7 +178,7 @@
                     <canvas id="scoreDistChart"></canvas>
                 </div>
             </div>
-            
+
             <!-- Chart 2: Selection Status Split -->
             <div class="chart-card">
                 <h3>👥 Candidate Selection Status</h3>
@@ -177,7 +186,7 @@
                     <canvas id="statusChart"></canvas>
                 </div>
             </div>
-            
+
             <!-- Chart 3: AI Verdict Split -->
             <div class="chart-card">
                 <h3>🤖 AI Recommendation Breakdown</h3>
@@ -185,7 +194,7 @@
                     <canvas id="aiRecChart"></canvas>
                 </div>
             </div>
-            
+
             <!-- Chart 4: Security Violations Breakdown -->
             <div class="chart-card">
                 <h3>🔐 Security Violations Logged</h3>
@@ -200,180 +209,305 @@
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-    // Check authentication
-    const ok = await Auth.requireAdmin();
-    if (!ok) return;
-    Auth.updateNav();
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Check authentication
+        const ok = await Auth.requireAdmin();
+        if (!ok) return;
+        Auth.updateNav();
 
-    try {
-        const data = await API.get('/api/admin/analytics-data');
-        if (!data) return;
+        try {
+            const data = await API.get('/api/admin/analytics-data');
+            if (!data) return;
 
-        renderScoreDistribution(data.score_distribution);
-        renderSelectionStatus(data.selection_status);
-        renderAIRecommendations(data.ai_recommendations);
-        renderViolationsBreakdown(data.violations_breakdown);
-    } catch(err) {
-        console.error('Failed to load analytics data:', err);
-    }
-});
+            renderScoreDistribution(data.score_distribution);
+            renderSelectionStatus(data.selection_status);
+            renderAIRecommendations(data.ai_recommendations);
+            renderViolationsBreakdown(data.violations_breakdown);
+        } catch (err) {
+            console.error('Failed to load analytics data:', err);
+        }
+    });
 
-function renderScoreDistribution(scores) {
-    const ctx = document.getElementById('scoreDistChart').getContext('2d');
-    const labels = Object.keys(scores);
-    const values = Object.values(scores);
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Number of Students',
-                data: values,
-                backgroundColor: 'rgba(99, 102, 241, 0.7)',
-                borderColor: 'rgb(99, 102, 241)',
-                borderWidth: 1.5,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
+    function renderScoreDistribution(scores) {
+        const ctx = document.getElementById('scoreDistChart').getContext('2d');
+        const labels = Object.keys(scores);
+        const values = Object.values(scores);
+
+        // Gradient: red → orange → yellow → lime → emerald → violet per band
+        const bandColors = [
+            { bg: 'rgba(239,68,68,0.75)', border: '#ef4444' },   // 0-49  Poor
+            { bg: 'rgba(249,115,22,0.75)', border: '#f97316' },   // 50-59 Below Avg
+            { bg: 'rgba(234,179,8,0.75)', border: '#eab308' },   // 60-69 Average
+            { bg: 'rgba(132,204,22,0.75)', border: '#84cc16' },   // 70-79 Good
+            { bg: 'rgba(16,185,129,0.75)', border: '#10b981' },   // 80-89 Great
+            { bg: 'rgba(139,92,246,0.75)', border: '#8b5cf6' },   // 90-100 Elite
+        ];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Number of Students',
+                    data: values,
+                    backgroundColor: bandColors.map(c => c.bg),
+                    borderColor: bandColors.map(c => c.border),
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                    ticks: { color: 'var(--text-secondary)' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.parsed.y} candidates`
+                        }
+                    }
                 },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: 'var(--text-secondary)' }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, color: 'rgba(148,163,184,0.9)', font: { size: 11 } },
+                        grid: { color: 'rgba(255,255,255,0.06)' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: 'rgba(148,163,184,0.9)', font: { size: 11 } }
+                    }
                 }
             }
-        }
-    });
-}
-
-// Custom HSL generation helper for modern premium colors
-function generateHexPalette(count) {
-    const palette = ['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#6b7280'];
-    while (palette.length < count) {
-        palette.push(`hsl(${Math.random() * 360}, 70%, 55%)`);
+        });
     }
-    return palette.slice(0, count);
-}
 
-function renderSelectionStatus(statusCounts) {
-    const ctx = document.getElementById('statusChart').getContext('2d');
-    const labels = Object.keys(statusCounts).map(s => s.toUpperCase());
-    const values = Object.values(statusCounts);
-    
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: [
-                    '#10b981', // selected
-                    '#f59e0b', // waitlisted
-                    '#ef4444', // rejected
-                    '#b91c1c', // disqualified
-                    '#6b7280'  // pending
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { color: 'var(--text-secondary)' }
-                }
-            }
+    // Custom HSL generation helper for modern premium colors
+    function generateHexPalette(count) {
+        const palette = ['#10b981', '#6366f1', '#f59e0b', '#ef4444', '#6b7280'];
+        while (palette.length < count) {
+            palette.push(`hsl(${Math.random() * 360}, 70%, 55%)`);
         }
-    });
-}
+        return palette.slice(0, count);
+    }
 
-function renderAIRecommendations(aiRecs) {
-    const ctx = document.getElementById('aiRecChart').getContext('2d');
-    const labels = Object.keys(aiRecs);
-    const values = Object.values(aiRecs);
-    
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: [
-                    '#10b981', // Highly Recommended
-                    '#6366f1', // Recommended
-                    '#f59e0b', // Borderline
-                    '#ef4444', // Not Recommended
-                    '#b91c1c'  // Disqualified
-                ],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { color: 'var(--text-secondary)' }
-                }
+    function renderSelectionStatus(statusCounts) {
+        const ctx = document.getElementById('statusChart').getContext('2d');
+
+        // Fix order: backend returns {selected, waitlisted, rejected, disqualified, pending}
+        const ORDER = ['selected', 'waitlisted', 'rejected', 'disqualified', 'pending'];
+        const COLOR_MAP = {
+            selected: { bg: '#22c55e', border: '#15803d' },  // Green-500   — Positive ✅
+            waitlisted: { bg: '#facc15', border: '#ca8a04' },  // Yellow-400  — On Hold 🟡
+            rejected: { bg: '#f43f5e', border: '#be123c' },  // Rose-500    — Rejected ❌
+            disqualified: { bg: '#6366f1', border: '#4338ca' },  // Indigo-500  — Misconduct 🔵
+            pending: { bg: '#64748b', border: '#334155' }   // Slate-500   — Awaiting ⚪
+        };
+
+        const labels = [];
+        const values = [];
+        const bgColors = [];
+        const borderColors = [];
+        const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+
+        ORDER.forEach(key => {
+            if (key in statusCounts) {
+                labels.push(key.charAt(0).toUpperCase() + key.slice(1));
+                // Use 0.001 for zero counts — invisible segment but legend dot still shows
+                values.push(statusCounts[key] > 0 ? statusCounts[key] : 0.001);
+                bgColors.push(COLOR_MAP[key].bg);
+                borderColors.push(COLOR_MAP[key].border);
             }
-        }
-    });
-}
+        });
 
-function renderViolationsBreakdown(violations) {
-    const ctx = document.getElementById('violationsChart').getContext('2d');
-    const rawLabels = Object.keys(violations);
-    const labels = rawLabels.map(l => l.replace('_', ' ').toUpperCase());
-    const values = Object.values(violations);
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Violations Count',
-                data: values,
-                backgroundColor: 'rgba(239, 68, 68, 0.7)',
-                borderColor: 'rgb(239, 68, 68)',
-                borderWidth: 1.5,
-                borderRadius: 4
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
+        // If everything is 0, show a "No data yet" placeholder
+        if (values.every(v => v <= 0.001)) {
+            labels.length = 0; values.length = 0; bgColors.length = 0; borderColors.length = 0;
+            labels.push('No Data Yet');
+            values.push(1);
+            bgColors.push('#1e293b');
+            borderColors.push('#334155');
+        }
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: bgColors,
+                    borderColor: borderColors,
+                    borderWidth: 2.5,
+                    hoverOffset: 10,
+                    hoverBorderWidth: 3
+                }]
             },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                    ticks: { color: 'var(--text-secondary)' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
                 },
-                y: {
-                    grid: { display: false },
-                    ticks: { color: 'var(--text-secondary)', font: { size: 9 } }
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'rgba(203,213,225,0.95)',
+                            padding: 16,
+                            font: { size: 11, weight: '500' },
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            pointStyleWidth: 10
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15,23,42,0.92)',
+                        borderColor: 'rgba(99,102,241,0.4)',
+                        borderWidth: 1,
+                        padding: 12,
+                        callbacks: {
+                            label: function (ctx) {
+                                const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+                                return `  ${ctx.label}: ${ctx.parsed} candidates (${pct}%)`;
+                            }
+                        }
+                    }
                 }
             }
-        }
-    });
-}
+        });
+    }
+
+    function renderAIRecommendations(aiRecs) {
+        const ctx = document.getElementById('aiRecChart').getContext('2d');
+
+        // Fixed semantic mapping — matches backend keys exactly
+        const AI_ORDER = [
+            'ELITE CANDIDATE',
+            'HIGHLY RECOMMENDED',
+            'RECOMMENDED',
+            'WAITLISTED',
+            'NOT RECOMMENDED',
+            'DISQUALIFIED'
+        ];
+        const AI_COLORS = {
+            'ELITE CANDIDATE': { bg: '#8b5cf6', border: '#7c3aed' },  // Violet  — top tier
+            'HIGHLY RECOMMENDED': { bg: '#10b981', border: '#059669' },  // Emerald — strong yes
+            'RECOMMENDED': { bg: '#06b6d4', border: '#0891b2' },  // Cyan    — good
+            'WAITLISTED': { bg: '#f59e0b', border: '#d97706' },  // Amber   — maybe
+            'NOT RECOMMENDED': { bg: '#f87171', border: '#ef4444' },  // Red     — no
+            'DISQUALIFIED': { bg: '#1e293b', border: '#334155' }   // Dark    — out
+        };
+
+        const labels = [];
+        const values = [];
+        const bgColors = [];
+        const borderColors = [];
+
+        AI_ORDER.forEach(key => {
+            if (key in aiRecs) {
+                labels.push(key);
+                values.push(aiRecs[key]);
+                bgColors.push(AI_COLORS[key].bg);
+                borderColors.push(AI_COLORS[key].border);
+            }
+        });
+
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: bgColors,
+                    borderColor: borderColors,
+                    borderWidth: 2,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'rgba(148,163,184,0.95)',
+                            padding: 12,
+                            font: { size: 10 },
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.label}: ${ctx.parsed} candidates`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderViolationsBreakdown(violations) {
+        const ctx = document.getElementById('violationsChart').getContext('2d');
+        const rawLabels = Object.keys(violations);
+        const labels = rawLabels.map(l => l.replace(/_/g, ' ').toUpperCase());
+        const values = Object.values(violations);
+
+        // Each violation type gets its own distinct color
+        const VIOLATION_COLORS = [
+            { bg: 'rgba(239,68,68,0.80)', border: '#ef4444' },  // copy attempt       — Red
+            { bg: 'rgba(168,85,247,0.80)', border: '#a855f7' },  // devtools           — Purple
+            { bg: 'rgba(249,115,22,0.80)', border: '#f97316' },  // fullscreen exit     — Orange
+            { bg: 'rgba(234,179,8,0.80)', border: '#eab308' },  // idle timeout        — Yellow
+            { bg: 'rgba(244,63,94,0.80)', border: '#f43f5e' },  // paste attempt       — Rose
+            { bg: 'rgba(20,184,166,0.80)', border: '#14b8a6' },  // refresh attempt     — Teal
+            { bg: 'rgba(99,102,241,0.80)', border: '#6366f1' },  // tab switch          — Indigo
+            { bg: 'rgba(236,72,153,0.80)', border: '#ec4899' },  // right click         — Pink
+        ];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Violations Count',
+                    data: values,
+                    backgroundColor: values.map((_, i) => (VIOLATION_COLORS[i] || VIOLATION_COLORS[0]).bg),
+                    borderColor: values.map((_, i) => (VIOLATION_COLORS[i] || VIOLATION_COLORS[0]).border),
+                    borderWidth: 2,
+                    borderRadius: 5,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.parsed.x} incidents`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, color: 'rgba(148,163,184,0.9)', font: { size: 11 } },
+                        grid: { color: 'rgba(255,255,255,0.06)' }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: 'rgba(148,163,184,0.9)', font: { size: 10 } }
+                    }
+                }
+            }
+        });
+    }
 </script>
 {% endblock %}

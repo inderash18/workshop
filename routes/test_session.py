@@ -683,13 +683,234 @@ def _get_final_status(assignment):
     return status
 
 
+def generate_ai_recommendation(scores, violations_count):
+    if violations_count >= 3:
+        return "ELITE REVIEW BLOCK: High proctoring flags logged. Potential breach of challenge protocol."
+    score = scores.get("score_final", scores.get("final", 0))
+    if score >= 90:
+        return "ELITE LEVEL: Candidate exhibits exceptional cognitive parsing, advanced logical agility, and master-level creative resolution. Strongly prioritized for direct fellowship allocation."
+    elif score >= 80:
+        return "HIGHLY RECOMMENDED: Strong problem solving and logical agility demonstrated. Consistent score metrics qualify candidate for cohort workshops."
+    elif score >= 65:
+        return "RECOMMENDED: Balanced capability shown across cognitive benchmarks. Standard recommendation status for fellowship review."
+    elif score >= 50:
+        return "WAITLISTED: Candidate meets basic logic constraints but lacks depth in creativity and prompt intelligence domains."
+    else:
+        return "NOT RECOMMENDED: Cognitive metrics fall below cohort threshold values."
+
+
+def build_test_report_data(test_id, candidate_id):
+    from models.database import get_candidate_by_id, get_assignment, get_test_by_id_str, get_candidate_by_email
+    from services.security_engine import get_security_analytics_for_assignment
+    
+    test = get_test_by_id_str(test_id)
+    if not test:
+        return None
+        
+    assignment = get_assignment(test_id, candidate_id)
+    if not assignment:
+        return None
+        
+    candidate = get_candidate_by_id(candidate_id)
+    if not candidate:
+        return None
+        
+    questions = test.get("questions", [])
+    answers = assignment.get("answers", {})
+    scores = assignment.get("scores", {})
+    
+    # Calculate correct/wrong/skipped questions
+    correct_count = 0
+    wrong_count = 0
+    skipped_count = 0
+    questions_list = []
+    category_scores = {}
+    
+    for i, q in enumerate(questions):
+        q_id = q.get("id") or str(i)
+        user_ans = answers.get(q_id, "")
+        correct_ans = q.get("correct_answer", q.get("correct", ""))
+        
+        answered = bool(user_ans)
+        is_correct = False
+        
+        if answered:
+            is_correct = str(user_ans).strip().lower() == str(correct_ans).strip().lower()
+            if is_correct:
+                correct_count += 1
+            else:
+                wrong_count += 1
+        else:
+            skipped_count += 1
+            
+        cat = q.get("category", "General")
+        if cat not in category_scores:
+            category_scores[cat] = {"correct": 0, "total": 0}
+        category_scores[cat]["total"] += 1
+        if is_correct:
+            category_scores[cat]["correct"] += 1
+            
+        questions_list.append({
+            "number": i + 1,
+            "text": q.get("text", ""),
+            "category": cat,
+            "difficulty": q.get("difficulty_level", q.get("difficulty", "medium")),
+            "marks": q.get("marks", q.get("xp_points", 10)),
+            "user_answer": user_ans,
+            "correct_answer": correct_ans,
+            "correct": is_correct,
+            "answered": answered,
+            "xp": int(q.get("marks", 10)) * 2 if is_correct else 0
+        })
+        
+    breakdown = []
+    for cat, stat in category_scores.items():
+        cat_pct = int((stat["correct"] / stat["total"]) * 100) if stat["total"] > 0 else 0
+        breakdown.append({
+            "category": cat,
+            "score": cat_pct
+        })
+        
+    score_pct = int(scores.get("score_final", scores.get("final", 0)))
+    
+    achievements = []
+    if score_pct >= 85:
+        achievements.append("Elite Performer (85%+)")
+    elif score_pct >= 50:
+        achievements.append("Passed Challenge")
+        
+    violation_cnt = assignment.get("violation_count", 0)
+    if violation_cnt == 0:
+        achievements.append("Honor Code Verified (0 Violations)")
+        
+    # Get security analytics
+    sec_analytics = get_security_analytics_for_assignment(assignment)
+    security_score = int(sec_analytics.get("security_score", 100))
+    
+    # Calculate AI recommendations and subscores
+    logic_score = int(scores.get("logic", score_pct))
+    creativity_score = int(scores.get("creativity", score_pct))
+    problem_solving_score = int(scores.get("problem_solving", score_pct))
+    innovation_score = int(scores.get("innovation", score_pct))
+    human_intel_score = int(scores.get("ai_knowledge", score_pct))
+    
+    # Time taken formatting
+    started_at = assignment.get("started_at")
+    completed_at = assignment.get("completed_at")
+    time_taken_secs = 0
+    if started_at and completed_at:
+        try:
+            from datetime import datetime
+            t1 = datetime.fromisoformat(started_at)
+            t2 = datetime.fromisoformat(completed_at)
+            time_taken_secs = int((t2 - t1).total_seconds())
+        except Exception:
+            pass
+    if time_taken_secs <= 0:
+        time_taken_secs = assignment.get("time_taken", 0)
+        
+    minutes = time_taken_secs // 60
+    seconds = time_taken_secs % 60
+    time_taken_str = f"{minutes}m {seconds}s"
+    
+    # AI recommendation
+    ai_reco = generate_ai_recommendation(scores, violation_cnt)
+    
+    # Final Selection Status Mapping
+    status_map = {1: "Selected", 2: "Rejected", 3: "Disqualified", 4: "Waitlisted"}
+    final_selection_status = status_map.get(candidate.get("selected", 0), "Waitlisted")
+    if assignment.get("status") == "disqualified":
+        final_selection_status = "Disqualified"
+        
+    ai_reco_badge = "RECOMMENDED"
+    if violation_cnt >= 3 or assignment.get("status") == "disqualified":
+        ai_reco_badge = "DISQUALIFIED"
+    else:
+        if score_pct >= 90:
+            ai_reco_badge = "ELITE CANDIDATE"
+        elif score_pct >= 80:
+            ai_reco_badge = "HIGHLY RECOMMENDED"
+        elif score_pct >= 65:
+            ai_reco_badge = "RECOMMENDED"
+        elif score_pct >= 50:
+            ai_reco_badge = "WAITLISTED"
+        else:
+            ai_reco_badge = "NOT RECOMMENDED"
+            
+    report_data = {
+        "candidate_name": candidate.get("name", "Unknown"),
+        "candidate_id": candidate_id,
+        "email": candidate.get("email", ""),
+        "college": candidate.get("college", ""),
+        "department": candidate.get("department", ""),
+        "test_name": test.get("name", "Untitled Test"),
+        "date": test.get("date", ""),
+        "score_final": score_pct,
+        "security_score": security_score,
+        "total_questions": len(questions),
+        "correct_answers": correct_count,
+        "wrong_answers": wrong_count,
+        "skipped_answers": skipped_count,
+        "attempted_questions": correct_count + wrong_count,
+        "time_taken_str": time_taken_str,
+        "violations": {
+            "fullscreen": sec_analytics.get("fullscreen_violations", 0),
+            "tab_switch": sec_analytics.get("tab_switch_count", 0),
+            "copy": sec_analytics.get("copy_attempts", 0),
+            "paste": sec_analytics.get("paste_attempts", 0),
+            "devtools": sec_analytics.get("devtools_attempts", 0),
+            "disconnect": sec_analytics.get("disconnect_events", 0),
+            "suspicious": sec_analytics.get("suspicious_activities", 0),
+        },
+        "ai_report": {
+            "critical_thinking": logic_score,
+            "creativity": creativity_score,
+            "problem_solving": problem_solving_score,
+            "innovation": innovation_score,
+            "human_intelligence": human_intel_score,
+            "security": security_score,
+            "future_leader": score_pct,
+            "ai_thinking": human_intel_score,
+        },
+        "ai_recommendation": ai_reco,
+        "ai_recommendation_badge": ai_reco_badge,
+        "final_selection_status": final_selection_status,
+        "achievements": achievements,
+        "breakdown": breakdown,
+        "questions": questions_list
+    }
+    return report_data
+
+
 @test_session_bp.route("/report/<test_id>")
 @test_session_bp.route("/report/<test_id>/<candidate_id>")
 def show_test_report(test_id, candidate_id=None):
     if "user_email" not in session and "admin_logged_in" not in session:
         from flask import redirect, url_for
         return redirect(url_for("auth.login_page"))
-    return render_template("report.html")
+        
+    is_admin = session.get("admin_logged_in", False)
+    student_email = session.get("user_email")
+    
+    from models.database import get_candidate_by_email
+    if not is_admin:
+        candidate = get_candidate_by_email(student_email)
+        if not candidate:
+            return "Candidate not found", 404
+        candidate_id = candidate["candidate_id"]
+    else:
+        if not candidate_id:
+            if student_email:
+                candidate = get_candidate_by_email(student_email)
+                candidate_id = candidate["candidate_id"] if candidate else None
+            if not candidate_id:
+                return "Candidate ID is required for administrator views", 400
+                
+    report = build_test_report_data(test_id, candidate_id)
+    if not report:
+        return "Report data not found", 404
+        
+    return render_template("report.html", report=report)
 
 
 @test_session_bp.route("/api/report/<test_id>", methods=["GET"])
@@ -701,7 +922,7 @@ def api_get_test_report(test_id, candidate_id=None):
     if not is_admin and not student_email:
         return jsonify({"error": "Authentication required"}), 401
         
-    from models.database import get_candidate_by_id
+    from models.database import get_candidate_by_email
     if not is_admin:
         candidate = get_candidate_by_email(student_email)
         if not candidate:
@@ -715,90 +936,11 @@ def api_get_test_report(test_id, candidate_id=None):
             if not candidate_id:
                 return jsonify({"error": "Candidate ID is required for administrator views"}), 400
 
-    test = get_test_by_id_str(test_id)
-    if not test:
-        return jsonify({"error": "Test not found"}), 404
-
-    assignment = get_assignment(test_id, candidate_id)
-    if not assignment:
-        return jsonify({"error": "Not assigned to this test"}), 404
-
-    candidate = get_candidate_by_id(candidate_id)
-    if not candidate:
-        return jsonify({"error": "Candidate not found"}), 404
-
-    questions = test.get("questions", [])
-    answers = assignment.get("answers", {})
-    scores = assignment.get("scores", {})
-    
-    score_pct = int(scores.get("score_final", scores.get("final", 0)))
-    
-    questions_list = []
-    category_scores = {}
-    
-    for i, q in enumerate(questions):
-        q_id = q.get("id") or str(i)
-        user_ans = answers.get(q_id, "")
-        correct_ans = q.get("correct_answer", q.get("correct", ""))
+    report = build_test_report_data(test_id, candidate_id)
+    if not report:
+        return jsonify({"error": "Report data not found"}), 404
         
-        answered = bool(user_ans)
-        is_correct = False
-        is_partial = False
-        
-        if answered:
-            if q.get("type") == "mcq":
-                is_correct = str(user_ans).strip().lower() == str(correct_ans).strip().lower()
-            else:
-                is_correct = str(user_ans).strip().lower() == str(correct_ans).strip().lower()
-        
-        cat = q.get("category", "General")
-        if cat not in category_scores:
-            category_scores[cat] = {"correct": 0, "total": 0}
-        category_scores[cat]["total"] += 1
-        if is_correct:
-            category_scores[cat]["correct"] += 1
-            
-        questions_list.append({
-            "text": q.get("text", ""),
-            "user_answer": user_ans,
-            "correct_answer": correct_ans,
-            "correct": is_correct,
-            "partial": is_partial,
-            "answered": answered,
-            "xp": int(q.get("marks", 5)) * 2 if is_correct else 0
-        })
-        
-    breakdown = []
-    for cat, stat in category_scores.items():
-        cat_pct = int((stat["correct"] / stat["total"]) * 100) if stat["total"] > 0 else 0
-        breakdown.append({
-            "category": cat,
-            "score": cat_pct
-        })
-        
-    achievements = []
-    if score_pct >= 85:
-        achievements.append("Elite Performer (85%+)")
-    elif score_pct >= 50:
-        achievements.append("Passed Challenge")
-    
-    violation_cnt = assignment.get("violation_count", 0)
-    if violation_cnt == 0:
-        achievements.append("Honor Code Verified (0 Violations)")
-
-    return jsonify({
-        "candidate_name": candidate.get("name", "Unknown"),
-        "candidate_id": candidate_id,
-        "email": candidate.get("email", ""),
-        "college": candidate.get("college", ""),
-        "department": candidate.get("department", ""),
-        "test_name": test.get("name", "Untitled Test"),
-        "date": test.get("date", ""),
-        "score": score_pct,
-        "breakdown": breakdown,
-        "achievements": achievements,
-        "questions": questions_list
-    })
+    return jsonify(report)
 
 
 @test_session_bp.route("/api/student/tests/<test_id>/answer", methods=["POST"])

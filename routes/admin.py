@@ -17,6 +17,14 @@ admin_bp = Blueprint("admin", __name__)
 
 
 @admin_bp.route("/admin")
+@admin_bp.route("/admin/candidates")
+@admin_bp.route("/admin/settings")
+@admin_bp.route("/admin/questions")
+@admin_bp.route("/admin/logs")
+@admin_bp.route("/admin/security")
+@admin_bp.route("/admin/analytics")
+@admin_bp.route("/admin/shortlisting")
+@admin_bp.route("/admin/security-monitoring")
 def admin():
     if "admin_logged_in" in session:
         return render_template("admin.html")
@@ -29,36 +37,6 @@ def admin_login_page():
     if "admin_logged_in" in session:
         return redirect(url_for("admin.admin"))
     return render_template("admin_login.html")
-
-
-@admin_bp.route("/admin/candidates")
-@admin_required
-def admin_candidates_page():
-    return render_template("admin_candidates.html")
-
-
-@admin_bp.route("/admin/settings")
-@admin_required
-def admin_settings_page():
-    return render_template("admin_settings.html")
-
-
-@admin_bp.route("/admin/logs")
-@admin_required
-def admin_logs_page():
-    return render_template("admin_logs.html")
-
-
-@admin_bp.route("/admin/security")
-@admin_required
-def admin_security_page():
-    return render_template("admin_security.html")
-
-
-@admin_bp.route("/admin/questions")
-@admin_required
-def admin_questions_page():
-    return render_template("admin_questions.html")
 
 
 @admin_bp.route("/api/admin/login", methods=["POST"])
@@ -151,6 +129,8 @@ def get_candidates():
                     "violation_count": at.get("violation_count", 0),
                     "time_taken": at.get("time_taken", 0),
                     "status": at.get("status", "pending"),
+                    "test_id": str(at.get("test_id", "")),
+                    "security_score": float(at.get("security_score", 100.0)),
                 }
     except Exception:
         pass
@@ -190,18 +170,23 @@ def get_candidates():
         c_data["time_taken"] = attempt.get("time_taken", c.get("time_taken", 0))
         c_data["attempt_status"] = attempt.get("status", "not_started")
         c_data["selection_status"] = STATUS_LABELS.get(c.get("selected", 0), "pending")
+        c_data["test_id"] = attempt.get("test_id", "")
+        c_data["security_score"] = attempt.get("security_score", c.get("security_score", 100.0))
 
         # AI recommendation enrichment
-        ai_rec = ai_eval.get("final_recommendation", "")
-        if not ai_rec:
-            if final_score >= 80:
-                ai_rec = "Highly Recommended"
-            elif final_score >= 60:
-                ai_rec = "Recommended"
-            elif final_score >= 40:
-                ai_rec = "Borderline"
+        if attempt.get("status") == "disqualified":
+            ai_rec = "DISQUALIFIED"
+        else:
+            if final_score >= 90:
+                ai_rec = "ELITE CANDIDATE"
+            elif final_score >= 80:
+                ai_rec = "HIGHLY RECOMMENDED"
+            elif final_score >= 65:
+                ai_rec = "RECOMMENDED"
+            elif final_score >= 50:
+                ai_rec = "WAITLISTED"
             else:
-                ai_rec = "Not Recommended"
+                ai_rec = "NOT RECOMMENDED"
         c_data["ai_recommendation"] = ai_rec
         c_data["ai_scores"] = {
             "logic": ai_eval.get("logic_score", 0),
@@ -323,7 +308,7 @@ def toggle_selection():
 
     if candidate_id is None or selected is None:
         return jsonify({"error": "Missing parameters"}), 400
-    if selected not in [0, 1, 2, 3]:
+    if selected not in [0, 1, 2, 3, 4]:
         return jsonify({"error": "Invalid selection status"}), 400
 
     candidate = get_candidate_by_id(candidate_id)
@@ -338,10 +323,7 @@ def toggle_selection():
     return jsonify({"success": True})
 
 
-@admin_bp.route("/admin/analytics")
-@admin_required
-def admin_analytics_page():
-    return render_template("admin_analytics.html")
+
 
 
 @admin_bp.route("/api/admin/analytics-data", methods=["GET"])
@@ -370,17 +352,23 @@ def api_admin_analytics_data():
                 score_ranges["0-49"] += 1
 
     # 2. Selection Status Distribution
+    STATUS_LABELS = {0: "pending", 1: "selected", 2: "rejected", 3: "disqualified", 4: "waitlisted"}
     status_counts = {"selected": 0, "waitlisted": 0, "rejected": 0, "disqualified": 0, "pending": 0}
     for c in candidates:
-        status = c.get("selection_status") or c.get("status") or "pending"
-        status = status.lower()
+        sel_val = c.get("selected", 0)
+        status = STATUS_LABELS.get(sel_val, "pending").lower()
         if status in status_counts:
             status_counts[status] += 1
-        else:
-            status_counts["pending"] += 1
 
     # 3. AI Recommendation Distribution
-    ai_recs = {"Highly Recommended": 0, "Recommended": 0, "Borderline": 0, "Not Recommended": 0, "Disqualified": 0}
+    ai_recs = {
+        "ELITE CANDIDATE": 0,
+        "HIGHLY RECOMMENDED": 0,
+        "RECOMMENDED": 0,
+        "WAITLISTED": 0,
+        "NOT RECOMMENDED": 0,
+        "DISQUALIFIED": 0
+    }
     for c in candidates:
         rec = c.get("ai_recommendation") or "—"
         if rec in ai_recs:

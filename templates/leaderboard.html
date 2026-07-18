@@ -76,38 +76,55 @@
 
 {% block scripts %}
 <script>
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str || '';
+    return div.innerHTML;
+}
+
 (async function() {
     try {
-        const data = await API.get('/api/leaderboard');
+        const res = await API.get('/api/leaderboard');
+        const data = (res && res.results) ? res.results : (res || []);
+        
         if (!data || !data.length) {
             document.getElementById('lbBody').innerHTML = '<tr><td colspan="5" class="empty-state">No results available yet.</td></tr>';
             return;
         }
+        
         const medals = ['🥇','🥈','🥉'];
         const top3 = data.slice(0, 3);
         const colors = ['gold','silver','bronze'];
-        document.getElementById('top3').innerHTML = top3.map((p, i) => `
-            <div class="top-card ${colors[i]}">
-                <div class="top-medal">${medals[i]}</div>
-                <div class="top-name">${p.name}</div>
-                <div class="top-college">${p.college || '—'}</div>
-                <div class="top-score">${p.score}%</div>
-            </div>
-        `).join('');
-        document.getElementById('lbBody').innerHTML = data.map((p, i) => `
-            <tr class="rank-${i+1}">
-                <td class="rank-cell">${i < 3 ? `<span class="medal">${medals[i]}</span>` : '#' + (i+1)}</td>
-                <td class="name-cell">${p.name}</td>
-                <td class="college-cell">${p.college || '—'}</td>
-                <td class="score-cell">${p.score}%</td>
-                <td class="badges-cell">
-                    ${i === 0 ? '<span class="mini-badge gold">Gold</span>' : ''}
-                    ${i === 1 ? '<span class="mini-badge silver">Silver</span>' : ''}
-                    ${i === 2 ? '<span class="mini-badge bronze">Bronze</span>' : ''}
-                    ${p.score >= 90 ? '<span class="mini-badge elite">Elite</span>' : ''}
-                </td>
-            </tr>
-        `).join('');
+        
+        document.getElementById('top3').innerHTML = top3.map((p, i) => {
+            const scoreVal = p.score_final !== undefined ? p.score_final : (p.score !== undefined ? p.score : 0);
+            return `
+                <div class="top-card ${colors[i]}">
+                    <div class="top-medal">${medals[i]}</div>
+                    <div class="top-name">${escapeHtml(p.name)}</div>
+                    <div class="top-college">${escapeHtml(p.college || '—')}</div>
+                    <div class="top-score">${scoreVal}%</div>
+                </div>
+            `;
+        }).join('');
+        
+        document.getElementById('lbBody').innerHTML = data.map((p, i) => {
+            const scoreVal = p.score_final !== undefined ? p.score_final : (p.score !== undefined ? p.score : 0);
+            return `
+                <tr class="rank-${i+1}">
+                    <td class="rank-cell">${i < 3 ? `<span class="medal">${medals[i]}</span>` : '#' + (i+1)}</td>
+                    <td class="name-cell">${escapeHtml(p.name)}</td>
+                    <td class="college-cell">${escapeHtml(p.college || '—')}</td>
+                    <td class="score-cell">${scoreVal}%</td>
+                    <td class="badges-cell">
+                        ${i === 0 ? '<span class="mini-badge gold">Gold</span>' : ''}
+                        ${i === 1 ? '<span class="mini-badge silver">Silver</span>' : ''}
+                        ${i === 2 ? '<span class="mini-badge bronze">Bronze</span>' : ''}
+                        ${scoreVal >= 90 ? '<span class="mini-badge elite">Elite</span>' : ''}
+                    </td>
+                </tr>
+            `;
+        }).join('');
     } catch(e) {
         console.error('Leaderboard load error:', e);
         document.getElementById('lbBody').innerHTML = '<tr><td colspan="5" class="empty-state">Failed to load leaderboard.</td></tr>';

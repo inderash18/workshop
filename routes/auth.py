@@ -100,7 +100,7 @@ def api_signup():
         "name": name,
         "college": college,
         "department": department,
-        "year": int(year),
+        "year": int(year) if str(year).isdigit() else str(year),
         "email": email,
         "phone": phone,
         "password_hash": hash_password(password),
@@ -291,7 +291,7 @@ def update_profile():
     candidate["phone"] = phone
     candidate["college"] = college
     candidate["department"] = department
-    candidate["year"] = int(year)
+    candidate["year"] = int(year) if str(year).isdigit() else str(year)
     candidate["linkedin"] = linkedin
     candidate["github"] = github
     candidate["bio"] = bio

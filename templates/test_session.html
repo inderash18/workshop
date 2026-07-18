@@ -1,11 +1,14 @@
 {% extends "base.html" %}
 {% block title %}Test Session — AI Next Gen{% endblock %}
+{% block body_class %}test-page{% endblock %}
 
 {% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
     body {
         overflow: hidden;
         background: #09090b !important;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     .nav, .site-footer {
         display: none !important;
@@ -16,210 +19,239 @@
         min-height: 100vh;
         background: #09090b !important;
     }
-    .test-session {
+    
+    /* Sleek Top-Anchored Progress Line */
+    .progress-bar-fixed {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        z-index: 10000;
+    }
+    .progress-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #1E220B, #3a411a, #65712f);
+        transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    /* Master Portal Layout */
+    .test-session-root {
         position: fixed;
         inset: 0;
         display: flex;
         flex-direction: column;
         background: #09090b;
-        z-index: 9999;
         color: #f4f4f5;
-        --text-primary: #f4f4f5;
-        --text-secondary: #a1a1aa;
-        --text-muted: #71717a;
+        z-index: 9999;
     }
-    .session-topbar {
-        height: 56px;
+    
+    /* Modern Header */
+    .portal-header {
+        height: 72px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 1.5rem;
-        background: rgba(255, 255, 255, 0.02);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0 2.5rem;
+        background: rgba(255, 255, 255, 0.01);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         flex-shrink: 0;
-        z-index: 10;
     }
-    .session-topbar-left {
+    .portal-header-left {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1rem;
     }
-    .session-topbar-left .test-name {
-        font-size: 0.95rem;
-        font-weight: 600;
+    .portal-header-left .portal-title {
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
         color: #f4f4f5;
     }
-    .session-topbar-left .test-badge {
-        padding: 0.2rem 0.6rem;
+    .portal-header-left .portal-badge {
+        padding: 0.25rem 0.65rem;
         border-radius: 999px;
-        background: rgba(139, 92, 246, 0.15);
-        color: #a78bfa;
+        background: rgba(30, 34, 11, 0.2);
+        border: 1px solid rgba(30, 34, 11, 0.4);
+        color: #e4e4e7;
         font-size: 0.65rem;
         font-weight: 700;
+        letter-spacing: 0.05em;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
     }
-    .timer-display {
+    
+    /* Premium Timer Pill */
+    .timer-pill {
         display: flex;
         align-items: center;
-        gap: 0.6rem;
+        gap: 0.5rem;
         padding: 0.5rem 1.25rem;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: #f4f4f5;
-    }
-    .timer-display .timer-icon {
-        font-size: 1rem;
-    }
-    .timer-display .timer-value {
-        font-size: 1.1rem;
-        font-weight: 700;
-        font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-        letter-spacing: 0.05em;
-    }
-    .timer-display .timer-value.warning {
-        color: #fbbf24;
-    }
-    .timer-display .timer-value.danger {
-        color: #f87171;
-        animation: pulse 1s infinite;
-    }
-    .session-topbar-right {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-    .security-indicator {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.35rem 0.75rem;
         border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 600;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: #e4e4e7;
+        transition: all 0.3s ease;
     }
-    .security-indicator.secure {
-        background: rgba(34, 197, 94, 0.12);
-        color: #4ade80;
-        border: 1px solid rgba(34, 197, 94, 0.2);
-    }
-    .security-indicator.violation {
-        background: rgba(239, 68, 68, 0.12);
-        color: #fca5a5;
-        border: 1px solid rgba(239, 68, 68, 0.2);
-    }
-    .security-dot {
+    .timer-pill .timer-indicator {
         width: 8px;
         height: 8px;
         border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
     }
-    .security-indicator.secure .security-dot {
-        background: #4ade80;
-        box-shadow: 0 0 8px rgba(74, 222, 128, 0.4);
+    .timer-pill .timer-val {
+        font-size: 0.95rem;
+        font-weight: 700;
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 0.02em;
     }
-    .security-indicator.violation .security-dot {
+    .timer-pill.warning .timer-indicator {
+        background: #f59e0b;
+        box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+    }
+    .timer-pill.danger {
+        border-color: rgba(239, 68, 68, 0.2);
+        background: rgba(239, 68, 68, 0.05);
+    }
+    .timer-pill.danger .timer-indicator {
         background: #ef4444;
-        box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
-        animation: pulse 1.5s infinite;
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+        animation: timerBlink 1s infinite alternate;
     }
-    .session-main {
+    .timer-pill.danger .timer-val {
+        color: #fca5a5;
+    }
+    @keyframes timerBlink {
+        from { opacity: 1; }
+        to { opacity: 0.3; }
+    }
+    
+    /* Security Badge */
+    .security-status-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 1rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: rgba(34, 197, 94, 0.08);
+        color: #4ade80;
+        border: 1px solid rgba(34, 197, 94, 0.15);
+        transition: all 0.3s ease;
+    }
+    .security-status-badge.alert {
+        background: rgba(239, 68, 68, 0.08);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+    .security-status-badge .security-pulse {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+    
+    /* Main Distraction-free Content Area */
+    .portal-body {
         flex: 1;
         overflow-y: auto;
-        padding: 2rem;
+        padding: 3rem 2rem;
         display: flex;
         justify-content: center;
+        align-items: center;
     }
-    .question-container {
+    .question-card-wrapper {
         width: 100%;
-        max-width: 800px;
-        animation: fadeSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 720px;
+        animation: enterQuestion 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    @keyframes fadeSlideIn {
+    @keyframes enterQuestion {
         from { opacity: 0; transform: translateY(16px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    .question-header {
+    
+    /* Question Metadata */
+    .q-meta {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.25rem;
     }
-    .q-number {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #8b5cf6, #ec4899);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.95rem;
+    .q-num-badge {
+        font-size: 0.75rem;
         font-weight: 800;
-        color: #fff;
-        box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
-    }
-    .q-type {
-        padding: 0.25rem 0.7rem;
-        border-radius: 999px;
-        font-size: 0.7rem;
-        font-weight: 700;
+        color: #a1a1aa;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
-    .q-type.mcq {
-        background: rgba(59, 130, 246, 0.15);
-        color: #60a5fa;
+    .q-type-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.25rem 0.65rem;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
-    .q-type.text {
-        background: rgba(34, 197, 94, 0.15);
-        color: #4ade80;
-    }
-    .q-type.textarea {
-        background: rgba(234, 179, 8, 0.15);
-        color: #fde047;
-    }
-    .q-xp {
+    .q-type-badge.mcq { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.2); }
+    .q-type-badge.text { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+    .q-type-badge.textarea { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .q-marks {
         margin-left: auto;
-        font-size: 0.78rem;
-        color: #a1a1aa;
-        font-weight: 600;
-    }
-    .question-text {
-        font-size: 1.15rem;
+        font-size: 0.8rem;
+        color: #71717a;
         font-weight: 500;
-        color: #f4f4f5;
-        line-height: 1.7;
-        margin-bottom: 2rem;
     }
-    .mcq-options {
+    
+    /* Question Text */
+    .q-title {
+        font-size: 1.35rem;
+        font-weight: 600;
+        color: #f4f4f5;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        letter-spacing: -0.01em;
+    }
+    
+    /* Option Tiles */
+    .options-grid {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: 0.85rem;
     }
-    .mcq-option {
+    .option-tile {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 1rem 1.25rem;
+        gap: 1.25rem;
+        padding: 1.1rem 1.5rem;
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 2px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.015);
+        border: 1px solid rgba(255, 255, 255, 0.06);
         cursor: pointer;
-        transition: all 0.25s;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .mcq-option:hover {
-        border-color: rgba(139, 92, 246, 0.3);
-        background: rgba(139, 92, 246, 0.04);
+    .option-tile:hover {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.12);
+        transform: translateY(-1px);
     }
-    .mcq-option.selected {
-        border-color: #8b5cf6;
-        background: rgba(139, 92, 246, 0.12);
+    .option-tile.selected {
+        background: rgba(30, 34, 11, 0.25);
+        border-color: rgba(30, 34, 11, 0.7);
+        box-shadow: 0 0 20px rgba(30, 34, 11, 0.15);
     }
-    .option-letter {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.06);
+    .option-index-badge {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -227,213 +259,367 @@
         font-weight: 700;
         color: #a1a1aa;
         flex-shrink: 0;
-        transition: all 0.25s;
+        transition: all 0.2s;
     }
-    .mcq-option.selected .option-letter {
-        background: #8b5cf6;
+    .option-tile.selected .option-index-badge {
+        background: #1E220B;
+        border-color: #323816;
         color: #fff;
     }
-    .option-text {
+    .option-label-text {
         font-size: 0.95rem;
         color: #e4e4e7;
+        line-height: 1.5;
     }
-    .text-input {
+    
+    /* Inputs */
+    .premium-text-input {
         width: 100%;
-        padding: 1rem 1.25rem;
+        padding: 1.1rem 1.5rem;
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 2px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.015);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         color: #f4f4f5;
-        font-size: 1rem;
-        outline: none;
-        transition: all 0.25s;
-        font-family: inherit;
+        font-size: 0.95rem;
+        transition: all 0.25s ease;
     }
-    .text-input:focus {
-        border-color: #8b5cf6;
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    .premium-text-input:focus {
+        border-color: rgba(30, 34, 11, 0.8);
+        background: rgba(255, 255, 255, 0.025);
+        box-shadow: 0 0 20px rgba(30, 34, 11, 0.15);
     }
-    .text-input::placeholder {
-        color: #71717a;
-    }
-    .textarea-input {
+    .premium-textarea {
         width: 100%;
-        min-height: 180px;
-        padding: 1rem 1.25rem;
+        min-height: 200px;
+        padding: 1.1rem 1.5rem;
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 2px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.015);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         color: #f4f4f5;
-        font-size: 1rem;
-        outline: none;
-        transition: all 0.25s;
-        font-family: inherit;
+        font-size: 0.95rem;
+        line-height: 1.6;
         resize: vertical;
+        transition: all 0.25s ease;
+        font-family: inherit;
     }
-    .textarea-input:focus {
-        border-color: #8b5cf6;
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    .premium-textarea:focus {
+        border-color: rgba(30, 34, 11, 0.8);
+        background: rgba(255, 255, 255, 0.025);
+        box-shadow: 0 0 20px rgba(30, 34, 11, 0.15);
     }
-    .textarea-input::placeholder {
-        color: #71717a;
-    }
-    .session-bottombar {
-        height: 64px;
+    
+    /* Bottom Nav Bar */
+    .portal-footer {
+        height: 80px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 1.5rem;
-        background: rgba(255, 255, 255, 0.02);
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0 2.5rem;
+        background: rgba(255, 255, 255, 0.005);
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
         flex-shrink: 0;
     }
-    .progress-section {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        flex: 1;
-        max-width: 400px;
-    }
-    .progress-text {
-        font-size: 0.8rem;
-        color: #a1a1aa;
+    .portal-footer-left {
+        font-size: 0.85rem;
+        color: #71717a;
         font-weight: 500;
-        white-space: nowrap;
     }
-    .progress-track {
-        flex: 1;
-        height: 6px;
-        border-radius: 3px;
-        background: rgba(255, 255, 255, 0.06);
-        overflow: hidden;
-    }
-    .progress-fill {
-        height: 100%;
-        border-radius: 3px;
-        background: linear-gradient(90deg, #8b5cf6, #ec4899);
-        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .nav-buttons {
-        display: flex;
+    
+    /* Sleek buttons */
+    .btn-nav-action {
+        padding: 0.7rem 1.75rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex;
+        align-items: center;
         gap: 0.5rem;
     }
-    .btn-nav {
-        padding: 0.55rem 1.25rem;
-        border-radius: 10px;
-        font-size: 0.82rem;
-        font-weight: 600;
+    .btn-next-action {
+        background: #1E220B;
+        color: #ffffff;
+        border: 1px solid #323816;
+    }
+    .btn-next-action:hover {
+        background: #323816;
+        transform: translateY(-1px);
+    }
+    .btn-submit-action {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #ffffff;
         border: none;
-        cursor: pointer;
-        transition: all 0.2s;
+    }
+    .btn-submit-action:hover {
+        opacity: 0.95;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+    }
+    
+    /* Full-Screen overlays */
+    .portal-overlay {
+        position: fixed;
+        inset: 0;
+        background: #09090b;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 0.4rem;
+        justify-content: center;
+        padding: 2rem;
+        z-index: 100000;
+        overflow-y: auto;
     }
-    .btn-prev {
-        background: rgba(255, 255, 255, 0.06);
-        color: #a1a1aa;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+    .overlay-card {
+        background: rgba(255, 255, 255, 0.015);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 24px;
+        padding: 3.5rem 3rem;
+        max-width: 540px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
-    .btn-prev:hover {
-        background: rgba(255, 255, 255, 0.1);
+    .overlay-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
     }
-    .btn-next {
-        background: linear-gradient(135deg, #8b5cf6, #ec4899);
-        color: #fff;
-    }
-    .btn-next:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-    }
-    .btn-submit-test {
-        padding: 0.6rem 1.5rem;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #22c55e, #16a34a);
-        color: #fff;
-        font-size: 0.85rem;
+    .overlay-title {
+        font-size: 1.75rem;
         font-weight: 700;
-        border: none;
+        color: #f4f4f5;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
+    .overlay-desc {
+        color: #a1a1aa;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+    .overlay-rules-list {
+        text-align: left;
+        background: rgba(255, 255, 255, 0.01);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 2.25rem;
+    }
+    .overlay-rules-list li {
+        font-size: 0.85rem;
+        color: #e4e4e7;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .overlay-rules-list li:last-child {
+        margin-bottom: 0;
+    }
+    .btn-action-primary {
+        background: #1E220B;
+        color: #ffffff;
+        border: 1px solid #323816;
+        padding: 0.85rem 2.25rem;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        font-weight: 700;
         cursor: pointer;
-        transition: all 0.3s;
+        width: 100%;
+        transition: all 0.2s;
     }
-    .btn-submit-test:hover {
+    .btn-action-primary:hover {
+        background: #323816;
         transform: translateY(-1px);
-        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
     }
-    .btn-submit-test.danger {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
+    
+    .overlay-error-msg {
+        color: #ef4444;
+        font-size: 0.82rem;
+        margin-top: 1rem;
+        font-weight: 600;
     }
-    .btn-submit-test.danger:hover {
-        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+    
+    .badge-category {
+        padding: 0.25rem 0.75rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #e4e4e7;
     }
-    .btn-disabled {
-        opacity: 0.4;
-        pointer-events: none;
+    .badge-difficulty {
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
+    .badge-difficulty.easy { background: rgba(34, 197, 94, 0.12); color: #4ade80; }
+    .badge-difficulty.medium { background: rgba(245, 158, 11, 0.12); color: #fbbf24; }
+    .badge-difficulty.hard { background: rgba(239, 68, 68, 0.12); color: #f87171; }
+    
+    .auto-save-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.72rem;
+        color: #a1a1aa;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 0.35rem 0.75rem;
+        border-radius: 99px;
+        font-weight: 600;
     }
-    @keyframes dangerFlash {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
-        50% { box-shadow: 0 0 20px 4px rgba(239, 68, 68, 0.15); }
+    .save-dot {
+        width: 6px;
+        height: 6px;
+        background: #22c55e;
+        border-radius: 50%;
+        transition: background 0.3s;
     }
-    .danger-flash {
-        animation: dangerFlash 2s infinite;
+    .save-dot.saving {
+        background: #f59e0b;
+        animation: pulseSave 1.2s infinite alternate;
+    }
+    @keyframes pulseSave {
+        from { opacity: 0.4; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1.15); }
     }
 </style>
 {% endblock %}
 
 {% block content %}
 {% if denied %}
-<div class="test-session" style="justify-content:center;align-items:center;padding:2rem;">
-    <div style="text-align:center;max-width:500px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);padding:3rem 2rem;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,0.5);">
-        <div style="font-size:4rem;margin-bottom:1.5rem;animation:pulse 2s infinite;">🔒</div>
-        <h2 style="font-size:1.6rem;font-weight:700;margin-bottom:1rem;color:#f4f4f5;">Access Denied</h2>
-        <p style="color:#a1a1aa;font-size:0.95rem;line-height:1.6;margin-bottom:2rem;">{{ reason }}</p>
-        <a href="/dashboard" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:0.75rem 2rem;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:.85rem;font-weight:600;transition:all .3s;box-shadow:0 4px 16px rgba(99,102,241,.3);">Return to Dashboard</a>
+<div class="test-session-root" style="justify-content:center;align-items:center;padding:2rem;">
+    <div class="overlay-card" style="border-color: rgba(239, 68, 68, 0.2);">
+        <div class="overlay-icon">🔒</div>
+        <h2 class="overlay-title" style="color:#f87171;">Access Denied</h2>
+        <p class="overlay-desc">{{ reason }}</p>
+        <a href="/dashboard" class="btn-nav-action" style="background:#1E220B; border:1px solid #323816; color:white; justify-content:center; text-decoration:none; width:100%;">Return to Dashboard</a>
     </div>
 </div>
 {% else %}
-<div class="test-session">
-    <div class="session-topbar">
-        <div class="session-topbar-left">
-            <span class="test-name" id="testTitle">Loading...</span>
-            <span class="test-badge" id="testBadge">LIVE</span>
-        </div>
-        <div class="timer-display" id="timerDisplay">
-            <span class="timer-icon">⏱</span>
-            <span class="timer-value" id="timerValue">00:00:00</span>
-        </div>
-        <div class="session-topbar-right">
-            <div class="security-indicator secure" id="securityIndicator">
-                <span class="security-dot"></span>
-                <span id="securityText">Secure</span>
+<div class="test-session-root">
+    <!-- Fixed top progress bar -->
+    <div class="progress-bar-fixed">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+
+    <!-- Active Test Portal View (Hides initially) -->
+    <div id="testPortalContent" style="display: none; height: 100%; flex-direction: column;">
+        <!-- Header -->
+        <header class="portal-header">
+            <div class="portal-header-left">
+                <span class="portal-title" id="testTitle">AI NEXT GEN CHALLENGE ARENA</span>
+                <span class="portal-badge" id="testBadge" style="background:#ff4d4d; border-color:#ff4d4d; color:white;">ACTIVE</span>
+            </div>
+            
+            <div class="timer-pill" id="timerDisplay">
+                <span class="timer-indicator"></span>
+                <span class="timer-val" id="timerValue">00:00:00</span>
+            </div>
+            
+            <div class="portal-header-right" style="display: flex; gap: 0.75rem; align-items: center;">
+                <div class="auto-save-indicator" id="autoSaveIndicator">
+                    <span class="save-dot"></span>
+                    <span id="autoSaveText">Synced</span>
+                </div>
+                <div class="security-status-badge" id="securityIndicator">
+                    <span class="security-pulse"></span>
+                    <span id="securityText">Secure</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Body -->
+        <main class="portal-body">
+            <div class="question-card-wrapper" id="questionContainer">
+                <div class="q-meta">
+                    <span class="q-num-badge" id="qNumber">Challenge 1</span>
+                    <span class="q-type-badge mcq" id="qType">MCQ</span>
+                    <span class="badge-category" id="qCategory">General</span>
+                    <span class="badge-difficulty medium" id="qDifficulty">Medium</span>
+                    <span class="q-marks" id="qXp">10 Intelligence Points</span>
+                </div>
+                <h2 class="q-title" id="qText">Loading challenge text...</h2>
+                <div id="qAnswer"></div>
+                
+                <!-- Live AI Evaluation Status Alerts -->
+                <div class="ai-status-row" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.04); font-size: 0.72rem; color: #a1a1aa; font-family: var(--font-mono);">
+                    <span style="display:inline-flex; align-items:center; gap:0.3rem;"><span style="width:5px; height:5px; border-radius:50%; background:#22c55e; display:inline-block; animation: pulseSave 1.2s infinite alternate;"></span> Cognitive Analysis Active</span>
+                    <span style="display:inline-flex; align-items:center; gap:0.3rem;"><span style="width:5px; height:5px; border-radius:50%; background:#22c55e; display:inline-block; animation: pulseSave 1.2s infinite alternate;"></span> Security Monitoring Active</span>
+                    <span style="display:inline-flex; align-items:center; gap:0.3rem;"><span style="width:5px; height:5px; border-radius:50%; background:#3b82f6; display:inline-block;"></span> Challenge Synced</span>
+                    <span style="display:inline-flex; align-items:center; gap:0.3rem;"><span style="width:5px; height:5px; border-radius:50%; background:#8b5cf6; display:inline-block;"></span> AI Evaluation Enabled</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="portal-footer">
+            <div class="portal-footer-left" id="progressText">
+                Challenge 1 of 10
+            </div>
+            <div class="portal-footer-right">
+                <button class="btn-nav-action btn-next-action" id="btnNext" onclick="nextQuestion()">
+                    Next Challenge <span style="font-size: 1.1em; line-height: 1;">→</span>
+                </button>
+                <button class="btn-submit-action btn-nav-action" id="btnSubmit" onclick="submitTest()" style="display:none">
+                    Submit Challenge
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Start / Instruction Screen Overlay -->
+    <div id="startOverlay" class="portal-overlay">
+        <div class="overlay-card" id="startOverlayCard" style="max-width: 580px;">
+            <div id="startOverlayStatic">
+                <div class="overlay-icon">🧠</div>
+                <h1 class="overlay-title">AI Next Gen Challenge Arena</h1>
+                <p class="overlay-desc">Welcome to the Cognitive Challenge Arena. This session evaluates your analytical scaling, problem-solving speed, and prompt/response intelligence metrics under continuous proctoring.</p>
+                
+                <ul class="overlay-error-msg" id="startOverlayError" style="display:none; list-style:none; text-align:center; margin-bottom:1.5rem;"></ul>
+                
+                <ul class="overlay-rules-list">
+                    <li>
+                        <span style="font-size:1.1rem;line-height:1;">🖥️</span>
+                        <span><strong>Fullscreen Enforced:</strong> Exiting fullscreen mode will immediately suspend your challenge.</span>
+                    </li>
+                    <li>
+                        <span style="font-size:1.1rem;line-height:1;">🔒</span>
+                        <span><strong>Workspace Lock:</strong> Moving outside the browser tab or workspace window will register integrity warnings.</span>
+                    </li>
+                    <li>
+                        <span style="font-size:1.1rem;line-height:1;">⏱️</span>
+                        <span><strong>Active Countdown:</strong> Once initialized, the arena timer runs continuously.</span>
+                    </li>
+                </ul>
+                
+                <button class="btn-action-primary" onclick="startTestButtonClicked()">Start Challenge in Fullscreen</button>
+            </div>
+            
+            <!-- Futuristic Initialization Logger -->
+            <div id="initLogger" style="display: none; text-align: left; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 77, 77, 0.15); border-radius: 12px; padding: 1.5rem; font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.8; color: #a1a1aa; width: 100%;">
+                <div class="log-line" id="log-1" style="color: #4ade80;"></div>
+                <div class="log-line" id="log-2" style="margin-top: 0.5rem;"></div>
+                <div class="log-line" id="log-3" style="margin-top: 0.5rem;"></div>
+                <div class="log-line" id="log-4" style="margin-top: 0.5rem;"></div>
+                <div class="log-line" id="log-5" style="margin-top: 0.5rem; font-weight: 700; color: #ff4d4d; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem;"></div>
             </div>
         </div>
     </div>
 
-    <div class="session-main" id="sessionMain">
-        <div class="question-container" id="questionContainer">
-            <div class="question-header">
-                <div class="q-number" id="qNumber">1</div>
-                <span class="q-type mcq" id="qType">MCQ</span>
-                <span class="q-xp" id="qXp">10 XP</span>
-            </div>
-            <div class="question-text" id="qText">Loading question...</div>
-            <div id="qAnswer"></div>
-        </div>
-    </div>
-
-    <div class="session-bottombar">
-        <div class="progress-section">
-            <span class="progress-text" id="progressText">1 / 10</span>
-            <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
-        </div>
-        <div class="nav-buttons">
-            <button class="btn-nav btn-prev" id="btnPrev" style="display:none !important">← Previous</button>
-            <button class="btn-nav btn-next" id="btnNext" onclick="nextQuestion()">Next →</button>
-            <button class="btn-submit-test" id="btnSubmit" onclick="submitTest()" style="display:none">Submit Test</button>
+    <!-- Fullscreen Required Interruption Overlay -->
+    <div id="fullscreenInterruptionOverlay" class="portal-overlay" style="display: none;">
+        <div class="overlay-card" style="border-color: rgba(245, 158, 11, 0.3); background: rgba(15, 10, 5, 0.98);">
+            <div class="overlay-icon" style="animation: pulse 1.5s infinite alternate;">⚠️</div>
+            <h1 class="overlay-title" style="color: #fbbf24;">Arena Access Suspended</h1>
+            <p class="overlay-desc">Your cognitive assessment workspace has been locked because you exited fullscreen mode. Access is suspended to preserve challenge integrity.</p>
+            
+            <button class="btn-action-primary" style="background:#fbbf24; border-color:#d97706; color:#09090b;" onclick="resumeFullscreen()">Restore Fullscreen Workspace</button>
         </div>
     </div>
 </div>
@@ -483,7 +669,7 @@ function showWarningModal(title, body, countdownSeconds = 0, onClose = null) {
     modal.style.cssText = `
         position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;
         background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;
-        backdrop-filter:blur(8px);font-family:'Inter',sans-serif;
+        backdrop-filter:blur(8px);font-family:'Plus Jakarta Sans',sans-serif;
     `;
     modal.innerHTML = `
     <div style="background:linear-gradient(135deg,#1a0a0a,#2d0a0a);border:2px solid #ff4444;
@@ -514,7 +700,6 @@ function showWarningModal(title, body, countdownSeconds = 0, onClose = null) {
 function closeWarningModal() {
     const m = document.getElementById('secWarningModal');
     if (m) m.remove();
-    // Return to fullscreen if needed
     if (isTestActive && !document.fullscreenElement) tryFullscreen();
 }
 
@@ -524,18 +709,19 @@ function showDisqualifyModal(reason, detail = '') {
     SEC.isDisqualified = true;
     isTestActive = false;
 
-    // Clear all intervals immediately
     clearAllIntervals();
 
     let existing = document.getElementById('disqualifyModal');
     if (existing) existing.remove();
+
+    if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
 
     const modal = document.createElement('div');
     modal.id = 'disqualifyModal';
     modal.style.cssText = `
         position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;
         background:rgba(0,0,0,.96);display:flex;align-items:center;justify-content:center;
-        font-family:'Inter',sans-serif;
+        font-family:'Plus Jakarta Sans',sans-serif;
     `;
     modal.innerHTML = `
     <div style="background:linear-gradient(135deg,#0a0010,#1a0020);border:2px solid #9900ff;
@@ -551,7 +737,7 @@ function showDisqualifyModal(reason, detail = '') {
         <p style="color:#aaa;font-size:.85rem;margin-bottom:2rem;">This violation has been logged and reported to the admin. Redirecting in <span id='dqCountdown'>5</span>s...</p>
         <div style="display:flex;gap:1rem;justify-content:center;">
             <button onclick="window.location.href='/dashboard'" style="
-                background:linear-gradient(135deg,#6600cc,#9900ff);color:white;border:none;
+                background:#1E220B;border:1px solid #323816;color:white;
                 padding:.75rem 2rem;border-radius:10px;font-size:1rem;cursor:pointer;
             ">Go to Dashboard</button>
         </div>
@@ -573,13 +759,12 @@ async function logViolation(type, detail = '', force = false) {
     if (SEC.isDisqualified) return;
     if (!isTestActive && !force) return;
 
-    // Cooldown: avoid duplicate rapid events (except critical)
     const CRITICAL = ['fullscreen_exit','copy_attempt','paste_attempt','devtools_opened',
         'refresh_attempt','multiple_tabs','script_manipulation','right_click'];
     const now = Date.now();
     if (!CRITICAL.includes(type)) {
         const last = VIOLATION_COOLDOWNS[type] || 0;
-        if (now - last < 3000) return;  // 3s cooldown for non-critical
+        if (now - last < 3000) return;
     }
     VIOLATION_COOLDOWNS[type] = now;
 
@@ -597,7 +782,6 @@ async function logViolation(type, detail = '', force = false) {
         if (!res) return;
 
         if (res.action === 'auto_submit_disqualify' || res.status === 'disqualified') {
-            // Save answers before disqualify
             try { await saveCurrentAnswer(); } catch(e) {}
             try { await API.post(`/api/student/tests/${TEST_ID}/submit`, { answers, _auto: true }); } catch(e) {}
             showDisqualifyModal(type, res.message || 'Security violation detected.');
@@ -619,14 +803,12 @@ async function logViolation(type, detail = '', force = false) {
             else autoSubmit();
         } else if (res.action === 'pause_timer') {
             SEC.timerPaused = true;
-            Toast.show(`Internet disconnected. Timer paused for ${res.pause_seconds || 30}s.`, 'error');
+            Toast.show(`Internet disconnected. Timer paused.`, 'error');
         } else if (res.action === 'resume_timer') {
             SEC.timerPaused = false;
             Toast.show('Connection restored. Timer resumed.', 'success');
         }
-    } catch(e) {
-        // Network error — still track locally
-    }
+    } catch(e) {}
 }
 
 function updateSecurityBadge() {
@@ -634,11 +816,11 @@ function updateSecurityBadge() {
     const text = document.getElementById('securityText');
     if (!indicator || !text) return;
     if (SEC.totalViolations === 0) {
-        indicator.className = 'security-indicator secure';
+        indicator.className = 'security-status-badge';
         text.textContent = 'Secure';
     } else {
-        indicator.className = 'security-indicator violation';
-        text.textContent = `${SEC.totalViolations} violation${SEC.totalViolations > 1 ? 's' : ''}`;
+        indicator.className = 'security-status-badge alert';
+        text.textContent = `${SEC.totalViolations} Alert${SEC.totalViolations > 1 ? 's' : ''}`;
     }
 }
 
@@ -646,7 +828,11 @@ function updateSecurityBadge() {
 async function initTest() {
     try {
         test = await API.get(`/api/student/tests/${TEST_ID}/start`);
-        if (!test || !test.questions) { Toast.show('Failed to load test', 'error'); return; }
+        if (!test || !test.questions) { 
+            showStartOverlayError('Failed to load test parameters.'); 
+            exitFullscreenMode();
+            return; 
+        }
         questions = test.questions;
         document.getElementById('testTitle').textContent = test.name;
         remainingSeconds = test.time_remaining !== undefined ? test.time_remaining : (test.duration || 60) * 60;
@@ -657,10 +843,17 @@ async function initTest() {
         renderQuestion(savedQ);
         isTestActive = true;
         enableSecurity();
-        tryFullscreen();
     } catch(e) {
-        Toast.show('Error: ' + e.message, 'error');
-        setTimeout(() => window.location.href = '/dashboard', 2000);
+        showStartOverlayError('Error: ' + e.message);
+        exitFullscreenMode();
+    }
+}
+
+function showStartOverlayError(msg) {
+    const err = document.getElementById('startOverlayError');
+    if (err) {
+        err.style.display = 'block';
+        err.innerHTML = `<li>⚠️ ${msg}</li>`;
     }
 }
 
@@ -668,69 +861,88 @@ async function initTest() {
 function renderQuestion(idx) {
     currentQ = idx;
     const q = questions[idx];
-    document.getElementById('qNumber').textContent = idx + 1;
+    document.getElementById('qNumber').textContent = `Challenge ${idx + 1}`;
+    
+    // Category & Difficulty
+    document.getElementById('qCategory').textContent = q.category || 'General';
+    const diffEl = document.getElementById('qDifficulty');
+    const difficulty = (q.difficulty_level || q.difficulty || 'medium').toLowerCase();
+    diffEl.textContent = difficulty.toUpperCase();
+    diffEl.className = `badge-difficulty ${difficulty}`;
+
     const typeEl = document.getElementById('qType');
     typeEl.textContent = (q.type || 'text').toUpperCase();
-    typeEl.className = 'q-type ' + (q.type || 'text');
-    document.getElementById('qXp').textContent = (q.xp || q.marks || 10) + ' XP';
+    typeEl.className = 'q-type-badge ' + (q.type || 'text');
+    document.getElementById('qXp').textContent = `${q.xp || q.marks || 10} Intelligence Points`;
     document.getElementById('qText').textContent = q.text;
     const ansEl = document.getElementById('qAnswer');
+    
     if (q.type === 'mcq') {
         const letters = ['A','B','C','D','E','F','G','H'];
-        ansEl.innerHTML = `<div class="mcq-options">${(q.options || []).map((opt, i) => `
-            <div class="mcq-option ${answers[q.id] === opt ? 'selected' : ''}" onclick="selectMCQ('${q.id}','${opt.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)">
-                <span class="option-letter">${letters[i]}</span>
-                <span class="option-text">${opt}</span>
+        ansEl.innerHTML = `<div class="options-grid">${(q.options || []).map((opt, i) => `
+            <div class="option-tile ${answers[q.id] === opt ? 'selected' : ''}" onclick="selectMCQ('${q.id}','${opt.replace(/'/g,"\\'").replace(/"/g,'&quot;')}',this)">
+                <span class="option-index-badge">${letters[i]}</span>
+                <span class="option-label-text">${opt}</span>
             </div>`).join('')}</div>`;
     } else if (q.type === 'text') {
-        ansEl.innerHTML = `<input type="text" class="text-input" id="answerInput_${idx}"
-            placeholder="Type your answer..."
+        ansEl.innerHTML = `<input type="text" class="premium-text-input" id="answerInput_${idx}"
+            placeholder="Type your answer here..."
             value="${(answers[q.id] || '').replace(/"/g, '&quot;')}"
             oninput="answers['${q.id}']=this.value">`;
     } else {
-        ansEl.innerHTML = `<textarea class="textarea-input" id="answerInput_${idx}"
-            placeholder="Write your detailed answer..."
+        ansEl.innerHTML = `<textarea class="premium-textarea" id="answerInput_${idx}"
+            placeholder="Write your detailed solution here..."
             oninput="answers['${q.id}']=this.value">${answers[q.id] || ''}</textarea>`;
     }
-    document.getElementById('progressText').textContent = `${idx + 1} / ${questions.length}`;
-    document.getElementById('progressFill').style.width = ((idx + 1) / questions.length * 100) + '%';
-    document.getElementById('btnNext').style.display = idx === questions.length - 1 ? 'none' : 'flex';
-    document.getElementById('btnSubmit').style.display = idx === questions.length - 1 ? 'block' : 'none';
+    
+    document.getElementById('progressText').textContent = `Challenge ${idx + 1} of ${questions.length}`;
+    document.getElementById('progressBarFill').style.width = ((idx + 1) / questions.length * 100) + '%';
+    document.getElementById('btnNext').style.display = idx === questions.length - 1 ? 'none' : 'inline-flex';
+    document.getElementById('btnSubmit').style.display = idx === questions.length - 1 ? 'inline-flex' : 'none';
+    
     const container = document.getElementById('questionContainer');
     container.style.animation = 'none';
     container.offsetHeight;
-    container.style.animation = 'fadeSlideIn .4s cubic-bezier(.4,0,.2,1)';
+    container.style.animation = 'enterQuestion 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards';
     window.scrollTo(0, 0);
     SEC.idleSeconds = 0;
 }
 
 function selectMCQ(qId, value, el) {
     answers[qId] = value;
-    el.parentElement.querySelectorAll('.mcq-option').forEach(o => o.classList.remove('selected'));
+    el.parentElement.querySelectorAll('.option-tile').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
+    saveCurrentAnswer();
 }
 
 async function saveCurrentAnswer() {
     if (!questions[currentQ]) return;
     const q = questions[currentQ];
     const ans = answers[q.id] || '';
+    
+    const saveDot = document.getElementById('autoSaveIndicator').querySelector('.save-dot');
+    const saveText = document.getElementById('autoSaveText');
+    if (saveDot) saveDot.classList.add('saving');
+    if (saveText) saveText.textContent = 'Saving...';
+    
     try {
         await API.post(`/api/student/tests/${TEST_ID}/answer`, {
             question_id: q.id,
             answer: ans,
             current_question_index: currentQ + 1,
         });
-    } catch(e) {}
+        if (saveText) saveText.textContent = 'Synced';
+    } catch(e) {
+        if (saveText) saveText.textContent = 'Error';
+    } finally {
+        if (saveDot) saveDot.classList.remove('saving');
+    }
 }
 
 async function nextQuestion() {
     await saveCurrentAnswer();
     SEC.idleSeconds = 0;
     if (currentQ < questions.length - 1) renderQuestion(currentQ + 1);
-}
-
-function prevQuestion() {
-    // Navigating backwards is strictly prohibited
 }
 
 // ─── Timer ───────────────────────────────────────────────────
@@ -753,18 +965,22 @@ function updateTimerDisplay() {
     const el = document.getElementById('timerValue');
     if (!el) return;
     el.textContent = display;
-    el.className = 'timer-value';
-    if (remainingSeconds <= 300) el.classList.add('danger');
-    else if (remainingSeconds <= 600) el.classList.add('warning');
-    const td = document.getElementById('timerDisplay');
-    if (td && remainingSeconds <= 300) td.classList.add('danger-flash');
+    
+    const pill = document.getElementById('timerDisplay');
+    if (pill) {
+        pill.className = 'timer-pill';
+        if (remainingSeconds <= 120) {
+            pill.classList.add('danger');
+        } else if (remainingSeconds <= 300) {
+            pill.classList.add('warning');
+        }
+    }
 }
 
 // ─── ENTERPRISE SECURITY LAYER ───────────────────────────────
 function enableSecurity() {
     const rules = test.security_rules || {};
 
-    // 1. CONTEXT MENU — CRITICAL
     if (rules.right_click_detection) {
         document.addEventListener('contextmenu', e => {
             e.preventDefault();
@@ -773,7 +989,6 @@ function enableSecurity() {
         }, true);
     }
 
-    // 2. CLIPBOARD — CRITICAL
     if (rules.copy_detection) {
         document.addEventListener('copy', e => {
             e.preventDefault();
@@ -792,54 +1007,41 @@ function enableSecurity() {
         }, true);
     }
 
-    // 3. TEXT SELECTION — CRITICAL (treat as copy attempt)
     if (rules.copy_detection) {
         document.addEventListener('selectstart', e => {
-            // allow selection in answer inputs
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
             e.preventDefault();
         }, true);
     }
 
-    // 4. KEYBOARD SHORTCUTS — CRITICAL
     document.addEventListener('keydown', e => {
         const ctrl = e.ctrlKey || e.metaKey;
-        // Dev tools
         if (rules.devtools_detection && (e.key === 'F12' || (ctrl && e.shiftKey && ['I','J','C'].includes(e.key)) ||
             (ctrl && e.shiftKey && e.key === 'K'))) {
             e.preventDefault();
             logViolation('devtools_opened', `DevTools shortcut: ${e.key}`);
             return;
         }
-        // View source
         if (rules.copy_detection && ctrl && e.key === 'u') { e.preventDefault(); logViolation('copy_attempt', 'View source attempted'); return; }
-        // Print
         if (rules.copy_detection && ctrl && e.key === 'p') { e.preventDefault(); logViolation('copy_attempt', 'Print attempted'); return; }
-        // Save As
         if (ctrl && e.key === 's') { e.preventDefault(); return; }
-        // Find (allow)
-        // Refresh — CRITICAL
         if (rules.refresh_detection && (e.key === 'F5' || (ctrl && e.key === 'r') || (ctrl && e.shiftKey && e.key === 'R'))) {
             e.preventDefault();
             logViolation('refresh_attempt', 'Keyboard refresh attempted');
             return;
         }
-        // Alt+Tab / Alt+F4
         if (rules.tab_switch_limit > 0 && e.altKey && (e.key === 'Tab' || e.key === 'F4')) {
             e.preventDefault();
             logViolation('tab_switch', 'Alt+Tab window switch attempt');
         }
-        // Win key
         if (e.key === 'Meta' || e.key === 'OS') {
             e.preventDefault();
         }
-        // Escape from fullscreen
         if (rules.fullscreen_mandatory && e.key === 'Escape') {
             e.preventDefault();
         }
     }, true);
 
-    // 5. VISIBILITY / TAB SWITCH — MAJOR
     if (rules.tab_switch_limit > 0) {
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && isTestActive) {
@@ -849,7 +1051,6 @@ function enableSecurity() {
         });
     }
 
-    // 6. WINDOW BLUR — MAJOR
     if (rules.window_blur_limit > 0) {
         window.addEventListener('blur', () => {
             if (!isTestActive) return;
@@ -858,7 +1059,6 @@ function enableSecurity() {
         });
     }
 
-    // 7. WINDOW FOCUS (reconnect)
     if (rules.fullscreen_mandatory) {
         window.addEventListener('focus', () => {
             if (isTestActive && !document.fullscreenElement) {
@@ -867,37 +1067,32 @@ function enableSecurity() {
         });
     }
 
-    // 8. FULLSCREEN CHANGE — CRITICAL
     if (rules.fullscreen_mandatory) {
         document.addEventListener('fullscreenchange', () => {
             if (!document.fullscreenElement && isTestActive) {
                 logViolation('fullscreen_exit', 'Exited fullscreen mode');
-                // Show re-enter warning
-                showWarningModal(
-                    '🔒 Fullscreen Required',
-                    'You have exited fullscreen mode. Please re-enter fullscreen to continue your test. Repeated exits will result in disqualification.',
-                    0,
-                    () => tryFullscreen()
-                );
+                document.getElementById('testPortalContent').style.display = 'none';
+                document.getElementById('fullscreenInterruptionOverlay').style.display = 'flex';
+            } else if (document.fullscreenElement && isTestActive) {
+                document.getElementById('fullscreenInterruptionOverlay').style.display = 'none';
+                document.getElementById('testPortalContent').style.display = 'flex';
             }
         });
     }
 
-    // 9. BROWSER RESIZE — MAJOR
     if (rules.browser_resize_limit > 0) {
         let resizeDebounce = null;
         window.addEventListener('resize', () => {
             if (!isTestActive) return;
             clearTimeout(resizeDebounce);
             resizeDebounce = setTimeout(() => {
-                if (document.fullscreenElement) return; // ignore while fullscreen adjusting
+                if (document.fullscreenElement) return;
                 SEC.resizeCount++;
                 logViolation('browser_resize', `Browser resized #${SEC.resizeCount}`);
             }, 800);
         });
     }
 
-    // 10. BEFORE UNLOAD — CRITICAL
     if (rules.refresh_detection) {
         window.addEventListener('beforeunload', e => {
             if (isTestActive) {
@@ -908,25 +1103,19 @@ function enableSecurity() {
         });
     }
 
-    // 11. NETWORK MONITORING — MAJOR
     if (rules.internet_disconnect_rules) {
         startConnectionTracker();
     }
 
-    // 12. IDLE DETECTION — MAJOR
     if (rules.idle_detection) {
         startIdleTracker();
     }
 
-    // 13. DEVTOOLS DETECTION — CRITICAL (size-based trap)
     if (rules.devtools_detection) {
         startDevToolsDetector();
     }
 
-    // 14. DOM MUTATION GUARD — CRITICAL
     startDomMutationGuard();
-
-    // 15. MOUSE TRACKING — SUSPICIOUS (no movement = suspicious)
     startMouseTracker();
 }
 
@@ -940,22 +1129,11 @@ function startDevToolsDetector() {
         const opened = widthDiff > threshold || heightDiff > threshold;
         if (document.fullscreenElement && opened && !devtoolsOpen && isTestActive) {
             devtoolsOpen = true;
-            logViolation('devtools_opened', `DevTools panel detected (size diff: ${widthDiff}x${heightDiff})`);
+            logViolation('devtools_opened', `DevTools panel detected`);
         } else if (!opened) {
             devtoolsOpen = false;
         }
     }, 1500);
-
-    // Console override trap
-    try {
-        const consoleProxy = {};
-        ['log','warn','error','info','debug','table','dir'].forEach(method => {
-            consoleProxy[method] = function() {
-                if (isTestActive) logViolation('devtools_opened', 'Console access detected');
-            };
-        });
-        // Don't override — just monitor
-    } catch(e) {}
 }
 
 // ─── DOM Mutation Guard ──────────────────────────────────────
@@ -964,7 +1142,6 @@ function startDomMutationGuard() {
         SEC.mutationObserver = new MutationObserver((mutations) => {
             if (!isTestActive) return;
             for (const mut of mutations) {
-                // Detect script injection
                 for (const node of mut.addedNodes) {
                     if (node.tagName === 'SCRIPT') {
                         logViolation('script_manipulation', 'Script injection detected');
@@ -986,7 +1163,7 @@ function startMouseTracker() {
     mouseCheckInterval = setInterval(() => {
         if (!isTestActive) return;
         const now = Date.now();
-        if (now - lastMouseTime > 120000) { // 2 min no mouse
+        if (now - lastMouseTime > 120000) {
             logViolation('no_mouse_movement', 'No mouse movement for 2+ minutes');
         }
     }, 60000);
@@ -1005,7 +1182,7 @@ function startIdleTracker() {
         const limit = (test.security_rules && test.security_rules.idle_timeout_seconds) || 60;
         if (SEC.idleSeconds >= limit) {
             SEC.idleSeconds = 0;
-            logViolation('idle_timeout', `Student idle for ${limit} seconds on one question`);
+            logViolation('idle_timeout', `Student idle for ${limit} seconds`);
         }
     }, 1000);
 }
@@ -1015,7 +1192,7 @@ function startConnectionTracker() {
     window.addEventListener('offline', () => {
         if (!isTestActive) return;
         logViolation('internet_disconnect', 'Internet connection lost');
-        Toast.show('⚠️ Internet disconnected! Your answers are saved. Reconnect to continue.', 'error');
+        Toast.show('⚠️ Internet disconnected! Answers are saved. Reconnect to continue.', 'error');
     });
     window.addEventListener('online', () => {
         if (!isTestActive) return;
@@ -1024,29 +1201,124 @@ function startConnectionTracker() {
     });
 }
 
-// ─── Fullscreen ───────────────────────────────────────────────
+// ─── Fullscreen Helpers ──────────────────────────────────────
 function tryFullscreen() {
     const el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen().catch(()=>{});
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+    const requestFS = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (requestFS) requestFS.call(el).catch(()=>{});
+}
+
+function exitFullscreenMode() {
+    if (document.fullscreenElement) {
+        document.exitFullscreen().catch(()=>{});
+    }
+}
+
+// ─── START TEST & FULLSCREEN FLOW ───────────────────────────
+function startTestButtonClicked() {
+    const el = document.documentElement;
+    const requestFS = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    
+    if (requestFS) {
+        requestFS.call(el).then(() => {
+            setTimeout(() => {
+                if (document.fullscreenElement) {
+                    document.getElementById('startOverlayStatic').style.display = 'none';
+                    document.getElementById('initLogger').style.display = 'block';
+                    runBootSequence();
+                } else {
+                    showStartOverlayError("Fullscreen mode must be enabled to begin the challenge.");
+                }
+            }, 300);
+        }).catch(err => {
+            showStartOverlayError("Could not activate fullscreen. Please grant browser permissions and try again.");
+        });
+    } else {
+        showStartOverlayError("Your browser does not support fullscreen mode.");
+    }
+}
+
+function runBootSequence() {
+    const delay = (ms) => new Promise(res => setTimeout(res, ms));
+    
+    const log1 = document.getElementById('log-1');
+    const log2 = document.getElementById('log-2');
+    const log3 = document.getElementById('log-3');
+    const log4 = document.getElementById('log-4');
+    const log5 = document.getElementById('log-5');
+    
+    Promise.resolve()
+        .then(() => {
+            log1.textContent = "⚡ WELCOME TO AI NEXT GEN CHALLENGE";
+            return delay(800);
+        })
+        .then(() => {
+            log2.innerHTML = "<span style='color:#fbbf24;'>[RUNNING]</span> Initializing Security Verification...";
+            return delay(800);
+        })
+        .then(() => {
+            log2.innerHTML = "<span style='color:#4ade80;'>[OK]</span> Security Verification Active (Anti-Cheat Locked)";
+            return delay(800);
+        })
+        .then(() => {
+            log3.innerHTML = "<span style='color:#fbbf24;'>[RUNNING]</span> Entering Intelligence Arena...";
+            return delay(800);
+        })
+        .then(() => {
+            log3.innerHTML = "<span style='color:#4ade80;'>[OK]</span> Intelligence Arena Workspace Synchronized";
+            return delay(800);
+        })
+        .then(() => {
+            log4.innerHTML = "<span style='color:#fbbf24;'>[RUNNING]</span> Loading Cognitive Assessment Parameters...";
+            return delay(800);
+        })
+        .then(() => {
+            log4.innerHTML = "<span style='color:#4ade80;'>[OK]</span> AI Cognitive Challenge Initialized";
+            return delay(800);
+        })
+        .then(() => {
+            log5.textContent = "🚀 CHALLENGE BEGINS...";
+            return delay(1000);
+        })
+        .then(() => {
+            document.getElementById('startOverlay').style.display = 'none';
+            document.getElementById('testPortalContent').style.display = 'flex';
+            initTest();
+        });
+}
+
+function resumeFullscreen() {
+    const el = document.documentElement;
+    const requestFS = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (requestFS) {
+        requestFS.call(el).then(() => {
+            setTimeout(() => {
+                if (document.fullscreenElement) {
+                    document.getElementById('fullscreenInterruptionOverlay').style.display = 'none';
+                    document.getElementById('testPortalContent').style.display = 'flex';
+                }
+            }, 300);
+        });
+    }
 }
 
 // ─── Submit & AutoSubmit ─────────────────────────────────────
 async function submitTest() {
-    if (!confirm('Are you sure you want to submit? This cannot be undone.')) return;
+    if (!confirm('Are you sure you want to submit your assessment? This cannot be undone.')) return;
     await _doSubmit();
 }
 
 async function autoSubmit() {
-    Toast.show('⏰ Time is up! Auto-submitting...', 'warning');
+    Toast.show('⏰ Time limit reached! Auto-submitting...', 'warning');
     await _doSubmit();
 }
 
 async function _doSubmit() {
     isTestActive = false;
     clearAllIntervals();
+    exitFullscreenMode();
     try {
+        await saveCurrentAnswer();
         await API.post(`/api/student/tests/${TEST_ID}/submit`, { answers });
         Toast.show('✅ Test submitted successfully!', 'success');
         setTimeout(() => window.location.href = '/dashboard', 1500);
@@ -1063,10 +1335,6 @@ function clearAllIntervals() {
     if (mouseCheckInterval) clearInterval(mouseCheckInterval);
     if (SEC.mutationObserver) SEC.mutationObserver.disconnect();
 }
-
-{% if not denied %}
-initTest();
-{% endif %}
 </script>
 
 <style>
@@ -1081,4 +1349,3 @@ initTest();
 }
 </style>
 {% endblock %}
-

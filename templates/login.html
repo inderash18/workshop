@@ -6,24 +6,18 @@
     .auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--bg-primary);position:relative;overflow:hidden}
     .auth-page::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(30,34,11,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(30,34,11,.015) 1px,transparent 1px);background-size:50px 50px}
     .auth-page::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(30,34,11,.03),transparent 50%);pointer-events:none}
-    .auth-card{position:relative;z-index:1;width:100%;max-width:420px;padding:2.5rem;border-radius:16px;background:var(--bg-tertiary);border:1px solid var(--border-default);box-shadow:var(--shadow-lg)}
+    .auth-card{position:relative;z-index:1;width:100%;max-width:420px;padding:2.5rem;}
     .auth-header{text-align:center;margin-bottom:2rem}
     .auth-logo{width:56px;height:56px;border-radius:12px;object-fit:cover;margin-bottom:1rem;box-shadow:var(--shadow-sm)}
     .auth-header h1{font-size:1.5rem;font-weight:700;color:var(--text-primary);margin-bottom:.35rem}
     .auth-header p{font-size:.9rem;color:var(--text-secondary)}
     .auth-form{display:flex;flex-direction:column;gap:1.25rem}
     .form-group{display:flex;flex-direction:column;gap:.4rem}
-    .form-group label{font-size:.8rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
-    .form-group input{padding:.75rem 1rem;border-radius:8px;background:var(--bg-primary);border:1px solid var(--border-default);color:var(--text-primary);font-size:.95rem;transition:all .2s;outline:none}
-    .form-group input:focus{border-color:var(--accent-primary);box-shadow:0 0 0 3px rgba(30,34,11,.08)}
-    .form-group input::placeholder{color:var(--text-muted)}
-    .btn-login{width:100%;padding:.85rem;border-radius:8px;background:var(--gradient-brand);color:var(--text-inverse);font-size:.95rem;font-weight:600;border:none;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
-    .btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(30,34,11,.15)}
-    .btn-login:active{transform:translateY(0)}
-    .btn-login.loading{pointer-events:none;opacity:.85}
-    .btn-login .spinner{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin:0 auto}
-    .btn-login.loading .spinner{display:block}
-    .btn-login.loading .btn-text{display:none}
+    .form-group label{font-size:.78rem;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}
+    .btn-login-wrap{width:100%;position:relative;}
+    .btn-login-wrap.loading .btn-text{display:none}
+    .btn-login-wrap .spinner{display:none;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;margin:0 auto}
+    .btn-login-wrap.loading .spinner{display:block}
     @keyframes spin{to{transform:rotate(360deg)}}
     .auth-error{display:none;padding:.75rem 1rem;border-radius:8px;background:var(--color-danger-bg);border:1px solid var(--color-danger-border);color:var(--color-danger);font-size:.85rem;text-align:center}
     .auth-error.show{display:block}
@@ -38,7 +32,7 @@
 
 {% block content %}
 <div class="auth-page">
-    <div class="auth-card">
+    <div class="auth-card card">
         <div class="auth-header">
             <img src="/static/img/logo.jpg" alt="AI Next Gen" class="auth-logo">
             <h1>Welcome Back</h1>
@@ -48,13 +42,13 @@
         <form class="auth-form" id="loginForm" onsubmit="return handleLogin(event)">
             <div class="form-group">
                 <label>Email Address</label>
-                <input type="email" id="loginEmail" placeholder="you@example.com" required autocomplete="email">
+                <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" required autocomplete="email">
             </div>
             <div class="form-group">
                 <label>Password</label>
-                <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password">
+                <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
             </div>
-            <button type="submit" class="btn-login" id="loginBtn">
+            <button type="submit" class="btn btn-primary btn-login-wrap" id="loginBtn">
                 <span class="btn-text">Log In</span>
                 <div class="spinner"></div>
             </button>

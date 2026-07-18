@@ -205,14 +205,14 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       border: none;
-      border-radius: 6px;
+      border-radius: var(--border-radius-md);
       cursor: pointer;
-      transition: all 0.3s;
+      transition: background var(--duration-normal) var(--ease-out), transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out);
       align-self: flex-start;
       margin-top: 1rem;
     }
     .btn-save-settings:hover {
-      box-shadow: 0 4px 16px rgba(30, 34, 11, 0.18);
+      box-shadow: var(--shadow-md);
       transform: translateY(-1px);
     }
     
@@ -381,6 +381,20 @@
           </div>
 
           <div class="field-row">
+            <span class="field-label">Year</span>
+            <select id="editYear" class="field-input" required style="background:transparent; border:none; color:var(--text-primary); -webkit-appearance:none; font-family:inherit; outline:none; padding:0.25rem 0;">
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+                <option value="5">5th Year</option>
+                <option value="Masters">Masters</option>
+                <option value="PhD">PhD</option>
+            </select>
+            <span class="field-status">✓</span>
+          </div>
+
+          <div class="field-row">
             <span class="field-label">LinkedIn</span>
             <input type="url" id="editLinkedin" class="field-input" placeholder="https://linkedin.com/in/you">
             <span class="field-status">✓</span>
@@ -486,6 +500,7 @@ async function uploadAvatar(e) {
             document.getElementById('editPhone').value = profile.phone || '';
             document.getElementById('editCollege').value = profile.college || '';
             document.getElementById('editDept').value = profile.department || '';
+            document.getElementById('editYear').value = profile.year || '4';
             document.getElementById('editLinkedin').value = profile.linkedin || '';
             document.getElementById('editGithub').value = profile.github || '';
         }
@@ -538,6 +553,7 @@ async function saveProfile(e) {
         phone: document.getElementById('editPhone').value,
         college: document.getElementById('editCollege').value,
         department: document.getElementById('editDept').value,
+        year: document.getElementById('editYear').value,
         linkedin: document.getElementById('editLinkedin').value,
         github: document.getElementById('editGithub').value
     };

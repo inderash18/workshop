@@ -1,472 +1,1668 @@
 {% extends "base.html" %}
 {% block title %}Admin Dashboard — AI Next Gen{% endblock %}
+{% block body_class %}admin-page{% endblock %}
 
 {% block head %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-    body { background: var(--bg-primary); }
-    
-    .admin-layout {
-      display: flex;
-      min-height: calc(100vh - 60px);
-      margin-top: 60px;
+    body {
+        background: var(--bg-primary);
+        font-family: var(--font-body);
+        color: var(--text-primary);
+        overflow-x: hidden;
     }
     
-    .admin-sidebar {
-      width: 240px;
-      background: var(--bg-tertiary);
-      border-right: 1px solid var(--border-default);
-      padding: 1.5rem 0;
-      position: sticky;
-      top: 60px;
-      height: calc(100vh - 60px);
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
+    /* Layout styling */
+    .admin-container {
+        display: flex;
+        min-height: 100vh;
+        background: var(--bg-primary);
     }
     
+    /* Modern Premium Sidebar */
+    .sidebar {
+        width: 260px;
+        background: var(--bg-tertiary);
+        border-right: 1px solid var(--border-default);
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1000;
+        padding: 2rem 1rem;
+    }
+    .sidebar-header {
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--color-primary);
+        padding: 0 1rem 2rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 1.5rem;
+    }
+    .sidebar-header-badge {
+        font-size: 0.6rem;
+        font-weight: 700;
+        background: rgba(30, 34, 11, 0.08);
+        border: 1px solid rgba(30, 34, 11, 0.15);
+        color: var(--color-primary);
+        padding: 0.15rem 0.45rem;
+        border-radius: 999px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
     .sidebar-nav {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-      padding: 0 0.75rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--duration-fast) var(--ease-out);
+        border: 1px solid transparent;
+    }
+    .nav-item:hover {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    .nav-item.active {
+        background: rgba(30, 34, 11, 0.04);
+        border-color: rgba(30, 34, 11, 0.08);
+        color: var(--color-primary);
+    }
+    .nav-item .icon {
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+    }
+    .sidebar-footer {
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .sidebar-user {
+        display: flex;
+        flex-direction: column;
+    }
+    .sidebar-user-name {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .sidebar-user-role {
+        font-size: 0.7rem;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+    .btn-logout {
+        font-size: 0.85rem;
+        color: var(--color-danger);
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+    .btn-logout:hover {
+        background: var(--color-danger-bg);
     }
     
-    .sidebar-link {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.7rem 1rem;
-      border-radius: 8px;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.2s;
+    /* Main Panel Content Area */
+    .main-workspace {
+        flex: 1;
+        margin-left: 260px;
+        padding: 2.5rem 3rem;
+        min-height: 100vh;
     }
     
-    .sidebar-link:hover {
-      color: var(--text-primary);
-      background: var(--bg-primary);
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--border-light);
+        padding-bottom: 1.25rem;
+    }
+    .panel-header-title {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    .panel-header-title h1 {
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--color-primary);
+    }
+    .panel-header-title p {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+    .panel-header-actions {
+        display: flex;
+        gap: 0.75rem;
     }
     
-    .sidebar-link.active {
-      color: var(--text-primary);
-      background: var(--bg-secondary);
-      font-weight: 600;
+    /* Tab Panels */
+    .workspace-panel {
+        display: none;
+        animation: panelFadeIn 0.3s var(--ease-out) forwards;
+    }
+    .workspace-panel.active {
+        display: block;
+    }
+    @keyframes panelFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
-    .sidebar-link .icon {
-      font-size: 1.1rem;
-      width: 22px;
-      text-align: center;
+    /* Cards */
+    .clean-card {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-default);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
     }
     
-    .sidebar-divider {
-      height: 1px;
-      background: var(--border-subtle);
-      margin: 0.75rem;
+    /* Metrics Grid */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    .metric-card {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-default);
+        border-radius: 14px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        box-shadow: var(--shadow-xs);
+        transition: all 0.2s ease;
+    }
+    .metric-card:hover {
+        border-color: var(--border-strong);
+        transform: translateY(-1px);
+    }
+    .metric-card .label {
+        font-size: 0.75rem;
+        color: var(--text-tertiary);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .metric-card .value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
     }
     
-    .admin-main {
-      flex: 1;
-      padding: 2rem 2.5rem;
-      max-width: calc(100% - 240px);
-      overflow-y: auto;
+    /* Access Banner */
+    .access-banner-new {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        border-radius: 14px;
+        border: 1px solid var(--border-default);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-xs);
+    }
+    .access-banner-new.open {
+        background: rgba(46, 125, 50, 0.04);
+        border-color: rgba(46, 125, 50, 0.2);
+    }
+    .access-banner-new.closed {
+        background: rgba(198, 40, 40, 0.04);
+        border-color: rgba(198, 40, 40, 0.2);
+    }
+    .access-banner-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .access-banner-badge {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+    .open .access-banner-badge {
+        background: #2e7d32;
+        box-shadow: 0 0 8px rgba(46, 125, 50, 0.6);
+    }
+    .closed .access-banner-badge {
+        background: #c62828;
+        box-shadow: 0 0 8px rgba(198, 40, 40, 0.6);
+    }
+    .access-banner-text strong {
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+    .access-banner-text p {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        margin: 0.15rem 0 0 0;
+    }
+    .btn-access-toggle {
+        padding: 0.55rem 1.25rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .open .btn-access-toggle {
+        background: rgba(198, 40, 40, 0.08);
+        border: 1px solid rgba(198, 40, 40, 0.2);
+        color: #c62828;
+    }
+    .closed .btn-access-toggle {
+        background: #1E220B;
+        border: 1px solid #323816;
+        color: #fff;
+    }
+    .open .btn-access-toggle:hover { background: rgba(198, 40, 40, 0.15); }
+    .closed .btn-access-toggle:hover { background: #323816; }
+    
+    /* Search Row */
+    .filter-action-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .premium-search {
+        flex: 1;
+        min-width: 240px;
+        padding: 0.75rem 1.1rem;
+        border-radius: 10px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-default);
+        color: var(--text-primary);
+        font-size: 0.88rem;
+        transition: all 0.2s;
+    }
+    .premium-search:focus {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 12px var(--color-primary-glow);
+    }
+    .select-filter {
+        padding: 0.75rem 1.1rem;
+        border-radius: 10px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-default);
+        color: var(--text-primary);
+        font-size: 0.88rem;
+        outline: none;
+        cursor: pointer;
     }
     
-    .page-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
+    /* Modern Premium Tables */
+    .workspace-table-card {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-default);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+    .workspace-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.88rem;
+    }
+    .workspace-table th {
+        background: var(--bg-secondary);
+        padding: 1rem 1.25rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border-default);
+    }
+    .workspace-table td {
+        padding: 1.1rem 1.25rem;
+        border-bottom: 1px solid var(--border-subtle);
+        vertical-align: middle;
+    }
+    .workspace-table tr:last-child td {
+        border-bottom: none;
+    }
+    .workspace-table tr:hover td {
+        background: rgba(30, 34, 11, 0.015);
     }
     
-    .page-header h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text-primary);
+    /* Alert Status Badges (Trustworthiness and Severity Colors) */
+    .security-severity {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        display: inline-block;
     }
-    
-    .header-actions {
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
-    }
-    
-    /* Stats Row */
-    .stats-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .stat-mini-card {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-default);
-      border-radius: 10px;
-      padding: 1rem 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    
-    .stat-mini-card .label {
-      font-size: 0.7rem;
-      color: var(--text-secondary);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .stat-mini-card .value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
+    .security-severity.green { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .security-severity.yellow { background: #fffde7; color: #f57f17; border: 1px solid #fff9c4; }
+    .security-severity.orange { background: #fff3e0; color: #e65100; border: 1px solid #ffe0b2; }
+    .security-severity.red { background: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
 
-    /* Test Access Banner */
-    .access-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 1.25rem;
-      border-radius: 10px;
-      margin-bottom: 1.5rem;
-      border: 1px solid var(--border-default);
-      font-size: 0.85rem;
+    /* Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
     }
-    .access-banner.open {
-      background: rgba(16, 185, 129, 0.06);
-      border-color: rgba(16, 185, 129, 0.25);
-    }
-    .access-banner.closed {
-      background: rgba(239, 68, 68, 0.06);
-      border-color: rgba(239, 68, 68, 0.25);
-    }
-    .access-banner-left { display: flex; align-items: center; gap: 0.75rem; }
-    .access-banner-icon { font-size: 1.2rem; }
-    .access-banner-text strong { color: var(--text-primary); }
-    .access-banner-text p { color: var(--text-secondary); margin: 0; font-size: 0.78rem; }
+    .status-badge.success { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success-border); }
+    .status-badge.warning { background: var(--color-warning-bg); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
+    .status-badge.danger { background: var(--color-danger-bg); color: var(--color-danger); border: 1px solid var(--color-danger-border); }
+    .status-badge.secondary { background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-default); }
     
-    .access-toggle-btn {
-      padding: 0.45rem 1rem;
-      border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
+    /* Settings panel specific tabs */
+    .settings-subtabs {
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--border-default);
+        margin-bottom: 2rem;
+        padding-bottom: 0.5rem;
     }
-    .access-toggle-btn.open-state { background: var(--color-danger); color: white; }
-    .access-toggle-btn.closed-state { background: var(--color-success); color: white; }
-    
-    /* Search & Filters */
-    .search-row {
-      display: flex;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
+    .settings-subtab-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        padding: 0.6rem 1.2rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s;
     }
-    
-    .search-input {
-      flex: 1;
-      padding: 0.55rem 0.85rem;
-      border-radius: 8px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-default);
-      color: var(--text-primary);
-      font-size: 0.85rem;
-      outline: none;
+    .settings-subtab-btn:hover {
+        color: var(--text-primary);
+        background: var(--bg-secondary);
     }
-    .search-input:focus {
-      border-color: var(--accent-primary);
+    .settings-subtab-btn.active {
+        color: var(--color-primary);
+        background: rgba(30, 34, 11, 0.06);
     }
     
-    /* Table styling */
-    .table-container {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-default);
-      border-radius: 10px;
-      overflow: hidden;
+    /* Settings item rows */
+    .settings-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+    .settings-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+        margin-bottom: 1.5rem;
+    }
+    .settings-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+        padding: 0.5rem 0;
+    }
+    .settings-label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+    .settings-label-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    .settings-label-desc {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
     }
     
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-      text-align: left;
+    /* Form fields */
+    .settings-input, .settings-select {
+        width: 180px;
+        padding: 0.65rem 0.85rem;
+        border-radius: 8px;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-default);
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        outline: none;
+        transition: border 0.2s;
+    }
+    .settings-input:focus, .settings-select:focus {
+        border-color: var(--color-primary);
     }
     
-    .data-table th, .data-table td {
-      padding: 0.85rem 1rem;
-      border-bottom: 1px solid var(--border-subtle);
+    /* Toggle switch */
+    .switch-pill {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+    .switch-pill input { opacity: 0; width: 0; height: 0; }
+    .switch-slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-default);
+        transition: .2s;
+        border-radius: 24px;
+    }
+    .switch-slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 3px;
+        bottom: 3px;
+        background-color: var(--text-secondary);
+        transition: .2s;
+        border-radius: 50%;
+    }
+    input:checked + .switch-slider {
+        background-color: var(--color-primary);
+        border-color: var(--color-primary);
+    }
+    input:checked + .switch-slider:before {
+        transform: translateX(20px);
+        background-color: var(--bg-primary);
     }
     
-    .data-table th {
-      background: var(--bg-secondary);
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .btn-premium {
+        padding: 0.65rem 1.5rem;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s;
+        border: none;
     }
+    .btn-premium-primary {
+        background: var(--color-primary);
+        color: white;
+    }
+    .btn-premium-primary:hover { opacity: 0.9; }
     
-    .data-table tr:hover td {
-      background: var(--bg-primary);
+    .btn-premium-secondary {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-default);
     }
+    .btn-premium-secondary:hover { background: var(--bg-secondary); }
     
-    .candidate-name {
-      font-weight: 600;
-      color: var(--text-primary);
+    .btn-premium-danger {
+        background: var(--color-danger-bg);
+        color: var(--color-danger);
+        border: 1px solid var(--color-danger-border);
     }
+    .btn-premium-danger:hover { background: rgba(198, 40, 40, 0.12); }
     
-    .badge {
-      display: inline-block;
-      padding: 0.2rem 0.5rem;
-      border-radius: 999px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+    /* Selection action states */
+    .btn-shortlist-action {
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        transition: opacity 0.2s;
     }
-    .badge-success { background: var(--color-success-bg); color: var(--color-success); border: 1px solid var(--color-success-border); }
-    .badge-warning { background: var(--color-warning-bg); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
-    .badge-danger { background: var(--color-danger-bg); color: var(--color-danger); border: 1px solid var(--color-danger-border); }
-    .badge-secondary { background: var(--border-subtle); color: var(--text-secondary); border: 1px solid var(--border-default); }
+    .btn-shortlist-action.select { background: #e8f5e9; color: #2e7d32; }
+    .btn-shortlist-action.waitlist { background: #fffde7; color: #f57f17; }
+    .btn-shortlist-action.reject { background: #ffebee; color: #c62828; }
+    .btn-shortlist-action:hover { opacity: 0.8; }
 
-    /* Modals & Detail Drawers */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 10000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.25s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
+    /* Analytics Canvas Grid */
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
     }
-    .overlay.active {
-      opacity: 1;
-      visibility: visible;
+    .chart-container {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-default);
+        border-radius: 16px;
+        padding: 1.5rem;
+        min-height: 320px;
+        position: relative;
+        box-shadow: var(--shadow-sm);
+    }
+    .chart-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    /* Overlay Modal & Drawers */
+    .overlay-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+    .overlay-modal.active {
+        opacity: 1;
+        visibility: visible;
     }
     .overlay-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(15, 15, 15, 0.6);
-      backdrop-filter: blur(4px);
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 15, 15, 0.35);
+        backdrop-filter: blur(4px);
     }
     .overlay-content {
-      position: relative;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-default);
-      border-radius: 12px;
-      max-width: 600px;
-      width: 100%;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
-      z-index: 1;
-      transform: scale(0.95);
-      transition: transform 0.25s ease;
+        position: relative;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-default);
+        border-radius: 16px;
+        max-width: 620px;
+        width: 100%;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        z-index: 1;
+        transform: scale(0.96);
+        transition: transform 0.2s ease;
+        box-shadow: var(--shadow-xl);
     }
-    .overlay.active .overlay-content {
-      transform: scale(1);
+    .overlay-modal.active .overlay-content {
+        transform: scale(1);
     }
     .overlay-header {
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--border-subtle);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     .overlay-header h3 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
     }
     .overlay-close {
-      font-size: 1.25rem;
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
+        font-size: 1.5rem;
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        line-height: 1;
     }
     .overlay-body {
-      padding: 1.25rem;
-      overflow-y: auto;
+        padding: 1.5rem;
+        overflow-y: auto;
     }
     .overlay-footer {
-      padding: 1rem 1.25rem;
-      border-top: 1px solid var(--border-subtle);
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.5rem;
+        padding: 1.1rem 1.5rem;
+        border-top: 1px solid var(--border-subtle);
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
     }
-    .detail-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+
+    /* Detailed Security Counter Row */
+    .proctor-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        margin-top: 1rem;
     }
-    .detail-item { display: flex; flex-direction: column; gap: 0.2rem; }
-    .detail-item.full-width { grid-column: 1 / -1; }
-    .detail-item label {
-      font-size: 0.65rem;
-      font-weight: 600;
-      color: var(--text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .proctor-stat-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-default);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    .detail-item span {
-      font-size: 0.88rem;
-      color: var(--text-primary);
+    .proctor-stat-card span {
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+    .proctor-stat-card strong {
+        font-size: 0.95rem;
+        color: var(--color-primary);
+        font-weight: 700;
     }
     
-    .btn {
-      padding: 0.45rem 0.85rem;
-      border-radius: 6px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
+    /* Sliding Drawer */
+    .drawer-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background: rgba(15, 15, 15, 0.35);
+        backdrop-filter: blur(3px);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.25s;
     }
-    .btn-secondary {
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      border: 1px solid var(--border-default);
+    .drawer-overlay.open {
+        opacity: 1;
+        visibility: visible;
     }
-    .btn-secondary:hover { background: var(--border-default); }
-    .btn-primary { background: var(--gradient-brand); color: var(--text-inverse); }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-ghost { background: none; border: none; color: var(--text-secondary); padding: 0.35rem; }
-    .btn-ghost:hover { color: var(--text-primary); background: var(--bg-primary); }
-
-    @media (max-width: 768px) {
-      .admin-sidebar { display: none; }
-      .admin-main { max-width: 100%; padding: 1rem; }
-      .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    .drawer-container {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 480px;
+        background: var(--bg-tertiary);
+        border-left: 1px solid var(--border-default);
+        box-shadow: var(--shadow-xl);
+        transform: translateX(100%);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        display: flex;
+        flex-direction: column;
     }
+    .drawer-overlay.open .drawer-container {
+        transform: translateX(0);
+    }
+    .drawer-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .drawer-header h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .drawer-body {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    .drawer-footer {
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid var(--border-subtle);
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+    
+    /* Forms */
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+    }
+    .form-group label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .form-input, .form-textarea, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-default);
+        color: var(--text-primary);
+        font-size: 0.88rem;
+        outline: none;
+        transition: all 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+        border-color: var(--color-primary);
+    }
+    
+    .difficulty-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.15rem 0.45rem;
+        border-radius: 999px;
+        text-transform: uppercase;
+    }
+    .difficulty-badge.easy { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+    .difficulty-badge.medium { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .difficulty-badge.hard { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .difficulty-badge.expert { background: rgba(147, 51, 234, 0.1); color: #a855f7; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="admin-layout">
-    <!-- Sidebar navigation -->
-    <aside class="admin-sidebar">
+<div class="admin-container">
+    <!-- Modern Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <span>AI NEXT GEN</span>
+            <span class="sidebar-header-badge">Admin</span>
+        </div>
+        
         <nav class="sidebar-nav">
-            <a href="/admin" class="sidebar-link active"><span class="icon">📊</span> Dashboard</a>
-            <a href="/admin/analytics" class="sidebar-link"><span class="icon">📈</span> Analytics</a>
-            <a href="/admin/tests" class="sidebar-link"><span class="icon">📝</span> Tests</a>
-            <a href="/admin/candidates" class="sidebar-link"><span class="icon">👥</span> Candidates</a>
-            <a href="/admin/security" class="sidebar-link"><span class="icon">🔐</span> Security</a>
-            <a href="/admin/questions" class="sidebar-link"><span class="icon">❓</span> Question Bank</a>
-            <div class="sidebar-divider"></div>
-            <a href="/admin/settings" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
-            <a href="/admin/logs" class="sidebar-link"><span class="icon">📋</span> Logs</a>
+            <div class="nav-item active" id="sidebar-overview" onclick="switchNavTab('overview')">
+                <span class="icon">📊</span>
+                <span>Overview</span>
+            </div>
+            <div class="nav-item" id="sidebar-candidates" onclick="switchNavTab('candidates')">
+                <span class="icon">👥</span>
+                <span>Candidates</span>
+            </div>
+            <div class="nav-item" id="sidebar-questions" onclick="switchNavTab('questions')">
+                <span class="icon">❓</span>
+                <span>Question Bank</span>
+            </div>
+            <div class="nav-item" id="sidebar-settings" onclick="switchNavTab('settings')">
+                <span class="icon">⚙️</span>
+                <span>Test Settings</span>
+            </div>
+            <div class="nav-item" id="sidebar-analytics" onclick="switchNavTab('analytics')">
+                <span class="icon">📈</span>
+                <span>Analytics</span>
+            </div>
+            <div class="nav-item" id="sidebar-shortlisting" onclick="switchNavTab('shortlisting')">
+                <span class="icon">🏆</span>
+                <span>Shortlist Page</span>
+            </div>
+            <div class="nav-item" id="sidebar-security-monitoring" onclick="switchNavTab('security-monitoring')">
+                <span class="icon">🛡️</span>
+                <span>Security Monitoring</span>
+            </div>
         </nav>
+        
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <span class="sidebar-user-name" id="adminUser">Admin</span>
+                <span class="sidebar-user-role">System Auditor</span>
+            </div>
+            <div class="btn-logout" onclick="logoutAdmin()">Logout</div>
+        </div>
     </aside>
     
-    <main class="admin-main">
-        <!-- Header -->
-        <div class="page-header">
-            <h1>Candidates Evaluation</h1>
-            <div class="header-actions">
-                <button class="btn btn-secondary" id="export-csv">📥 Export CSV</button>
-                <button class="btn btn-primary" id="auto-shortlist">✨ Auto Shortlist</button>
-            </div>
-        </div>
-
-        <!-- Access Banner -->
-        <div class="access-banner closed" id="accessBanner">
-            <div class="access-banner-left">
-                <div class="access-banner-icon" id="accessIcon">🔒</div>
-                <div class="access-banner-text">
-                    <span id="accessTitle"><strong>Test Access: CLOSED</strong></span>
-                    <p id="accessDesc">Students cannot join or attempt the test.</p>
+    <!-- Main workspace content -->
+    <main class="main-workspace">
+        
+        <!-- ════════ PANEL 1: OVERVIEW ════════ -->
+        <section class="workspace-panel active" id="panel-overview">
+            <div class="panel-header">
+                <div class="panel-header-title">
+                    <h1>Overview & Diagnostic Stats</h1>
+                    <p>Real-time updates of workshop seats, access windows, and attempt statistics.</p>
                 </div>
             </div>
-            <button class="access-toggle-btn closed-state" id="accessToggleBtn" onclick="toggleTestAccess()">
-                Open Test
-            </button>
-        </div>
-        
-        <!-- Stats Strip -->
-        <div class="stats-strip">
-            <div class="stat-mini-card">
-                <span class="label">Total Registered</span>
-                <span class="value" id="statTotalCandidates">0</span>
+            
+            <!-- Access Banner -->
+            <div class="access-banner-new closed" id="accessBanner">
+                <div class="access-banner-info">
+                    <div class="access-banner-badge" id="accessIcon"></div>
+                    <div class="access-banner-text">
+                        <span id="accessTitle"><strong>Test Access: CLOSED</strong></span>
+                        <p id="accessDesc">Students cannot join or attempt the test.</p>
+                    </div>
+                </div>
+                <button class="btn-access-toggle" id="accessToggleBtn" onclick="toggleTestAccess()">
+                    Open Test
+                </button>
             </div>
-            <div class="stat-mini-card">
-                <span class="label">Completed attempts</span>
-                <span class="value" id="statCompleted">0</span>
+            
+            <!-- Metrics Cards Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <span class="label">Total Registrations</span>
+                    <span class="value" id="statTotalRegistrations">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">Total Attempts</span>
+                    <span class="value" id="statTotalAttempts">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">Total Selected</span>
+                    <span class="value" id="statTotalSelected">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">Total Waitlisted</span>
+                    <span class="value" id="statTotalWaitlisted">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">Total Rejected</span>
+                    <span class="value" id="statTotalRejected">0</span>
+                </div>
+                <div class="metric-card">
+                    <span class="label">Total Disqualified</span>
+                    <span class="value" id="statTotalDisqualified">0</span>
+                </div>
             </div>
-            <div class="stat-mini-card">
-                <span class="label">AI Shortlisted</span>
-                <span class="value" id="statShortlisted">0</span>
-            </div>
-            <div class="stat-mini-card">
-                <span class="label">Disqualified (DQ)</span>
-                <span class="value" id="statDisqualified">0</span>
-            </div>
-        </div>
+        </section>
 
-        <!-- Search Bar -->
-        <div class="search-row">
-            <input type="text" class="search-input" id="candidate-search" placeholder="Search candidate by name, email, or ID...">
-        </div>
+        <!-- ════════ PANEL 2: CANDIDATES ════════ -->
+        <section class="workspace-panel" id="panel-candidates">
+            <div class="panel-header">
+                <div class="panel-header-title">
+                    <h1>Candidates Directory</h1>
+                    <p>Manage and search the complete list of registered student candidates.</p>
+                </div>
+            </div>
+            
+            <div class="filter-action-row">
+                <input type="text" class="premium-search" id="candidate-search-directory" placeholder="Search by name, email, or college..." oninput="filterCandidateDirectory()">
+            </div>
+            
+            <div class="workspace-table-card">
+                <table class="workspace-table">
+                    <thead>
+                        <tr>
+                            <th>Candidate Name</th>
+                            <th>Email Address</th>
+                            <th>College / University</th>
+                            <th>Department</th>
+                            <th>Year</th>
+                            <th>LinkedIn</th>
+                            <th>GitHub</th>
+                        </tr>
+                    </thead>
+                    <tbody id="candidatesDirectoryBody">
+                        <tr>
+                            <td colspan="7" style="padding:3rem; text-align:center; color:var(--text-secondary);">Loading candidate directory...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ════════ PANEL 3: QUESTION BANK ════════ -->
+        <section class="workspace-panel" id="panel-questions">
+            <div class="panel-header">
+                <div class="panel-header-title">
+                    <h1>Question Bank Manager</h1>
+                    <p>Add, edit, deactivate, or remove questions from the assessment database.</p>
+                </div>
+                <div class="panel-header-actions">
+                    <button class="btn-premium btn-premium-primary" onclick="openCreateDrawer()">➕ Add Question</button>
+                </div>
+            </div>
+            
+            <div class="filter-action-row">
+                <input type="text" class="premium-search" id="question-search" oninput="filterQuestions()" placeholder="Search questions...">
+                <select class="select-filter" id="filterCategory" onchange="filterQuestions()">
+                    <option value="">All Categories</option>
+                    <option value="Logic">Logic</option>
+                    <option value="Pattern Recognition">Pattern Recognition</option>
+                    <option value="Innovation">Innovation</option>
+                    <option value="Problem Solving">Problem Solving</option>
+                    <option value="Critical Thinking">Critical Thinking</option>
+                    <option value="AI Thinking">AI Thinking</option>
+                </select>
+                <select class="select-filter" id="filterDifficulty" onchange="filterQuestions()">
+                    <option value="">All Difficulties</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                    <option value="expert">Expert</option>
+                </select>
+                <select class="select-filter" id="filterStatus" onchange="filterQuestions()">
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+            
+            <div class="workspace-table-card">
+                <table class="workspace-table">
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Category</th>
+                            <th>Type</th>
+                            <th>Difficulty</th>
+                            <th>Marks</th>
+                            <th>Timer</th>
+                            <th>Status</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="questionsBody">
+                        <tr>
+                            <td colspan="8" style="padding:3rem; text-align:center; color:var(--text-secondary);">Loading questions...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ════════ PANEL 4: TEST SETTINGS ════════ -->
+        <section class="workspace-panel" id="panel-settings">
+            <div class="panel-header">
+                <div class="panel-header-title">
+                    <h1>Global System Configuration</h1>
+                    <p>Set assessment timings, configure strict anti-cheat policies, and tweak evaluation weights.</p>
+                </div>
+            </div>
+            
+            <div class="settings-subtabs">
+                <button class="settings-subtab-btn active" id="btn-subtab-assessment" onclick="switchSettingsSubtab('assessment')">📝 Assessment Setup</button>
+                <button class="settings-subtab-btn" id="btn-subtab-security" onclick="switchSettingsSubtab('security')">🔐 Security Policies</button>
+                <button class="settings-subtab-btn" id="btn-subtab-ai" onclick="switchSettingsSubtab('ai')">🤖 AI Weights</button>
+                <button class="settings-subtab-btn" id="btn-subtab-shortlist" onclick="switchSettingsSubtab('shortlist')">🏆 Selection Rules</button>
+            </div>
+            
+            <div class="clean-card" style="max-width: 800px;">
+                <form id="settingsForm" onsubmit="return saveSettings(event)">
+                    
+                    <!-- Subtab 1: Assessment Setup -->
+                    <div class="settings-subtab-content" id="subtab-assessment">
+                        <h3 class="settings-section-title">Assessment Configurations</h3>
+                        <div class="settings-row">
+                            <div class="form-group">
+                                <label>Total Questions</label>
+                                <input type="number" id="totalQuestions" class="settings-input" min="1" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Duration (Minutes)</label>
+                                <input type="number" id="testDurationMinutes" class="settings-input" min="1" max="180">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="form-group">
+                                <label>Test Start Window</label>
+                                <input type="datetime-local" id="testStartDate" class="settings-input" style="width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label>Test End Window</label>
+                                <input type="datetime-local" id="testEndDate" class="settings-input" style="width: 100%;">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="form-group">
+                                <label>Registration Opening</label>
+                                <input type="datetime-local" id="registrationStartDate" class="settings-input" style="width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label>Registration Closing</label>
+                                <input type="datetime-local" id="registrationEndDate" class="settings-input" style="width: 100%;">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="form-group">
+                                <label>Registration Status</label>
+                                <select id="registrationStatus" class="settings-select" style="width: 100%;">
+                                    <option value="open">Open</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Test Availability</label>
+                                <select id="testAvailability" class="settings-select" style="width: 100%;">
+                                    <option value="open">Open</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="form-group">
+                                <label>Test Status</label>
+                                <select id="testStatus" class="settings-select" style="width: 100%;">
+                                    <option value="draft">Draft</option>
+                                    <option value="published">Published</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Leaderboard Display</label>
+                                <select id="leaderboardEnabled" class="settings-select" style="width: 100%;">
+                                    <option value="true">Enabled</option>
+                                    <option value="false">Disabled</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subtab 2: Security Policies -->
+                    <div class="settings-subtab-content" style="display:none;" id="subtab-security">
+                        <h3 class="settings-section-title">Strict Proctoring & Security Policies</h3>
+                        <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
+                            <div class="settings-item">
+                                <div class="settings-label">
+                                    <span class="settings-label-name">Mandatory Fullscreen Mode</span>
+                                    <span class="settings-label-desc">Force student test window into fullscreen. Exiting locks the test portal.</span>
+                                </div>
+                                <label class="switch-pill">
+                                    <input type="checkbox" id="secFullscreenEnabled">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-item">
+                                <div class="settings-label">
+                                    <span class="settings-label-name">DevTools & Inspect Trap</span>
+                                    <span class="settings-label-desc">Detect and log if Chrome/Safari inspector panels are opened.</span>
+                                </div>
+                                <label class="switch-pill">
+                                    <input type="checkbox" id="secDevtoolsEnabled">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-item">
+                                <div class="settings-label">
+                                    <span class="settings-label-name">Disable Clipboard (Copy/Paste)</span>
+                                    <span class="settings-label-desc">Block copy-paste shortcuts and text selections within question cards.</span>
+                                </div>
+                                <label class="switch-pill">
+                                    <input type="checkbox" id="secCopyEnabled">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-item">
+                                <div class="settings-label">
+                                    <span class="settings-label-name">Block Right-Clicks</span>
+                                    <span class="settings-label-desc">Prevent context menu opens.</span>
+                                </div>
+                                <label class="switch-pill">
+                                    <input type="checkbox" id="secRightClickEnabled">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-item">
+                                <div class="settings-label">
+                                    <span class="settings-label-name">Block Reload & Refresh</span>
+                                    <span class="settings-label-desc">Warn user and track keyboard reloads (F5, Cmd+R).</span>
+                                </div>
+                                <label class="switch-pill">
+                                    <input type="checkbox" id="secRefreshEnabled">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-item">
+                                <div class="settings-label">
+                                    <span class="settings-label-name">Tab Switches Guard</span>
+                                    <span class="settings-label-desc">Allow minor tab changes, auto-disqualify above limit.</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:1rem;">
+                                    <input type="number" id="secTabSwitchLimit" class="settings-input" style="width:70px;" min="1" max="10">
+                                    <label class="switch-pill">
+                                        <input type="checkbox" id="secTabSwitchEnabled">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-item">
+                                <div class="settings-label">
+                                    <span class="settings-label-name">Focus Loss Blur Guard</span>
+                                    <span class="settings-label-desc">Track times window focus is lost (clicking outside screen).</span>
+                                </div>
+                                <input type="number" id="secWindowBlurLimit" class="settings-input" style="width:70px;" min="1" max="10">
+                            </div>
+                            
+                            <div class="settings-item">
+                                <div class="settings-label">
+                                    <span class="settings-label-name">Idle Out Timer</span>
+                                    <span class="settings-label-desc">Detect lack of keyboard/mouse movement.</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:1rem;">
+                                    <input type="number" id="secIdleTimeoutSeconds" class="settings-input" style="width:80px;" min="10" max="600">
+                                    <label class="switch-pill">
+                                        <input type="checkbox" id="secIdleEnabled">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-item">
+                                <div class="settings-label">
+                                    <span class="settings-label-name">Disconnection Grace Period</span>
+                                    <span class="settings-label-desc">Pause test timer for network issues.</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:1rem;">
+                                    <input type="number" id="secDisconnectGraceSeconds" class="settings-input" style="width:80px;" min="5" max="300">
+                                    <label class="switch-pill">
+                                        <input type="checkbox" id="secInternetDisconnectEnabled">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-item">
+                                <div class="settings-label">
+                                    <span class="settings-label-name">Auto Disqualify (Hard Lock)</span>
+                                    <span class="settings-label-desc">If checked, exceeding limits auto-terminates and disqualifies attempts.</span>
+                                </div>
+                                <label class="switch-pill">
+                                    <input type="checkbox" id="secAutoDisqualifyEnabled">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <input type="checkbox" id="secMultipleLoginEnabled" style="display:none;">
+                        </div>
+                    </div>
+                    
+                    <!-- Subtab 3: AI Weights -->
+                    <div class="settings-subtab-content" style="display:none;" id="subtab-ai">
+                        <h3 class="settings-section-title">AI Evaluation Weight Rules</h3>
+                        <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:1.5rem;">Weights must equal exactly 100% in total.</p>
+                        
+                        <div style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1.5rem;">
+                            <div class="settings-item">
+                                <div class="settings-label"><span class="settings-label-name">Logic Puzzle Weight</span></div>
+                                <input type="number" id="weightLogic" class="settings-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+                            <div class="settings-item">
+                                <div class="settings-label"><span class="settings-label-name">Creativity Weight</span></div>
+                                <input type="number" id="weightCreativity" class="settings-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+                            <div class="settings-item">
+                                <div class="settings-label"><span class="settings-label-name">Innovation Weight</span></div>
+                                <input type="number" id="weightInnovation" class="settings-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+                            <div class="settings-item">
+                                <div class="settings-label"><span class="settings-label-name">Problem Solving Weight</span></div>
+                                <input type="number" id="weightProblemSolving" class="settings-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+                            <div class="settings-item">
+                                <div class="settings-label"><span class="settings-label-name">Human Intelligence Weight</span></div>
+                                <input type="number" id="weightHumanIntelligence" class="settings-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+                            <div class="settings-item">
+                                <div class="settings-label"><span class="settings-label-name">Security & Integrity Weight</span></div>
+                                <input type="number" id="weightSecurity" class="settings-input" min="0" max="100" oninput="calculateWeightsTotal()">
+                            </div>
+                            
+                            <div id="weightTotalBar" class="weight-total-bar valid">
+                                <span>Total Weight Assigned:</span>
+                                <span id="weightTotalVal">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subtab 4: Selection Rules -->
+                    <div class="settings-subtab-content" style="display:none;" id="subtab-shortlist">
+                        <h3 class="settings-section-title">Selection & Seat Configurations</h3>
+                        <div class="settings-row">
+                            <div class="form-group">
+                                <label>Selection Cap (N Seats)</label>
+                                <input type="number" id="shortlistLimit" class="settings-input" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label>AI Recommendation Weight</label>
+                                <input type="number" id="pctAiShortlist" class="settings-input" min="0" max="100">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="form-group">
+                                <label>Min Score for "Selection"</label>
+                                <input type="number" id="minScoreRequired" class="settings-input" min="0" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Manual review weight ratio</label>
+                                <input type="number" id="pctManualShortlist" class="settings-input" min="0" max="100">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="form-group">
+                                <label>Min Score for "Waitlist"</label>
+                                <input type="number" id="waitlistScoreRequired" class="settings-input" min="0" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Ideal Selection Ratio (%)</label>
+                                <input type="number" id="pctSelection" class="settings-input" min="1" max="100">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <div class="form-group">
+                                <label>Min Security Integrity Score</label>
+                                <input type="number" id="secScoreRequired" class="settings-input" min="0" max="100">
+                            </div>
+                            <div class="form-group">
+                                <label>Publish Results to Students</label>
+                                <label class="switch-pill" style="margin-top:0.4rem;">
+                                    <input type="checkbox" id="resultsPublished">
+                                    <span class="switch-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-save-settings btn-premium btn-premium-primary" id="btnSave">Save Configurations</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ════════ PANEL 5: ANALYTICS ════════ -->
+        <section class="workspace-panel" id="panel-analytics">
+            <div class="panel-header">
+                <div class="panel-header-title">
+                    <h1>Performance & Security Analytics</h1>
+                    <p>Comprehensive visualizations of score spreads, security alerts, and selection verdicts.</p>
+                </div>
+            </div>
+            
+            <div class="analytics-grid">
+                <div class="chart-container">
+                    <h3 class="chart-title">Score Distribution Spread</h3>
+                    <div style="height:250px;"><canvas id="scoreDistChart"></canvas></div>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Selection Status ratio</h3>
+                    <div style="height:250px;"><canvas id="statusChart"></canvas></div>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">AI Recommendation Spread</h3>
+                    <div style="height:250px;"><canvas id="aiRecChart"></canvas></div>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Violations category breakdown</h3>
+                    <div style="height:250px;"><canvas id="violationsChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ════════ PANEL 6: SHORTLIST PAGE ════════ -->
+        <section class="workspace-panel" id="panel-shortlisting">
+            <div class="panel-header">
+                <div class="panel-header-title">
+                    <h1>Selection Shortlist</h1>
+                    <p>Quickly review recommended, waitlisted, selected, and rejected candidates.</p>
+                </div>
+                <div class="panel-header-actions">
+                    <button class="btn-premium btn-premium-secondary" onclick="exportCsv()">Download CSV</button>
+                    <button class="btn-premium btn-premium-primary" onclick="runAutoShortlist()">AI Auto-Shortlist</button>
+                </div>
+            </div>
+            
+            <div class="filter-action-row">
+                <input type="text" class="premium-search" id="shortlist-search" placeholder="Search by candidate name, ID, or college..." oninput="renderShortlistTable(allCandidates)">
+                <select class="select-filter" id="shortlist-filter-status" onchange="renderShortlistTable(allCandidates)">
+                    <option value="">All Candidates</option>
+                    <option value="selected">✅ Selected Candidates</option>
+                    <option value="waitlisted">⏳ Waitlisted Candidates</option>
+                    <option value="rejected">❌ Rejected Candidates</option>
+                    <option value="disqualified">🚫 Disqualified Candidates</option>
+                    <option value="pending">⬜ Pending Reviews</option>
+                </select>
+                <select class="select-filter" id="shortlist-sort-key" onchange="renderShortlistTable(allCandidates)">
+                    <option value="score">Sort by Score</option>
+                    <option value="security">Sort by Security Score</option>
+                    <option value="ai">Sort by AI Recommendation</option>
+                </select>
+            </div>
+            
+            <div class="workspace-table-card">
+                <table class="workspace-table">
+                    <thead>
+                        <tr>
+                            <th>Candidate Name</th>
+                            <th>Candidate ID</th>
+                            <th>College Name</th>
+                            <th>Cognitive Score</th>
+                            <th>Security Score</th>
+                            <th>AI Recommendation</th>
+                            <th>Final Status</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shortlistTableBody">
+                        <tr>
+                            <td colspan="8" style="padding:3rem; text-align:center; color:var(--text-secondary);">Loading candidates...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ════════ PANEL 7: SECURITY MONITORING ════════ -->
+        <section class="workspace-panel" id="panel-security-monitoring">
+            <div class="panel-header">
+                <div class="panel-header-title">
+                    <h1>Security & Integrity Monitor</h1>
+                    <p>Review candidate trustworthy metrics, proctoring violations, and lock statuses.</p>
+                </div>
+            </div>
+            
+            <div class="filter-action-row">
+                <input type="text" class="premium-search" id="security-search" placeholder="Search candidates by name, email, or college..." oninput="renderSecurityMonitoringTable(allCandidates)">
+                <select class="select-filter" id="security-filter-severity" onchange="renderSecurityMonitoringTable(allCandidates)">
+                    <option value="">All Severities</option>
+                    <option value="green">🟢 Green (No Violations)</option>
+                    <option value="yellow">🟡 Yellow (Minor Violations)</option>
+                    <option value="orange">🟠 Orange (Suspicious Activities)</option>
+                    <option value="red">🔴 Red (Critical / Disqualified)</option>
+                </select>
+            </div>
+            
+            <div class="workspace-table-card">
+                <table class="workspace-table">
+                    <thead>
+                        <tr>
+                            <th>Candidate Name</th>
+                            <th>Candidate ID</th>
+                            <th>College Name</th>
+                            <th>Test Status</th>
+                            <th>Total Violations</th>
+                            <th>Severity Tier</th>
+                            <th>Security Score</th>
+                            <th>AI Verdict</th>
+                            <th>Final Status</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="securityTableBody">
+                        <tr>
+                            <td colspan="10" style="padding:3rem; text-align:center; color:var(--text-secondary);">Loading security database...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
         
-        <!-- Data Table Container -->
-        <div class="table-container" id="candidates-table">
-            <div style="padding:2rem; text-align:center; color:var(--text-secondary);">Loading candidates...</div>
-        </div>
     </main>
+</div>
+
+<!-- ════════ MODAL: DETAILED PROCTORING AUDIT OVERLAY ════════ -->
+<div class="overlay-modal" id="securityDetailModal">
+    <div class="overlay-backdrop" onclick="closeSecurityModal()"></div>
+    <div class="overlay-content" style="max-width: 580px;">
+        <div class="overlay-header">
+            <h3>Proctoring Diagnostics</h3>
+            <button class="overlay-close" onclick="closeSecurityModal()">&times;</button>
+        </div>
+        <div class="overlay-body">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-subtle); padding-bottom:1rem; margin-bottom:1rem;">
+                <div>
+                    <h4 id="secDetailName" style="font-size:1.15rem; font-weight:700; color:var(--color-primary); margin:0;">Student Name</h4>
+                    <p id="secDetailId" style="font-size:0.75rem; color:var(--text-secondary); margin:0.15rem 0 0 0;">ID: candidate_123</p>
+                </div>
+                <div id="secDetailBadge">
+                    <span class="security-severity green">Secure</span>
+                </div>
+            </div>
+            
+            <div class="proctor-stats-grid">
+                <div class="proctor-stat-card"><span>Fullscreen Exit Attempts</span><strong id="pStatFullscreen">0</strong></div>
+                <div class="proctor-stat-card"><span>Tab Switch Count</span><strong id="pStatTabSwitch">0</strong></div>
+                <div class="proctor-stat-card"><span>Copy Attempts</span><strong id="pStatCopy">0</strong></div>
+                <div class="proctor-stat-card"><span>Paste Attempts</span><strong id="pStatPaste">0</strong></div>
+                <div class="proctor-stat-card"><span>Refresh Attempts</span><strong id="pStatRefresh">0</strong></div>
+                <div class="proctor-stat-card"><span>DevTools Attempts</span><strong id="pStatDevTools">0</strong></div>
+                <div class="proctor-stat-card"><span>Multiple Login Sessions</span><strong id="pStatMultiLogin">0</strong></div>
+                <div class="proctor-stat-card"><span>Internet Disconnects</span><strong id="pStatDisconnect">0</strong></div>
+                <div class="proctor-stat-card"><span>Idle Time Violations</span><strong id="pStatIdle">0</strong></div>
+                <div class="proctor-stat-card"><span>Suspicious Activities</span><strong id="pStatSuspicious">0</strong></div>
+                <div class="proctor-stat-card"><span>Total Time Taken</span><strong id="pStatTime">—</strong></div>
+                <div class="proctor-stat-card"><span>Questions Answered</span><strong id="pStatAnswered">0</strong></div>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(30, 34, 11, 0.03); border:1px solid rgba(30, 34, 11, 0.08); padding:0.85rem 1.1rem; border-radius:10px; margin-top:1.5rem;">
+                <div>
+                    <span style="font-size:0.75rem; color:var(--text-tertiary); font-weight:700; text-transform:uppercase;">Calculated Trust Score</span>
+                    <h5 id="pStatScore" style="font-size:1.4rem; font-weight:800; color:var(--color-primary); margin:0;">100 / 100</h5>
+                </div>
+                <div>
+                    <span style="font-size:0.75rem; color:var(--text-tertiary); font-weight:700; text-transform:uppercase;">Enforced Action</span>
+                    <h5 id="pStatAction" style="font-size:0.9rem; font-weight:700; margin:0;">NONE</h5>
+                </div>
+            </div>
+        </div>
+        <div class="overlay-footer">
+            <button class="btn-premium btn-premium-danger" id="btnReassignTest" style="display:none;" onclick="triggerReassign()">Reassign Test</button>
+            <button class="btn-premium btn-premium-secondary" onclick="closeSecurityModal()">Close Details</button>
+        </div>
+    </div>
+</div>
+
+<!-- ════════ SLIDING DRAWER: QUESTION FORM ════════ -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer(event)">
+    <div class="drawer-container">
+        <div class="drawer-header">
+            <h3 id="drawerTitle">Create Question</h3>
+            <button class="overlay-close" onclick="toggleDrawer(false)">&times;</button>
+        </div>
+        <form onsubmit="return submitQuestionForm(event)" style="display:contents;">
+            <div class="drawer-body">
+                <input type="hidden" id="formQuestionId">
+                
+                <div class="form-group">
+                    <label>Question Title</label>
+                    <input type="text" id="formTitle" class="form-input" placeholder="Brief question identifier..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description / Text</label>
+                    <textarea id="formDescription" class="form-textarea" placeholder="Detail prompt of the question..." style="min-height:100px;" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="formCategory" class="form-select">
+                        <option value="Logic">Logic</option>
+                        <option value="Pattern Recognition">Pattern Recognition</option>
+                        <option value="Innovation">Innovation</option>
+                        <option value="Problem Solving">Problem Solving</option>
+                        <option value="Critical Thinking">Critical Thinking</option>
+                        <option value="AI Thinking">AI Thinking</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Difficulty</label>
+                    <select id="formDifficulty" class="form-select">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                        <option value="expert">Expert</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Question Type</label>
+                    <select id="formType" class="form-select" onchange="toggleFormOptionsVisibility()">
+                        <option value="mcq">MCQ (Multiple Choice)</option>
+                        <option value="text">Short Text</option>
+                        <option value="textarea">Long Answer / Textarea</option>
+                    </select>
+                </div>
+                
+                <!-- MCQ Options block -->
+                <div id="formOptionsWrapper" style="display:block;">
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label>Option A</label>
+                        <input type="text" id="optA" class="form-input" placeholder="Option A value...">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label>Option B</label>
+                        <input type="text" id="optB" class="form-input" placeholder="Option B value...">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0.75rem;">
+                        <label>Option C</label>
+                        <input type="text" id="optC" class="form-input" placeholder="Option C value (optional)...">
+                    </div>
+                    <div class="form-group">
+                        <label>Option D</label>
+                        <input type="text" id="optD" class="form-input" placeholder="Option D value (optional)...">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Correct Answer Value</label>
+                    <input type="text" id="formCorrect" class="form-input" placeholder="Exact correct answer string or MCQ option value...">
+                </div>
+                
+                <div class="form-group">
+                    <label>Answer Explanation</label>
+                    <textarea id="formExplanation" class="form-textarea" placeholder="Explanation behind the solution..." style="min-height:80px;"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Marks / XP Points</label>
+                    <input type="number" id="formMarks" class="form-input" min="1" max="100" value="10">
+                </div>
+                
+                <div class="form-group">
+                    <label>Timer Limit (Seconds)</label>
+                    <input type="number" id="formTimeLimit" class="form-input" min="10" max="600" value="60">
+                </div>
+                
+                <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.5rem;">
+                    <label class="switch-pill">
+                        <input type="checkbox" id="formIsActive" checked>
+                        <span class="switch-slider"></span>
+                    </label>
+                    <span style="font-size:0.85rem; font-weight:600;">Activate Question</span>
+                </div>
+            </div>
+            <div class="drawer-footer">
+                <button type="button" class="btn-premium btn-premium-secondary" onclick="toggleDrawer(false)">Cancel</button>
+                <button type="submit" class="btn-premium btn-premium-primary" id="btnSaveQuestion">Save Question</button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
 let allCandidates = [];
-let filterText = '';
+let allQuestions = [];
+let chartInstances = {};
+let activeTabId = 'overview';
 
+// Page Initializer
 async function init() {
     const ok = await Auth.requireAdmin();
     if (!ok) return;
     Auth.updateNav();
-
-    await loadStats();
-    await loadCandidates();
-    initSearch();
-    initExport();
-    initAutoShortlist();
+    
+    // Auto-select tab based on path
+    const path = window.location.pathname;
+    let initialTab = 'overview';
+    if (path.includes('candidates')) initialTab = 'candidates';
+    else if (path.includes('settings')) initialTab = 'settings';
+    else if (path.includes('questions')) initialTab = 'questions';
+    else if (path.includes('analytics')) initialTab = 'analytics';
+    else if (path.includes('shortlisting')) initialTab = 'shortlisting';
+    else if (path.includes('security-monitoring')) initialTab = 'security-monitoring';
+    
+    switchNavTab(initialTab, false);
+    
+    // Load common startup data
     await loadTestAccess();
+    await loadCandidates();
+    await loadQuestions();
+    await loadSettingsData();
+    await loadAnalytics();
 }
 
-async function loadStats() {
-    try {
-        const stats = await API.get('/api/admin/stats');
-        if (stats) {
-            document.getElementById('statTotalCandidates').textContent = stats.total_candidates || stats.total || 0;
-            document.getElementById('statCompleted').textContent = stats.completed_tests || stats.completed || 0;
-            document.getElementById('statShortlisted').textContent = stats.shortlisted || stats.selected || 0;
-            document.getElementById('statDisqualified').textContent = stats.disqualified || 0;
-        }
-    } catch (e) {
-        console.error('Failed to load stats:', e);
+// Router & Tab Switching
+function switchNavTab(tabId, pushState = true) {
+    activeTabId = tabId;
+    
+    // Toggle active sidebar link
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    const activeSidebarItem = document.getElementById('sidebar-' + tabId);
+    if (activeSidebarItem) activeSidebarItem.classList.add('active');
+    
+    // Toggle active panel
+    document.querySelectorAll('.workspace-panel').forEach(panel => panel.classList.remove('active'));
+    const activePanel = document.getElementById('panel-' + tabId);
+    if (activePanel) activePanel.classList.add('active');
+    
+    if (pushState) {
+        const pathSuffix = tabId === 'overview' ? '' : '/' + tabId;
+        history.pushState(null, '', '/admin' + pathSuffix);
     }
 }
 
+// Support browser back/forward buttons
+window.addEventListener('popstate', () => {
+    const path = window.location.pathname;
+    let tab = 'overview';
+    if (path.includes('candidates')) tab = 'candidates';
+    else if (path.includes('settings')) tab = 'settings';
+    else if (path.includes('questions')) tab = 'questions';
+    else if (path.includes('analytics')) tab = 'analytics';
+    else if (path.includes('shortlisting')) tab = 'shortlisting';
+    else if (path.includes('security-monitoring')) tab = 'security-monitoring';
+    switchNavTab(tab, false);
+});
+
+// Admin Account Logout
+async function logoutAdmin() {
+    try {
+        await API.post('/api/admin/logout');
+        Toast.success('Logged Out', 'Redirecting...');
+        setTimeout(() => window.location.href = '/admin/login', 1000);
+    } catch (e) {
+        window.location.href = '/admin/login';
+    }
+}
+
+// ─── OVERVIEW STATS & BANNER OPERATIONS ───
 async function loadTestAccess() {
     try {
         const access = await API.get('/api/admin/test-access');
         if (access !== null && access !== undefined) {
             updateAccessBanner(access.test_open);
         }
-    } catch(e) { console.error('Failed to load test access state:', e); }
+    } catch(e) { console.error('Failed to load test access:', e); }
 }
 
 async function toggleTestAccess() {
@@ -477,11 +1673,9 @@ async function toggleTestAccess() {
         if (res && res.success) {
             updateAccessBanner(res.test_open);
             Toast.success(res.test_open ? '✅ Test Opened' : '🔒 Test Closed', res.message);
-        } else {
-            Toast.error('Error', (res && res.error) || 'Failed to toggle');
         }
     } catch(e) {
-        Toast.error('Error', e.message || 'Failed to toggle');
+        Toast.error('Error', e.message || 'Failed to toggle access');
     } finally {
         btn.disabled = false;
     }
@@ -489,293 +1683,1007 @@ async function toggleTestAccess() {
 
 function updateAccessBanner(isOpen) {
     const banner = document.getElementById('accessBanner');
-    const icon = document.getElementById('accessIcon');
     const title = document.getElementById('accessTitle');
     const desc = document.getElementById('accessDesc');
     const btn = document.getElementById('accessToggleBtn');
 
     if (isOpen) {
-        banner.className = 'access-banner open';
-        icon.textContent = '✅';
+        banner.className = 'access-banner-new open';
         title.innerHTML = '<strong>Test Access: OPEN</strong>';
         desc.textContent = 'Students can now register and attempt the test.';
-        btn.className = 'access-toggle-btn open-state';
-        btn.textContent = 'Close Test';
+        btn.textContent = 'Close Access';
     } else {
-        banner.className = 'access-banner closed';
-        icon.textContent = '🔒';
+        banner.className = 'access-banner-new closed';
         title.innerHTML = '<strong>Test Access: CLOSED</strong>';
-        desc.textContent = 'Students cannot join or attempt the test.';
-        btn.className = 'access-toggle-btn closed-state';
-        btn.textContent = 'Open Test';
+        desc.textContent = 'Students cannot join or start new attempts.';
+        btn.textContent = 'Open Access';
     }
 }
 
-async function loadCandidates() {
-    const container = document.getElementById('candidates-table');
-    if (!container) return;
+function calculateOverviewStats(candidates) {
+    const total = candidates.length;
+    const attempts = candidates.filter(c => c.attempt_status === 'completed' || c.attempt_status === 'disqualified').length;
+    const selected = candidates.filter(c => c.selection_status === 'selected').length;
+    const waitlisted = candidates.filter(c => c.selection_status === 'waitlisted').length;
+    const rejected = candidates.filter(c => c.selection_status === 'rejected').length;
+    const disqualified = candidates.filter(c => c.selection_status === 'disqualified' || c.attempt_status === 'disqualified').length;
 
+    document.getElementById('statTotalRegistrations').textContent = total;
+    document.getElementById('statTotalAttempts').textContent = attempts;
+    document.getElementById('statTotalSelected').textContent = selected;
+    document.getElementById('statTotalWaitlisted').textContent = waitlisted;
+    document.getElementById('statTotalRejected').textContent = rejected;
+    document.getElementById('statTotalDisqualified').textContent = disqualified;
+}
+
+// ─── CANDIDATES API LOADS ───
+async function loadCandidates() {
     try {
         const data = await API.get('/api/admin/candidates');
         allCandidates = data.candidates || data.data || data || [];
-        renderCandidates(allCandidates);
+        calculateOverviewStats(allCandidates);
+        renderCandidatesDirectory(allCandidates);
+        renderShortlistTable(allCandidates);
+        renderSecurityMonitoringTable(allCandidates);
     } catch (err) {
-        container.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">Failed to load candidates: ${err.message}</div>`;
+        console.error('Failed to load database:', err);
     }
 }
 
-function renderCandidates(candidates) {
-    const container = document.getElementById('candidates-table');
-    if (!container) return;
+function renderCandidatesDirectory(candidates) {
+    const tbody = document.getElementById('candidatesDirectoryBody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = candidates.map(c => {
+        const liLink = c.linkedin ? `<a href="${escapeHtml(c.linkedin)}" target="_blank" style="text-decoration:none;">🔗 LinkedIn</a>` : '—';
+        const ghLink = c.github ? `<a href="${escapeHtml(c.github)}" target="_blank" style="text-decoration:none;">🔗 GitHub</a>` : '—';
+        return `
+            <tr>
+                <td style="font-weight:700;color:var(--text-primary);">${escapeHtml(c.name || 'N/A')}</td>
+                <td>${escapeHtml(c.email || 'N/A')}</td>
+                <td>${escapeHtml(c.college || 'N/A')}</td>
+                <td>${escapeHtml(c.department || 'N/A')}</td>
+                <td><code>${escapeHtml(c.year || '—')}</code></td>
+                <td>${liLink}</td>
+                <td>${ghLink}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterCandidateDirectory() {
+    const searchVal = document.getElementById('candidate-search-directory').value.toLowerCase().trim();
+    const filtered = allCandidates.filter(c => {
+        if (!searchVal) return true;
+        return (c.name || '').toLowerCase().includes(searchVal) ||
+               (c.email || '').toLowerCase().includes(searchVal) ||
+               (c.college || '').toLowerCase().includes(searchVal);
+    });
+    renderCandidatesDirectory(filtered);
+}
+
+// ─── SELECTION SHORTLIST PAGE ───
+function renderShortlistTable(candidates) {
+    const tbody = document.getElementById('shortlistTableBody');
+    if (!tbody) return;
+
+    const searchVal = document.getElementById('shortlist-search').value.toLowerCase().trim();
+    const filterStatus = document.getElementById('shortlist-filter-status').value;
+    const sortKey = document.getElementById('shortlist-sort-key').value;
 
     let filtered = candidates.filter(c => {
-        if (!filterText) return true;
-        const search = filterText.toLowerCase();
-        return (c.name || '').toLowerCase().includes(search) ||
-               (c.email || '').toLowerCase().includes(search) ||
-               (c.candidate_id || '').toLowerCase().includes(search);
+        // Exclude completely empty registrants that haven't attempted the test unless manually shortlisted
+        if (c.attempt_status === 'not_started' && c.selection_status === 'pending') {
+            return false;
+        }
+        
+        // Search filter
+        if (searchVal) {
+            const matchesSearch = (c.name || '').toLowerCase().includes(searchVal) ||
+                                  (c.college || '').toLowerCase().includes(searchVal) ||
+                                  (c.candidate_id || '').toLowerCase().includes(searchVal);
+            if (!matchesSearch) return false;
+        }
+
+        // Status filter
+        if (filterStatus && c.selection_status !== filterStatus) {
+            return false;
+        }
+
+        return true;
     });
 
+    // Client Side Sorting
+    if (sortKey === 'score') {
+        filtered.sort((a, b) => b.score - a.score);
+    } else if (sortKey === 'security') {
+        filtered.sort((a, b) => (b.security_score || 0) - (a.security_score || 0));
+    } else if (sortKey === 'ai') {
+        const recWeights = { 'Highly Recommended': 4, 'Recommended': 3, 'Borderline': 2, 'Not Recommended': 1 };
+        filtered.sort((a, b) => (recWeights[b.ai_recommendation] || 0) - (recWeights[a.ai_recommendation] || 0));
+    }
+
     if (!filtered.length) {
-        container.innerHTML = '<div style="padding: 2rem; text-align: center; color: var(--text-secondary);">No candidates found.</div>';
+        tbody.innerHTML = '<tr><td colspan="8" style="padding: 3rem; text-align: center; color: var(--text-secondary);">No shortlisting records match your criteria.</td></tr>';
         return;
     }
 
-    let html = `
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>ID</th>
-            <th>Final Score</th>
-            <th>Security</th>
-            <th>AI Verdict</th>
-            <th>Status</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-
-    const AI_REC_CLASS = {
-      'Highly Recommended': 'badge-success',
-      'Recommended': 'badge-warning',
-      'Borderline': 'badge-secondary',
-      'Not Recommended': 'badge-danger',
+    const AI_REC_STYLE = {
+      'ELITE CANDIDATE': 'success',
+      'HIGHLY RECOMMENDED': 'success',
+      'RECOMMENDED': 'secondary',
+      'WAITLISTED': 'warning',
+      'NOT RECOMMENDED': 'danger',
+      'DISQUALIFIED': 'danger',
     };
 
-    filtered.forEach(c => {
-        const score = c.score !== undefined ? c.score : c.total_score;
-        const total = c.total_marks || 100;
-        const status = c.selection_status || c.status || 'pending';
-        const statusClass = {
-            selected: 'badge-success',
-            waitlisted: 'badge-warning',
-            rejected: 'badge-danger',
-            disqualified: 'badge-danger',
-            pending: 'badge-secondary',
-        }[status] || 'badge-secondary';
+    const STATUS_STYLE = {
+      'selected': 'success',
+      'waitlisted': 'warning',
+      'rejected': 'danger',
+      'disqualified': 'danger',
+      'pending': 'secondary',
+    };
 
+    tbody.innerHTML = filtered.map(c => {
+        const score = c.score !== undefined ? c.score : 0;
+        const securityScore = c.security_score !== undefined ? Math.round(c.security_score) : 100;
+        const status = c.selection_status || 'pending';
         const aiRec = c.ai_recommendation || '—';
-        const aiClass = AI_REC_CLASS[aiRec] || 'badge-secondary';
+        const reportUrl = `/report/${c.test_id}/${c.candidate_id}`;
 
-        const violations = c.violation_count || 0;
-        let secBadge = '';
-        if (c.attempt_status === 'disqualified') {
-            secBadge = '<span class="badge badge-danger">🚫 DQ</span>';
-        } else if (violations > 0) {
-            secBadge = `<span class="badge badge-warning">⚠️ ${violations} Alert</span>`;
-        } else if (c.attempt_status === 'completed') {
-            secBadge = '<span class="badge badge-success">🛡️ Clean</span>';
-        } else {
-            secBadge = '<span class="badge badge-secondary">⏳ Pending</span>';
-        }
-
-        html += `
-          <tr data-id="${c.id || c._id}">
-            <td class="candidate-name">${escapeHtml(c.name || 'N/A')}</td>
-            <td>${escapeHtml(c.email || 'N/A')}</td>
-            <td><code>${escapeHtml(c.candidate_id || c.id || '')}</code></td>
-            <td><strong>${score !== undefined && score !== null ? `${score}/${total}` : 'N/A'}</strong></td>
-            <td>${secBadge}</td>
-            <td><span class="badge ${aiClass}">${aiRec}</span></td>
-            <td><span class="badge ${statusClass}">${capitalize(status)}</span></td>
-            <td style="display:flex;gap:6px;align-items:center">
-              <button class="btn btn-sm btn-ghost view-btn" data-id="${c.id || c._id}" title="View Details">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-              <select class="status-select" data-id="${c.id || c._id}" style="font-size:0.75rem;padding:2px 6px;border-radius:6px;border:1px solid var(--border-default);background:var(--bg-secondary);color:var(--text-primary);cursor:pointer">
-                <option value="selected" ${status === 'selected' ? 'selected' : ''}>✅ Selected</option>
-                <option value="waitlisted" ${status === 'waitlisted' ? 'selected' : ''}>⏳ Waitlisted</option>
-                <option value="rejected" ${status === 'rejected' ? 'selected' : ''}>❌ Rejected</option>
-                <option value="disqualified" ${status === 'disqualified' ? 'selected' : ''}>🚫 Disqualified</option>
-                <option value="pending" ${status === 'pending' ? 'selected' : ''}>⬜ Pending</option>
-              </select>
+        return `
+          <tr>
+            <td style="font-weight:700;color:var(--text-primary);">${escapeHtml(c.name || 'N/A')}</td>
+            <td><code>${escapeHtml(c.candidate_id || '')}</code></td>
+            <td>${escapeHtml(c.college || '—')}</td>
+            <td><strong>${score}/100</strong></td>
+            <td><strong style="color:${securityScore < 70 ? '#ef4444' : '#22c55e'};">${securityScore}%</strong></td>
+            <td><span class="status-badge ${AI_REC_STYLE[aiRec] || 'secondary'}">${aiRec}</span></td>
+            <td><span class="status-badge ${STATUS_STYLE[status] || 'secondary'}">${status.toUpperCase()}</span></td>
+            <td style="text-align:right;">
+              <div style="display:inline-flex; gap:0.35rem; align-items:center;">
+                <button class="btn-shortlist-action select" onclick="updateCandidateStatus('${c.candidate_id || c.id}', 'selected')">Select</button>
+                <button class="btn-shortlist-action waitlist" onclick="updateCandidateStatus('${c.candidate_id || c.id}', 'waitlisted')">Waitlist</button>
+                <button class="btn-shortlist-action reject" onclick="updateCandidateStatus('${c.candidate_id || c.id}', 'rejected')">Reject</button>
+                <a href="${reportUrl}" target="_blank" class="btn-premium btn-premium-secondary" style="padding:0.4rem 0.6rem; font-size:0.75rem; text-decoration:none;">Report</a>
+              </div>
             </td>
           </tr>
         `;
-    });
-
-    html += '</tbody></table>';
-    container.innerHTML = html;
-
-    container.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', () => viewCandidateDetail(btn.dataset.id));
-    });
-
-    container.querySelectorAll('.status-select').forEach(sel => {
-        sel.addEventListener('change', async () => {
-            const candidateId = sel.dataset.id;
-            const newStatus = sel.value;
-            try {
-                await API.post(`/api/admin/candidates/${candidateId}/status`, { status: newStatus });
-                Toast.success('Updated', `Candidate status set to ${capitalize(newStatus)}`);
-                await loadStats();
-                await loadCandidates();
-            } catch (err) {
-                Toast.error('Error', err.message || 'Failed to update status');
-                await loadCandidates();
-            }
-        });
-    });
+    }).join('');
 }
 
-function initSearch() {
-    const search = document.getElementById('candidate-search');
-    if (!search) return;
+// ─── SECURITY MONITORING SYSTEM ───
+function renderSecurityMonitoringTable(candidates) {
+    const tbody = document.getElementById('securityTableBody');
+    if (!tbody) return;
 
-    let debounce;
-    search.addEventListener('input', () => {
-        clearTimeout(debounce);
-        debounce = setTimeout(() => {
-            filterText = search.value.trim();
-            renderCandidates(allCandidates);
-        }, 200);
+    const searchVal = document.getElementById('security-search').value.toLowerCase().trim();
+    const filterSeverity = document.getElementById('security-filter-severity').value;
+
+    let filtered = candidates.filter(c => {
+        // Only include candidates who have started/completed attempts
+        if (c.attempt_status === 'not_started') return false;
+
+        // Search filter
+        if (searchVal) {
+            const matchesSearch = (c.name || '').toLowerCase().includes(searchVal) ||
+                                  (c.college || '').toLowerCase().includes(searchVal) ||
+                                  (c.candidate_id || '').toLowerCase().includes(searchVal);
+            if (!matchesSearch) return false;
+        }
+
+        // Calculate severity tier local identifier
+        const severity = getCandidateSeverityTier(c);
+        if (filterSeverity && severity !== filterSeverity) {
+            return false;
+        }
+
+        return true;
     });
+
+    if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="10" style="padding:3rem; text-align:center; color:var(--text-secondary);">No security alert files found.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(c => {
+        const severity = getCandidateSeverityTier(c);
+        const securityScore = c.security_score !== undefined ? Math.round(c.security_score) : 100;
+        
+        let severityLabel = 'GREEN';
+        let severityClass = 'green';
+        if (severity === 'red') { severityLabel = 'CRITICAL'; severityClass = 'red'; }
+        else if (severity === 'orange') { severityLabel = 'HIGH'; severityClass = 'orange'; }
+        else if (severity === 'yellow') { severityLabel = 'MEDIUM'; severityClass = 'yellow'; }
+        
+        const statusClass = c.selection_status === 'disqualified' ? 'danger' : (c.selection_status === 'selected' ? 'success' : 'secondary');
+
+        return `
+            <tr style="${severityClass === 'red' ? 'background:rgba(198,40,40,0.015);' : ''}">
+                <td style="font-weight:700;color:var(--text-primary);">${escapeHtml(c.name || 'N/A')}</td>
+                <td><code>${escapeHtml(c.candidate_id || '')}</code></td>
+                <td>${escapeHtml(c.college || 'N/A')}</td>
+                <td style="text-transform:capitalize; font-weight:600;">${c.attempt_status.replace('_',' ')}</td>
+                <td><strong>${c.violation_count}</strong></td>
+                <td><span class="security-severity ${severityClass}">${severityLabel}</span></td>
+                <td><strong style="color:${securityScore < 70 ? '#ef4444' : '#22c55e'}; font-size:0.95rem;">${securityScore}%</strong></td>
+                <td><span class="status-badge secondary">${c.ai_recommendation || '—'}</span></td>
+                <td><span class="status-badge ${statusClass}">${c.selection_status.toUpperCase()}</span></td>
+                <td style="text-align:right;">
+                    <button class="btn-premium btn-premium-primary" style="padding:0.4rem 0.65rem;" onclick="viewSecurityDiagnostic('${c.candidate_id}', '${c.test_id}')">View Details</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
 }
 
-function initExport() {
-    const btn = document.getElementById('export-csv');
-    if (btn) {
-        btn.addEventListener('click', () => {
-            if (!allCandidates.length) {
-                Toast.warning('No Data', 'No candidates to export');
-                return;
-            }
-            const headers = ['Name', 'Email', 'Candidate ID', 'Score', 'Status'];
-            const rows = allCandidates.map(c => [
-                c.name || '',
-                c.email || '',
-                c.candidate_id || c.id || '',
-                c.score !== undefined ? `${c.score}/${c.total_marks || 100}` : 'N/A',
-                c.selection_status || c.status || 'pending',
-            ]);
-            let csv = headers.join(',') + '\n';
-            rows.forEach(row => {
-                csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
-            });
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `candidates_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
-            Toast.success('Exported', 'CSV file downloaded');
-        });
+function getCandidateSeverityTier(c) {
+    if (c.selection_status === 'disqualified' || c.attempt_status === 'disqualified' || c.violation_count >= 6) {
+        return 'red';
+    } else if (c.violation_count >= 3) {
+        return 'orange';
+    } else if (c.violation_count > 0) {
+        return 'yellow';
+    }
+    return 'green';
+}
+
+async function viewSecurityDiagnostic(candidateId, testId) {
+    if (!testId || testId === 'undefined') {
+        Toast.error('Audit Error', 'Candidate has not fully started or submitted the test.');
+        return;
+    }
+    
+    // Reset layout
+    document.getElementById('secDetailName').textContent = 'Loading...';
+    document.getElementById('secDetailId').textContent = '';
+    
+    try {
+        const data = await API.get(`/api/admin/candidate-security/${candidateId}/${testId}`);
+        if (!data || !data.security) {
+            Toast.error('Load Failed', 'No proctoring metrics logged.');
+            return;
+        }
+
+        const sec = data.security;
+        const candidate = data.candidate || {};
+        const testObj = data.test || {};
+        
+        // Populate names
+        document.getElementById('secDetailName').textContent = candidate.name || 'Candidate';
+        document.getElementById('secDetailId').textContent = `ID: ${candidateId} • College: ${candidate.college || '—'}`;
+        
+        // Compute Severity badge
+        const violations = testObj.violation_count || 0;
+        const isDisq = testObj.status === 'disqualified' || data.final_status === 'disqualified';
+        let sevClass = 'green';
+        let sevText = 'Green: Secure';
+        
+        if (isDisq || violations >= 6) { sevClass = 'red'; sevText = 'Critical Severity'; }
+        else if (violations >= 3) { sevClass = 'orange'; sevText = 'High Severity'; }
+        else if (violations > 0) { sevClass = 'yellow'; sevText = 'Medium Severity'; }
+        
+        document.getElementById('secDetailBadge').innerHTML = `<span class="security-severity ${sevClass}">${sevText}</span>`;
+        
+        // Detailed Counters
+        document.getElementById('pStatFullscreen').textContent = sec.fullscreen_violations || 0;
+        document.getElementById('pStatTabSwitch').textContent = sec.tab_switch_count || 0;
+        document.getElementById('pStatCopy').textContent = sec.copy_attempts || 0;
+        document.getElementById('pStatPaste').textContent = sec.paste_attempts || 0;
+        document.getElementById('pStatRefresh').textContent = sec.refresh_attempts || 0;
+        document.getElementById('pStatDevTools').textContent = sec.devtools_attempts || 0;
+        document.getElementById('pStatMultiLogin').textContent = sec.multiple_login_attempts || 0;
+        document.getElementById('pStatDisconnect').textContent = sec.disconnect_events || 0;
+        document.getElementById('pStatIdle').textContent = sec.idle_violations || 0;
+        document.getElementById('pStatSuspicious').textContent = sec.suspicious_activities || 0;
+        
+        // Time taken formatting
+        const tSecs = testObj.time_taken || 0;
+        document.getElementById('pStatTime').textContent = `${Math.floor(tSecs / 60)}m ${tSecs % 60}s`;
+        
+        // Questions answered
+        const answered = (data.question_analytics || []).filter(q => q.answer_submitted).length;
+        document.getElementById('pStatAnswered').textContent = `${answered} / ${(data.question_analytics || []).length}`;
+        
+        // Scores & Action
+        document.getElementById('pStatScore').textContent = `${Math.round(sec.security_score)} / 100`;
+        document.getElementById('pStatAction').textContent = isDisq ? '🚫 DISQUALIFIED' : (violations > 0 ? '⚠️ WARNING ACTIONS LOGGED' : '✅ SECURE VERIFIED');
+        document.getElementById('pStatAction').style.color = isDisq ? '#c62828' : (violations > 0 ? '#f57f17' : '#2e7d32');
+
+        currentDetailCandidateId = candidateId;
+        currentDetailTestId = testId;
+
+        // Show/Hide reassign button depending on status
+        const reassignBtn = document.getElementById('btnReassignTest');
+        if (reassignBtn) {
+            reassignBtn.style.display = 'inline-flex';
+        }
+
+        // Open Dialog
+        document.getElementById('securityDetailModal').classList.add('active');
+    } catch(err) {
+        Toast.error('Load Error', err.message || 'Failed to fetch proctor details.');
     }
 }
 
-function initAutoShortlist() {
-    const btn = document.getElementById('auto-shortlist');
-    if (btn) {
-        btn.addEventListener('click', async () => {
-            if (!confirm('Run AI Auto-Shortlist?\n\n• Score ≥ 80% → Selected\n• Score ≥ 60% → Waitlisted\n• Score < 60% → Rejected\n• Disqualified candidates remain unchanged')) return;
-            try {
-                const data = await API.post('/api/admin/auto-shortlist');
-                Toast.success('AI Shortlisting Done', data.message || 'Completed');
-                await loadStats();
-                await loadCandidates();
-            } catch (err) {
-                Toast.error('Error', err.message || 'Auto-shortlist failed');
-            }
-        });
+let currentDetailCandidateId = null;
+let currentDetailTestId = null;
+
+async function triggerReassign() {
+    if (!currentDetailCandidateId || !currentDetailTestId) return;
+    if (!confirm('Reassign test to this candidate? This will clear all previous answers, scores, and proctoring violations so they can start fresh.')) return;
+    
+    const reassignBtn = document.getElementById('btnReassignTest');
+    if (reassignBtn) reassignBtn.disabled = true;
+    
+    try {
+        const res = await API.post(`/api/admin/tests/${currentDetailTestId}/reset-candidate`, { candidate_id: currentDetailCandidateId });
+        if (res.success || res.message) {
+            Toast.success('Test Reassigned', 'The candidate can now start the test again.');
+            closeSecurityModal();
+            await loadCandidates();
+        }
+    } catch(err) {
+        Toast.error('Reassign Failed', err.message || 'Error occurred');
+    } finally {
+        if (reassignBtn) reassignBtn.disabled = false;
     }
 }
 
-async function viewCandidateDetail(id) {
-    const candidate = allCandidates.find(c => String(c.id || c._id) === String(id));
-    if (!candidate) return;
+function closeSecurityModal() {
+    document.getElementById('securityDetailModal').classList.remove('active');
+}
 
-    const aiRec = candidate.ai_recommendation || '—';
-    const aiScores = candidate.ai_scores || {};
-    const violations = candidate.violation_count || 0;
-    const timeTaken = candidate.time_taken ? `${Math.floor(candidate.time_taken / 60)}m ${candidate.time_taken % 60}s` : 'N/A';
+async function updateCandidateStatus(candidateId, newStatus) {
+    try {
+        await API.post(`/api/admin/candidates/${candidateId}/status`, { status: newStatus });
+        Toast.success('Selection Updated', `Candidate final status set to ${newStatus.toUpperCase()}`);
+        await loadCandidates();
+    } catch (err) {
+        Toast.error('Status Update Failed', err.message || 'Error occurred');
+    }
+}
 
-    const aiRecColor = {
-      'Highly Recommended': '#10b981',
-      'Recommended': '#6366f1',
-      'Borderline': '#f59e0b',
-      'Not Recommended': '#ef4444',
-    }[aiRec] || '#6b7280';
+async function runAutoShortlist() {
+    if (!confirm('Run AI Automated Shortlist Process?\n\n• Final Score ≥ Min Selected Score → Selected\n• Final Score ≥ Min Waitlist Score → Waitlisted\n• Else → Rejected\n• All manual overrides will be logged.')) return;
+    try {
+        const res = await API.post('/api/admin/auto-shortlist');
+        Toast.success('AI Selection Done', res.message || 'Auto-shortlisting complete.');
+        await loadCandidates();
+    } catch(err) {
+        Toast.error('Auto Selection Failed', err.message || 'Server error occurred');
+    }
+}
 
-    const overlay = document.createElement('div');
-    overlay.className = 'overlay candidate-detail-overlay';
-    overlay.innerHTML = `
-      <div class="overlay-backdrop"></div>
-      <div class="overlay-content">
-        <div class="overlay-header">
-          <h3>${escapeHtml(candidate.name || 'Candidate Detail')}</h3>
-          <button class="overlay-close">&times;</button>
-        </div>
-        <div class="overlay-body">
-          <div class="detail-grid">
-            <div class="detail-item"><label>Name</label><span>${escapeHtml(candidate.name || 'N/A')}</span></div>
-            <div class="detail-item"><label>Email</label><span>${escapeHtml(candidate.email || 'N/A')}</span></div>
-            <div class="detail-item"><label>Candidate ID</label><span><code>${escapeHtml(candidate.candidate_id || candidate.id || '')}</code></span></div>
-            <div class="detail-item"><label>Score</label><span style="font-size:1.1rem;font-weight:700;color:var(--accent-primary)">${candidate.score !== undefined ? `${candidate.score}/${candidate.total_marks || 100}` : 'N/A'}</span></div>
-            <div class="detail-item"><label>Time Taken</label><span>${timeTaken}</span></div>
-            <div class="detail-item"><label>Security Violations</label><span style="color:${violations > 0 ? '#ef4444' : '#10b981'}">${violations}</span></div>
-            <div class="detail-item full-width" style="background:${aiRecColor}15;border:1px solid ${aiRecColor}40;border-radius:8px;padding:0.75rem">
-              <label style="color:${aiRecColor}">🤖 AI Recommendation</label>
-              <span style="font-size:0.95rem;font-weight:700;color:${aiRecColor}">${aiRec}</span>
-            </div>
-            ${Object.keys(aiScores).some(k => aiScores[k] > 0) ? `
-            <div class="detail-item full-width">
-              <label>AI Score Breakdown</label>
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.4rem;margin-top:0.4rem">
-                ${Object.entries(aiScores).map(([k, v]) => `
-                  <div style="text-align:center;background:var(--bg-primary);border-radius:6px;padding:0.4rem">
-                    <div style="font-size:0.95rem;font-weight:700;color:var(--accent-primary)">${Math.round(v)}%</div>
-                    <div style="font-size:0.6rem;color:var(--text-tertiary);text-transform:uppercase">${k.replace('_', ' ')}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>` : ''}
-          </div>
-        </div>
-        <div class="overlay-footer">
-          <button class="btn btn-secondary overlay-close-btn">Close</button>
-        </div>
-      </div>
-    `;
+function exportCsv() {
+    if (!allCandidates.length) {
+        Toast.warning('No Records', 'No candidate data to export.');
+        return;
+    }
+    const headers = ['Candidate Name', 'Email Address', 'Candidate ID', 'Score Obtained', 'Attempt Status', 'AI Rec Verdict', 'Final Selection Status'];
+    const rows = allCandidates.map(c => [
+        c.name || '',
+        c.email || '',
+        c.candidate_id || '',
+        c.score !== undefined ? `${c.score}/100` : 'N/A',
+        c.attempt_status || 'pending',
+        c.ai_recommendation || '—',
+        c.selection_status || 'pending'
+    ]);
+    let csv = headers.join(',') + '\n';
+    rows.forEach(row => {
+        csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `candidate_verdicts_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    Toast.success('CSV Exported', 'Candidate checklist downloaded successfully.');
+}
 
-    document.body.appendChild(overlay);
-    requestAnimationFrame(() => overlay.classList.add('active'));
+// ─── QUESTION BANK CRUD ───
+async function loadQuestions() {
+    try {
+        const questions = await API.get('/api/admin/questions');
+        allQuestions = questions || [];
+        renderQuestionsTable(allQuestions);
+    } catch(err) {
+        console.error('Questions load error:', err);
+    }
+}
 
-    const close = () => {
-      overlay.classList.remove('active');
-      setTimeout(() => overlay.remove(), 250);
+function renderQuestionsTable(questions) {
+    const tbody = document.getElementById('questionsBody');
+    if (!tbody) return;
+    
+    if (!questions || questions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="padding:3rem;text-align:center;color:var(--text-secondary);">
+            <div style="font-size:2.5rem;opacity:0.3;margin-bottom:0.75rem;">❓</div>
+            No questions found in database.
+        </td></tr>`;
+        return;
+    }
+    
+    tbody.innerHTML = questions.map(q => {
+        const textTrunc = q.description && q.description.length > 70 
+            ? q.description.substring(0, 70) + '...' 
+            : (q.description || q.text || '');
+        const titleText = q.title || 'Untitled';
+        
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight:700;color:var(--text-primary);">${escapeHtml(titleText)}</div>
+                    <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.15rem;max-width:320px;word-break:break-all;">${escapeHtml(textTrunc)}</div>
+                </td>
+                <td><strong style="color:var(--color-primary);">${escapeHtml(q.category || 'Logic')}</strong></td>
+                <td><code style="background:var(--bg-secondary);padding:0.15rem 0.35rem;border-radius:4px;font-size:0.78rem;">${(q.question_type || q.type || 'mcq').toUpperCase()}</code></td>
+                <td><span class="difficulty-badge ${q.difficulty_level || q.difficulty || 'medium'}">${q.difficulty_level || q.difficulty || 'medium'}</span></td>
+                <td><strong>${q.marks || q.xp_points || 10} XP</strong></td>
+                <td style="font-family:monospace;">${q.time_limit || 60}s</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:0.35rem;">
+                        <span style="width:7px;height:7px;border-radius:50%;background:${q.is_active ? '#22c55e' : '#9eb1bb'};"></span>
+                        <span>${q.is_active ? 'Active' : 'Inactive'}</span>
+                    </div>
+                </td>
+                <td style="text-align:right;white-space:nowrap;">
+                    <button class="btn-premium btn-premium-secondary" style="padding:0.4rem 0.65rem;" onclick="openEditDrawer('${q.id}')">✏️ Edit</button>
+                    <button class="btn-premium btn-premium-danger" style="padding:0.4rem 0.65rem;" onclick="deleteQuestion('${q.id}')">🗑️ Delete</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterQuestions() {
+    const search = document.getElementById('question-search').value.toLowerCase();
+    const cat = document.getElementById('filterCategory').value.toLowerCase();
+    const diff = document.getElementById('filterDifficulty').value.toLowerCase();
+    const status = document.getElementById('filterStatus').value;
+    
+    const filtered = allQuestions.filter(q => {
+        const qTitle = (q.title || '').toLowerCase();
+        const qDesc = (q.description || q.text || '').toLowerCase();
+        const qCat = (q.category || '').toLowerCase();
+        const qDiff = (q.difficulty_level || q.difficulty || '').toLowerCase();
+        
+        const matchesSearch = !search || qTitle.includes(search) || qDesc.includes(search);
+        const matchesCat = !cat || qCat.includes(cat);
+        const matchesDiff = !diff || qDiff === diff;
+        
+        let matchesStatus = true;
+        if (status === 'active') matchesStatus = q.is_active === true;
+        if (status === 'inactive') matchesStatus = q.is_active === false;
+        
+        return matchesSearch && matchesCat && matchesDiff && matchesStatus;
+    });
+    
+    renderQuestionsTable(filtered);
+}
+
+function toggleDrawer(isOpen) {
+    const overlay = document.getElementById('drawerOverlay');
+    if (isOpen) overlay.classList.add('open');
+    else overlay.classList.remove('open');
+}
+
+function closeDrawer(e) {
+    if (e.target.id === 'drawerOverlay') toggleDrawer(false);
+}
+
+// Option fields visibility toggle inside Question Bank Create/Edit Drawer
+function toggleFormOptionsVisibility() {
+    const type = document.getElementById('formType').value;
+    const wrapper = document.getElementById('formOptionsWrapper');
+    if (type === 'mcq') {
+        wrapper.style.display = 'block';
+        document.getElementById('optA').required = true;
+        document.getElementById('optB').required = true;
+    } else {
+        wrapper.style.display = 'none';
+        document.getElementById('optA').required = false;
+        document.getElementById('optB').required = false;
+    }
+}
+
+function openCreateDrawer() {
+    document.getElementById('drawerTitle').textContent = 'Create Question';
+    document.getElementById('formQuestionId').value = '';
+    document.getElementById('formTitle').value = '';
+    document.getElementById('formDescription').value = '';
+    document.getElementById('formCategory').value = 'Logic';
+    document.getElementById('formDifficulty').value = 'medium';
+    document.getElementById('formType').value = 'mcq';
+    document.getElementById('formCorrect').value = '';
+    document.getElementById('formExplanation').value = '';
+    document.getElementById('formMarks').value = 10;
+    document.getElementById('formTimeLimit').value = 60;
+    document.getElementById('formIsActive').checked = true;
+    
+    document.getElementById('optA').value = '';
+    document.getElementById('optB').value = '';
+    document.getElementById('optC').value = '';
+    document.getElementById('optD').value = '';
+    
+    toggleFormOptionsVisibility();
+    toggleDrawer(true);
+}
+
+function openEditDrawer(qId) {
+    const q = allQuestions.find(x => x.id === qId);
+    if (!q) return;
+    
+    document.getElementById('drawerTitle').textContent = 'Edit Question';
+    document.getElementById('formQuestionId').value = q.id;
+    document.getElementById('formTitle').value = q.title || '';
+    document.getElementById('formDescription').value = q.description || q.text || '';
+    document.getElementById('formCategory').value = q.category || 'Logic';
+    document.getElementById('formType').value = q.question_type || q.type || 'mcq';
+    document.getElementById('formCorrect').value = q.correct_answer || q.correct || '';
+    document.getElementById('formExplanation').value = q.explanation || '';
+    document.getElementById('formDifficulty').value = q.difficulty_level || q.difficulty || 'medium';
+    document.getElementById('formMarks').value = q.marks || q.xp_points || 10;
+    document.getElementById('formTimeLimit').value = q.time_limit || 60;
+    document.getElementById('formIsActive').checked = q.is_active !== false;
+    
+    const opts = q.options || [];
+    document.getElementById('optA').value = opts[0] || '';
+    document.getElementById('optB').value = opts[1] || '';
+    document.getElementById('optC').value = opts[2] || '';
+    document.getElementById('optD').value = opts[3] || '';
+    
+    toggleFormOptionsVisibility();
+    toggleDrawer(true);
+}
+
+async function submitQuestionForm(e) {
+    e.preventDefault();
+    const saveBtn = document.getElementById('btnSaveQuestion');
+    saveBtn.disabled = true;
+    
+    const qId = document.getElementById('formQuestionId').value;
+    const type = document.getElementById('formType').value;
+    
+    let options = [];
+    if (type === 'mcq') {
+        options = [
+            document.getElementById('optA').value.trim(),
+            document.getElementById('optB').value.trim(),
+        ];
+        const optC = document.getElementById('optC').value.trim();
+        const optD = document.getElementById('optD').value.trim();
+        if (optC) options.push(optC);
+        if (optD) options.push(optD);
+    }
+    
+    const payload = {
+        title: document.getElementById('formTitle').value.trim(),
+        description: document.getElementById('formDescription').value.trim(),
+        category: document.getElementById('formCategory').value,
+        question_type: type,
+        options: options,
+        correct_answer: document.getElementById('formCorrect').value.trim(),
+        explanation: document.getElementById('formExplanation').value.trim(),
+        difficulty_level: document.getElementById('formDifficulty').value,
+        marks: parseInt(document.getElementById('formMarks').value, 10),
+        time_limit: parseInt(document.getElementById('formTimeLimit').value, 10),
+        is_active: document.getElementById('formIsActive').checked
+    };
+    
+    try {
+        let res;
+        if (qId) {
+            res = await API.put(`/api/admin/questions/${qId}`, payload);
+            if (res.success) Toast.success('Success', 'Question updated in question bank.');
+        } else {
+            res = await API.post('/api/admin/questions', payload);
+            if (res.success) Toast.success('Success', 'New question created.');
+        }
+        
+        toggleDrawer(false);
+        await loadQuestions();
+    } catch(err) {
+        Toast.error('Save Failed', err.message || 'Error occurred');
+    } finally {
+        saveBtn.disabled = false;
+    }
+    return false;
+}
+
+async function deleteQuestion(qId) {
+    if (!confirm('Are you sure you want to permanently delete this question?')) return;
+    try {
+        const res = await API.delete(`/api/admin/questions/${qId}`);
+        if (res.success) {
+            Toast.success('Deleted', 'Question removed from question bank.');
+            await loadQuestions();
+        }
+    } catch(err) {
+        Toast.error('Delete Failed', err.message || 'Error occurred');
+    }
+}
+
+// ─── SYSTEM SETTINGS OPERATIONS ───
+let currentSettings = {};
+
+function switchSettingsSubtab(subtabId) {
+    document.querySelectorAll('.settings-subtab-content').forEach(c => c.style.display = 'none');
+    document.querySelectorAll('.settings-subtab-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById('subtab-' + subtabId).style.display = 'block';
+    document.getElementById('btn-subtab-' + subtabId).classList.add('active');
+}
+
+function calculateWeightsTotal() {
+    const logic = parseInt(document.getElementById('weightLogic').value) || 0;
+    const creativity = parseInt(document.getElementById('weightCreativity').value) || 0;
+    const innovation = parseInt(document.getElementById('weightInnovation').value) || 0;
+    const problemSolving = parseInt(document.getElementById('weightProblemSolving').value) || 0;
+    const humanIntel = parseInt(document.getElementById('weightHumanIntelligence').value) || 0;
+    const security = parseInt(document.getElementById('weightSecurity').value) || 0;
+    
+    const sum = logic + creativity + innovation + problemSolving + humanIntel + security;
+    const bar = document.getElementById('weightTotalBar');
+    const val = document.getElementById('weightTotalVal');
+    
+    val.textContent = sum + '%';
+    
+    if (sum === 100) {
+        bar.className = 'weight-total-bar valid';
+        document.getElementById('btnSave').disabled = false;
+    } else {
+        bar.className = 'weight-total-bar invalid';
+        document.getElementById('btnSave').disabled = true;
+    }
+}
+
+async function loadSettingsData() {
+    try {
+        const stats = await API.get('/api/admin/settings');
+        currentSettings = stats;
+        
+        // Tab 1: Assessment Setup
+        document.getElementById('totalQuestions').value = stats.total_questions || 15;
+        document.getElementById('testDurationMinutes').value = stats.test_duration_minutes || 15;
+        document.getElementById('testStartDate').value = stats.test_start_date ? stats.test_start_date.substring(0, 16) : '';
+        document.getElementById('testEndDate').value = stats.test_end_date ? stats.test_end_date.substring(0, 16) : '';
+        document.getElementById('registrationStartDate').value = stats.registration_start_date ? stats.registration_start_date.substring(0, 16) : '';
+        document.getElementById('registrationEndDate').value = stats.registration_end_date ? stats.registration_end_date.substring(0, 16) : '';
+        document.getElementById('registrationStatus').value = stats.registration_status || 'open';
+        document.getElementById('testAvailability').value = stats.test_availability || 'open';
+        document.getElementById('testStatus').value = stats.test_status || 'published';
+        document.getElementById('leaderboardEnabled').value = String(stats.leaderboard_enabled);
+
+        // Tab 2: Security Policies
+        document.getElementById('secFullscreenEnabled').checked = stats.sec_fullscreen_enabled;
+        document.getElementById('secDevtoolsEnabled').checked = stats.sec_devtools_enabled;
+        document.getElementById('secTabSwitchEnabled').checked = stats.sec_tab_switch_enabled;
+        document.getElementById('secCopyEnabled').checked = stats.sec_copy_enabled;
+        document.getElementById('secRightClickEnabled').checked = stats.sec_right_click_enabled;
+        document.getElementById('secRefreshEnabled').checked = stats.sec_refresh_enabled;
+        document.getElementById('secIdleEnabled').checked = stats.sec_idle_enabled;
+        document.getElementById('secInternetDisconnectEnabled').checked = stats.sec_internet_disconnect_enabled;
+        document.getElementById('secAutoDisqualifyEnabled').checked = stats.sec_auto_disqualify_enabled;
+        
+        document.getElementById('secTabSwitchLimit').value = stats.sec_tab_switch_limit || 3;
+        document.getElementById('secWindowBlurLimit').value = stats.sec_window_blur_limit || 3;
+        document.getElementById('secIdleTimeoutSeconds').value = stats.sec_idle_timeout_seconds || 60;
+        document.getElementById('secDisconnectGraceSeconds').value = stats.sec_disconnect_grace_seconds || 30;
+
+        // Tab 3: Weights
+        document.getElementById('weightLogic').value = stats.weight_logic !== undefined ? stats.weight_logic : 40;
+        document.getElementById('weightCreativity').value = stats.weight_creativity !== undefined ? stats.weight_creativity : 20;
+        document.getElementById('weightInnovation').value = stats.weight_innovation !== undefined ? stats.weight_innovation : 10;
+        document.getElementById('weightProblemSolving').value = stats.weight_problem_solving !== undefined ? stats.weight_problem_solving : 10;
+        document.getElementById('weightHumanIntelligence').value = stats.weight_human_intelligence !== undefined ? stats.weight_human_intelligence : 10;
+        document.getElementById('weightSecurity').value = stats.weight_security !== undefined ? stats.weight_security : 10;
+        
+        // Tab 4: Shortlist
+        document.getElementById('shortlistLimit').value = stats.shortlist_top_n || 30;
+        document.getElementById('minScoreRequired').value = stats.min_score_required || 80;
+        document.getElementById('waitlistScoreRequired').value = stats.waitlist_score_required || 60;
+        document.getElementById('secScoreRequired').value = stats.sec_score_required || 70;
+        document.getElementById('pctSelection').value = stats.pct_selection || 10;
+        document.getElementById('pctAiShortlist').value = stats.pct_ai_shortlist || 50;
+        document.getElementById('pctManualShortlist').value = stats.pct_manual_shortlist || 50;
+        document.getElementById('resultsPublished').checked = stats.results_published;
+
+        calculateWeightsTotal();
+    } catch(e) {
+        console.error('Failed to load system settings:', e);
+    }
+}
+
+async function saveSettings(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSave');
+    btn.disabled = true;
+    
+    // Validate weight total
+    const logic = parseInt(document.getElementById('weightLogic').value) || 0;
+    const creativity = parseInt(document.getElementById('weightCreativity').value) || 0;
+    const innovation = parseInt(document.getElementById('weightInnovation').value) || 0;
+    const problemSolving = parseInt(document.getElementById('weightProblemSolving').value) || 0;
+    const humanIntel = parseInt(document.getElementById('weightHumanIntelligence').value) || 0;
+    const security = parseInt(document.getElementById('weightSecurity').value) || 0;
+    
+    if (logic + creativity + innovation + problemSolving + humanIntel + security !== 100) {
+        Toast.error('Validation Error', 'AI weights sum must equal exactly 100%.');
+        btn.disabled = false;
+        return false;
+    }
+    
+    const payload = {
+        leaderboard_enabled: document.getElementById('leaderboardEnabled').value === 'true',
+        results_published: document.getElementById('resultsPublished').checked,
+        
+        total_questions: parseInt(document.getElementById('totalQuestions').value, 10),
+        test_duration_minutes: parseInt(document.getElementById('testDurationMinutes').value, 10),
+        test_start_date: document.getElementById('testStartDate').value,
+        test_end_date: document.getElementById('testEndDate').value,
+        registration_start_date: document.getElementById('registrationStartDate').value,
+        registration_end_date: document.getElementById('registrationEndDate').value,
+        registration_status: document.getElementById('registrationStatus').value,
+        test_status: document.getElementById('testStatus').value,
+        test_availability: document.getElementById('testAvailability').value,
+
+        sec_fullscreen_enabled: document.getElementById('secFullscreenEnabled').checked,
+        sec_devtools_enabled: document.getElementById('secDevtoolsEnabled').checked,
+        sec_tab_switch_enabled: document.getElementById('secTabSwitchEnabled').checked,
+        sec_copy_enabled: document.getElementById('secCopyEnabled').checked,
+        sec_paste_enabled: false,
+        sec_right_click_enabled: document.getElementById('secRightClickEnabled').checked,
+        sec_refresh_enabled: document.getElementById('secRefreshEnabled').checked,
+        sec_multiple_login_enabled: false,
+        sec_idle_enabled: document.getElementById('secIdleEnabled').checked,
+        sec_internet_disconnect_enabled: document.getElementById('secInternetDisconnectEnabled').checked,
+        sec_auto_disqualify_enabled: document.getElementById('secAutoDisqualifyEnabled').checked,
+        
+        sec_tab_switch_limit: parseInt(document.getElementById('secTabSwitchLimit').value, 10),
+        sec_window_blur_limit: parseInt(document.getElementById('secWindowBlurLimit').value, 10),
+        sec_idle_timeout_seconds: parseInt(document.getElementById('secIdleTimeoutSeconds').value, 10),
+        sec_disconnect_grace_seconds: parseInt(document.getElementById('secDisconnectGraceSeconds').value, 10),
+
+        weight_logic: logic,
+        weight_creativity: creativity,
+        weight_innovation: innovation,
+        weight_problem_solving: problemSolving,
+        weight_human_intelligence: humanIntel,
+        weight_security: security,
+
+        shortlist_top_n: parseInt(document.getElementById('shortlistLimit').value, 10),
+        min_score_required: parseInt(document.getElementById('minScoreRequired').value, 10),
+        waitlist_score_required: parseInt(document.getElementById('waitlistScoreRequired').value, 10),
+        sec_score_required: parseInt(document.getElementById('secScoreRequired').value, 10),
+        pct_selection: parseInt(document.getElementById('pctSelection').value, 10),
+        pct_ai_shortlist: parseInt(document.getElementById('pctAiShortlist').value, 10),
+        pct_manual_shortlist: parseInt(document.getElementById('pctManualShortlist').value, 10),
+    };
+    
+    try {
+        const res = await API.post('/api/admin/settings', payload);
+        if (res.success) {
+            Toast.success('Saved', 'Global configurations updated successfully.');
+        }
+    } catch(err) {
+        Toast.error('Save Failed', err.message || 'Error saving settings.');
+    } finally {
+        btn.disabled = false;
+    }
+    return false;
+}
+
+// ─── ANALYTICS CONTROLLER ───
+async function loadAnalytics() {
+    try {
+        const data = await API.get('/api/admin/analytics-data');
+        if (!data) return;
+        
+        // Destroy existing chart instances to avoid overlaps
+        Object.values(chartInstances).forEach(c => c.destroy());
+        
+        chartInstances['scoreDist'] = renderScoreDistribution(data.score_distribution);
+        chartInstances['status'] = renderSelectionStatus(data.selection_status);
+        chartInstances['aiRec'] = renderAIRecommendations(data.ai_recommendations);
+        chartInstances['violations'] = renderViolationsBreakdown(data.violations_breakdown);
+    } catch(err) {
+        console.error('Analytics load error:', err);
+    }
+}
+
+function renderScoreDistribution(scores) {
+    const ctx = document.getElementById('scoreDistChart').getContext('2d');
+    const labels = Object.keys(scores);
+    const values = Object.values(scores);
+    
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Students Count',
+                data: values,
+                backgroundColor: 'rgba(30, 34, 11, 0.75)',
+                borderColor: '#1E220B',
+                borderWidth: 1.5,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(30, 34, 11, 0.04)' },
+                    ticks: { color: 'var(--text-secondary)' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: 'var(--text-secondary)' }
+                }
+            }
+        }
+    });
+}
+
+function renderSelectionStatus(statusCounts) {
+    const ctx = document.getElementById('statusChart').getContext('2d');
+
+    const ORDER = ['selected', 'waitlisted', 'rejected', 'disqualified', 'pending'];
+    const COLOR_MAP = {
+        selected:     { bg: '#22c55e', border: '#15803d' },  // Green-500   — Selected ✅
+        waitlisted:   { bg: '#facc15', border: '#ca8a04' },  // Yellow-400  — Waitlisted 🟡
+        rejected:     { bg: '#f43f5e', border: '#be123c' },  // Rose-500    — Rejected ❌
+        disqualified: { bg: '#6366f1', border: '#4338ca' },  // Indigo-500  — Disqualified 🔵
+        pending:      { bg: '#64748b', border: '#334155' }   // Slate-500   — Pending ⚪
     };
 
-    overlay.querySelector('.overlay-backdrop').addEventListener('click', close);
-    overlay.querySelector('.overlay-close').addEventListener('click', close);
-    overlay.querySelector('.overlay-close-btn').addEventListener('click', close);
+    const labels = [];
+    const values = [];
+    const bgColors = [];
+    const borderColors = [];
+    const total = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+
+    ORDER.forEach(key => {
+        if (key in statusCounts) {
+            labels.push(key.charAt(0).toUpperCase() + key.slice(1));
+            // Use 0.001 for zero counts — invisible segment but legend dot still shows
+            values.push(statusCounts[key] > 0 ? statusCounts[key] : 0.001);
+            bgColors.push(COLOR_MAP[key].bg);
+            borderColors.push(COLOR_MAP[key].border);
+        }
+    });
+
+    if (values.every(v => v <= 0.001)) {
+        // All zero — replace with real no-data placeholder
+        labels.length = 0; values.length = 0; bgColors.length = 0; borderColors.length = 0;
+        labels.push('No Data Yet');
+        values.push(1);
+        bgColors.push('#1e293b');
+        borderColors.push('#334155');
+    }
+
+    return new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: bgColors,
+                borderColor: borderColors,
+                borderWidth: 2,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#1e293b',
+                        boxWidth: 14,
+                        padding: 14,
+                        font: { size: 12, weight: '500' },
+                        usePointStyle: true,
+                        pointStyle: 'circle'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            const pct = total > 0 ? ((ctx.parsed / total) * 100).toFixed(1) : 0;
+                            return `  ${ctx.label}: ${ctx.parsed} candidates (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
-function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+function renderAIRecommendations(aiRecs) {
+    const ctx = document.getElementById('aiRecChart').getContext('2d');
+    const labels = Object.keys(aiRecs);
+    const values = Object.values(aiRecs);
+    
+    return new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: [
+                    '#8b5cf6', // Elite Candidate
+                    '#10b981', // Highly Recommended
+                    '#3b82f6', // Recommended
+                    '#f59e0b', // Waitlisted
+                    '#71717a', // Not Recommended
+                    '#ef4444'  // Disqualified
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: 'var(--text-secondary)', boxWidth: 12 }
+                }
+            }
+        }
+    });
+}
+
+function renderViolationsBreakdown(violations) {
+    const ctx = document.getElementById('violationsChart').getContext('2d');
+    const rawLabels = Object.keys(violations);
+    const labels = rawLabels.map(l => l.replace('_', ' ').toUpperCase());
+    const values = Object.values(violations);
+    
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Count',
+                data: values,
+                backgroundColor: 'rgba(198, 40, 40, 0.75)',
+                borderColor: '#c62828',
+                borderWidth: 1.5,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(30, 34, 11, 0.04)' },
+                    ticks: { color: 'var(--text-secondary)' }
+                },
+                y: {
+                    grid: { display: false },
+                    ticks: { color: 'var(--text-secondary)', font: { size: 9 } }
+                }
+            }
+        }
+    });
 }
 
 function escapeHtml(str) {

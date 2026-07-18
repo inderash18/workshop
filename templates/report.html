@@ -3,189 +3,1212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report — AI Next Gen</title>
+    <title>Assessment Report — AI Next Gen</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        :root{--bg:#0a0a0f;--bg-card:rgba(255,255,255,.03);--border:rgba(255,255,255,.06);--text-primary:#f0f0f5;--text-secondary:#9ca3af;--text-muted:#6b7280;--accent:#6366f1;--accent-light:#818cf8}
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text-primary);padding:2rem;min-height:100vh}
-        .report{max-width:900px;margin:0 auto}
-        .report-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
-        .report-topbar .brand{display:flex;align-items:center;gap:.5rem;font-weight:700;font-size:1rem}
-        .report-topbar .brand img{width:28px;height:28px;border-radius:6px}
-        .report-actions{display:flex;gap:.5rem}
-        .btn{padding:.5rem 1rem;border-radius:8px;font-size:.8rem;font-weight:600;border:none;cursor:pointer;transition:all .2s}
-        .btn-print{background:var(--accent);color:#fff}
-        .btn-print:hover{box-shadow:0 4px 12px rgba(99,102,241,.3)}
-        .btn-close{background:rgba(255,255,255,.06);color:var(--text-secondary);border:1px solid var(--border)}
-        .btn-close:hover{background:rgba(255,255,255,.1)}
-        .report-header{padding:2rem;border-radius:16px;background:var(--bg-card);border:1px solid var(--border);margin-bottom:1.5rem;position:relative;overflow:hidden}
-        .report-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#8b5cf6,#a78bfa)}
-        .report-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
-        .report-header h1{font-size:1.5rem;font-weight:800}
-        .status-badge{padding:.3rem .75rem;border-radius:999px;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
-        .status-badge.passed{background:rgba(34,197,94,.12);color:#22c55e}
-        .status-badge.failed{background:rgba(239,68,68,.12);color:#fca5a5}
-        .status-badge.completed{background:rgba(99,102,241,.12);color:#818cf8}
-        .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
-        .info-item label{display:block;font-size:.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem}
-        .info-item span{font-size:.9rem;color:var(--text-primary);font-weight:500}
-        .score-section{padding:2rem;border-radius:16px;background:var(--bg-card);border:1px solid var(--border);margin-bottom:1.5rem;text-align:center}
-        .score-section h2{font-size:.85rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem}
-        .final-score{font-size:4rem;font-weight:900;background:linear-gradient(135deg,var(--accent),#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
-        .final-score-label{font-size:.9rem;color:var(--text-muted);margin-top:.25rem}
-        .score-breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:1.5rem}
-        .breakdown-item{text-align:center;padding:1rem;border-radius:12px;background:rgba(255,255,255,.02)}
-        .breakdown-item .bi-val{font-size:1.25rem;font-weight:700;color:var(--text-primary)}
-        .breakdown-item .bi-label{font-size:.75rem;color:var(--text-muted);margin-top:.2rem}
-        .breakdown-bar{width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,.06);margin-top:.5rem;overflow:hidden}
-        .breakdown-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--accent),#8b5cf6)}
-        .section-card{padding:1.5rem;border-radius:16px;background:var(--bg-card);border:1px solid var(--border);margin-bottom:1.5rem}
-        .section-card h2{font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
-        .achievements-list{display:flex;flex-wrap:wrap;gap:.5rem}
-        .achievement-badge{padding:.4rem .75rem;border-radius:8px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.12);font-size:.8rem;color:#fde047;font-weight:500;display:flex;align-items:center;gap:.3rem}
-        .questions-table{width:100%;border-collapse:collapse;font-size:.82rem}
-        .questions-table th{text-align:left;padding:.6rem .75rem;font-size:.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
-        .questions-table td{padding:.6rem .75rem;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text-primary)}
-        .questions-table tr:hover td{background:rgba(255,255,255,.02)}
-        .correct{color:#22c55e;font-weight:600}
-        .incorrect{color:#fca5a5;font-weight:600}
-        .partial{color:#eab308;font-weight:600}
-        .no-answer{color:var(--text-muted)}
-        .report-footer{text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.8rem;border-top:1px solid var(--border);margin-top:1rem}
-        @media print{
-            body{background:#fff;color:#111;padding:1rem}
-            :root{--bg:#fff;--bg-card:#f9fafb;--border:#e5e7eb;--text-primary:#111;--text-secondary:#6b7280;--text-muted:#9ca3af}
-            .report-actions{display:none!important}
-            .btn{display:none!important}
-            .report-header::before{background:#6366f1!important}
-            .final-score{background:none;-webkit-text-fill-color:#6366f1;color:#6366f1}
-            .status-badge.passed{background:#dcfce7;color:#16a34a}
-            .status-badge.failed{background:#fee2e2;color:#dc2626}
-            .section-card,.report-header,.score-section{border:1px solid #e5e7eb;background:#f9fafb}
+        :root {
+            --bg-primary: #09090b;
+            --bg-secondary: #121214;
+            --bg-tertiary: #18181b;
+            --border-default: #27272a;
+            --border-subtle: #3f3f46;
+            
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            
+            --color-primary: #ff4d4d;
+            --color-primary-glow: rgba(255, 77, 77, 0.15);
+            
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-info: #3b82f6;
+            
+            --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
         }
-        @media(max-width:768px){.info-grid{grid-template-columns:1fr}.report-topbar{flex-direction:column;gap:1rem}}
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-display);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 2.5rem 2rem;
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .report-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* ----- Header Topbar ----- */
+        .report-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        .report-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .report-brand img {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1px solid var(--border-default);
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.82rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            border: 1px solid transparent;
+        }
+
+        .btn-print {
+            background: var(--color-primary);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 77, 77, 0.25);
+        }
+        .btn-print:hover {
+            background: #ff3333;
+            transform: translateY(-1px);
+        }
+
+        .btn-close {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border-color: var(--border-default);
+        }
+        .btn-close:hover {
+            background: var(--border-default);
+            color: var(--text-primary);
+        }
+
+        /* ----- Candidate Summary Header ----- */
+        .candidate-header-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 16px;
+            padding: 2.2rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .candidate-header-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-primary), #8b5cf6, var(--color-info));
+        }
+
+        .candidate-info-block h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .candidate-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .meta-item label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .meta-item span {
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .status-badge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .status-badge-container label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .selection-pill {
+            padding: 0.5rem 1.25rem;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border: 1px solid transparent;
+        }
+
+        .selection-pill.selected {
+            background: rgba(34, 197, 94, 0.12);
+            color: var(--color-success);
+            border-color: rgba(34, 197, 94, 0.2);
+        }
+        .selection-pill.waitlisted {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--color-warning);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+        .selection-pill.rejected {
+            background: rgba(113, 113, 122, 0.12);
+            color: var(--text-secondary);
+            border-color: rgba(113, 113, 122, 0.2);
+        }
+        .selection-pill.disqualified {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--color-danger);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        /* ----- Main Split Dashboard ----- */
+        .report-dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.7fr 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .report-section-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: 16px;
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-section-card h2 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-default);
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Metric Scores Box */
+        .score-headline-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-default);
+            padding-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .score-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-col label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.25rem;
+        }
+
+        .score-huge-val {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1;
+        }
+
+        .score-huge-val.primary {
+            background: linear-gradient(135deg, var(--color-primary), #ff8080);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-huge-val.security {
+            color: var(--color-success);
+        }
+
+        .score-huge-val.security.warning {
+            color: var(--color-warning);
+        }
+
+        .score-huge-val.security.danger {
+            color: var(--color-danger);
+        }
+
+        /* Score Details List */
+        .stats-summary-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .stat-summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .stat-summary-row span {
+            color: var(--text-secondary);
+        }
+
+        .stat-summary-row strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Achievements list */
+        .achievements-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .achievement-pill {
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            background: rgba(234, 179, 8, 0.08);
+            border: 1px solid rgba(234, 179, 8, 0.15);
+            color: #fde047;
+        }
+
+        /* AI Recommendation Alert */
+        .ai-recommendation-alert {
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .ai-recommendation-alert h4 {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #c084fc;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+        .ai-recommendation-alert p {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        /* AI Evaluation Grid */
+        .ai-evaluation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .evaluation-bar-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .eval-label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .eval-name {
+            color: var(--text-secondary);
+        }
+
+        .eval-value {
+            color: var(--text-primary);
+        }
+
+        .eval-bar-track {
+            height: 6px;
+            background-color: var(--border-default);
+            border-radius: 99px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .eval-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, var(--color-primary), #8b5cf6);
+        }
+
+        /* Security List */
+        .security-violations-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .security-violations-table td {
+            padding: 0.65rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .security-violations-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .violation-name {
+            color: var(--text-secondary);
+        }
+
+        .violation-val {
+            text-align: right;
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+
+        .violation-val.alert {
+            color: var(--color-danger);
+        }
+
+        .violation-val.secure {
+            color: var(--color-success);
+        }
+
+        /* Question Analysis */
+        .report-table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border-default);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            text-align: left;
+        }
+
+        .report-table th {
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        .report-table td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border-default);
+            vertical-align: top;
+            color: var(--text-primary);
+        }
+
+        .report-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge-diff {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .badge-diff.easy { background: rgba(34, 197, 94, 0.1); color: var(--color-success); }
+        .badge-diff.medium { background: rgba(245, 158, 11, 0.1); color: var(--color-warning); }
+        .badge-diff.hard { background: rgba(239, 68, 68, 0.1); color: var(--color-danger); }
+
+        .correct-indicator { color: var(--color-success); font-weight: 700; }
+        .incorrect-indicator { color: var(--color-danger); font-weight: 700; }
+        .skipped-indicator { color: var(--text-muted); font-style: italic; }
+
+        .report-footer {
+            text-align: center;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border-default);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        /* Print Settings */
+        @media print {
+            body {
+                background: #ffffff;
+                color: #111111;
+                padding: 1cm;
+            }
+            :root {
+                --bg-primary: #ffffff;
+                --bg-secondary: #f9f9fb;
+                --bg-tertiary: #f3f3f5;
+                --border-default: #e4e4e7;
+                --text-primary: #111111;
+                --text-secondary: #52525b;
+                --text-muted: #71717a;
+            }
+            .report-actions, .btn-action {
+                display: none !important;
+            }
+            .candidate-header-card {
+                border: 1px solid #d4d4d8 !important;
+                background: #f9f9fb !important;
+            }
+            .report-section-card {
+                border: 1px solid #d4d4d8 !important;
+                background: #f9f9fb !important;
+                page-break-inside: avoid;
+            }
+            .score-huge-val.primary {
+                background: none !important;
+                -webkit-text-fill-color: #ff4d4d !important;
+                color: #ff4d4d !important;
+            }
+            .eval-bar-track {
+                background-color: #e4e4e7 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .eval-bar-fill {
+                background: #8b5cf6 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .selection-pill.selected { background: #dcfce7; color: #15803d; }
+            .selection-pill.waitlisted { background: #fef3c7; color: #b45309; }
+            .selection-pill.rejected { background: #f4f4f5; color: #71717a; }
+            .selection-pill.disqualified { background: #fee2e2; color: #b91c1c; }
+        }
+
+        /* Dynamic Selection Card Styles */
+        .selection-banner-card {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(255, 77, 77, 0.08) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15), 0 0 80px rgba(255, 77, 77, 0.05) inset;
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+        }
+        .selection-banner-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .selection-badge-exclusive {
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle, #fcd34d 0%, #d97706 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.4), 0 0 15px rgba(255,255,255,0.4) inset;
+            border: 4px solid rgba(255, 255, 255, 0.25);
+            animation: pulseGlow 2s infinite alternate;
+        }
+        .selection-badge-exclusive span {
+            font-size: 3rem;
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.3));
+        }
+        @keyframes pulseGlow {
+            from { transform: scale(1); box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
+            to { transform: scale(1.05); box-shadow: 0 0 40px rgba(245, 158, 11, 0.6); }
+        }
+        .selection-cert-content {
+            flex: 1;
+        }
+        .selection-cert-content h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(90deg, #fff, #c084fc, #ff8080);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .selection-cert-content p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        .workshop-meta-row {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 1.25rem;
+            margin-top: 1.25rem;
+        }
+        .workshop-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .workshop-meta-item label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+        .workshop-meta-item span {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Surprise Panel Countdown */
+        .surprise-countdown-card {
+            background: var(--bg-tertiary);
+            border: 1px dashed rgba(139, 92, 246, 0.4);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .countdown-digits {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .countdown-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            min-width: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .countdown-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-family: var(--font-mono);
+            color: #c084fc;
+            line-height: 1.1;
+        }
+        .countdown-label {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+
+        /* Waitlist & Rejection Alert Banners */
+        .waitlist-banner-card {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(18, 18, 20, 1) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 20px;
+            padding: 2.2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        .waitlist-badge-exclusive {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.06);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 2.5rem;
+        }
+
+        .rejection-banner-card {
+            background: linear-gradient(135deg, rgba(113, 113, 122, 0.08) 0%, rgba(18, 18, 20, 1) 100%);
+            border: 1px solid rgba(113, 113, 122, 0.2);
+            border-radius: 20px;
+            padding: 2.2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .disqualification-banner-card {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(18, 18, 20, 1) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 20px;
+            padding: 2.2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .report-dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .candidate-header-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .status-badge-container {
+                align-items: flex-start;
+            }
+            .selection-banner-card, .waitlist-banner-card, .rejection-banner-card, .disqualification-banner-card {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 1.5rem;
+                gap: 1.5rem;
+            }
+            .selection-badge-exclusive {
+                margin: 0 auto;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="report">
+
+    <div class="report-container">
+        
+        <!-- Header Topbar -->
         <div class="report-topbar">
-            <div class="brand">
-                <img src="/static/img/logo.jpg" alt="AI Next Gen">
-                <span>AI Next Gen — Report</span>
+            <div class="report-brand">
+                <img src="/static/img/logo.jpg" alt="AI Next Gen Logo">
+                <span>AI Next Gen — Cognitive Analysis Report</span>
             </div>
             <div class="report-actions">
-                <button class="btn btn-print" onclick="window.print()">🖨 Print Report</button>
-                <button class="btn btn-close" onclick="window.close()">✕ Close</button>
+                <button class="btn-action btn-print" onclick="window.print()">🖨️ Download PDF Report</button>
+                <a href="/dashboard" class="btn-action btn-close">✕ Return to Dashboard</a>
             </div>
         </div>
 
-        <div class="report-header">
-            <div class="report-header-top">
-                <h1 id="candidateName">Loading...</h1>
-                <span class="status-badge completed" id="statusBadge">Completed</span>
+        <!-- Candidate Summary Header -->
+        <div class="candidate-header-card">
+            <div class="candidate-info-block">
+                <span style="font-size: 0.75rem; font-weight: 700; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.10em;">Assessed Candidate</span>
+                <h1>{{ report.candidate_name }}</h1>
+                <div class="candidate-meta-grid">
+                    <div class="meta-item">
+                        <label>Candidate ID</label>
+                        <span>{{ report.candidate_id }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Email Address</label>
+                        <span>{{ report.email }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Institution</label>
+                        <span>{{ report.college }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Department</label>
+                        <span>{{ report.department }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Assessment Challenge</label>
+                        <span>{{ report.test_name }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Completion Date</label>
+                        <span>{{ report.date }}</span>
+                    </div>
+                </div>
             </div>
-            <div class="info-grid">
-                <div class="info-item"><label>Candidate ID</label><span id="candidateId">—</span></div>
-                <div class="info-item"><label>Email</label><span id="candidateEmail">—</span></div>
-                <div class="info-item"><label>College</label><span id="candidateCollege">—</span></div>
-                <div class="info-item"><label>Department</label><span id="candidateDept">—</span></div>
-                <div class="info-item"><label>Test Name</label><span id="testName">—</span></div>
-                <div class="info-item"><label>Date</label><span id="testDate">—</span></div>
+            <div class="status-badge-container">
+                <label>Selection Verdict</label>
+                {% set status_lower = report.final_selection_status | lower %}
+                <span class="selection-pill {{ status_lower }}">
+                    {{ report.final_selection_status }}
+                </span>
             </div>
         </div>
 
-        <div class="score-section">
-            <h2>Final Score</h2>
-            <div class="final-score" id="finalScore">0%</div>
-            <div class="final-score-label" id="scoreLabel">Out of 100</div>
-            <div class="score-breakdown" id="scoreBreakdown"></div>
-        </div>
-
-        <div class="section-card">
-            <h2>🏆 Achievements</h2>
-            <div class="achievements-list" id="achievements">
-                <div class="achievement-badge">🏅 Test Completed</div>
+        <!-- Dynamic Premium Candidate Experience Banner -->
+        {% if report.final_selection_status | lower == 'selected' %}
+            <div class="selection-banner-card">
+                <div class="selection-badge-exclusive">
+                    <span>🏆</span>
+                </div>
+                <div class="selection-cert-content">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.12em;">Fellowship Invitation Unlocked</span>
+                    <h2>Congratulations! You are among the brightest minds selected for AI NEXT GEN 2026.</h2>
+                    <p>You have successfully cleared the AI Next Gen Intelligence Challenge. Your logical depth, problem-solving efficiency, and creativity dimensions have qualified you for an exclusive seat in our advanced AI cohort workshops.</p>
+                    
+                    <div class="workshop-meta-row">
+                        <div class="workshop-meta-item">
+                            <label>Workshop Invitation</label>
+                            <span style="color:#a78bfa;">AI Research Cohort Alpha</span>
+                        </div>
+                        <div class="workshop-meta-item">
+                            <label>Cohort Commencement</label>
+                            <span>October 15, 2026</span>
+                        </div>
+                        <div class="workshop-meta-item">
+                            <label>Assessed Rank</label>
+                            <span>Top 5% Cohort Elite</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+            
+            <!-- Hidden Selected Candidate Surprise Experience Section -->
+            <div class="surprise-countdown-card">
+                <div style="font-size: 2rem;">✨</div>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;">You have unlocked the AI NEXT GEN Selected Candidate Experience</h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; max-width: 500px; margin: 0 auto;">Your digital credentials and access tokens have been initialized on-chain. Below is the countdown tracking direct entry key activation to the Research Arena.</p>
+                
+                <div class="countdown-digits">
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="days-val">00</span>
+                        <span class="countdown-label">Days</span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="hours-val">00</span>
+                        <span class="countdown-label">Hours</span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="minutes-val">00</span>
+                        <span class="countdown-label">Mins</span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number" id="seconds-val">00</span>
+                        <span class="countdown-label">Secs</span>
+                    </div>
+                </div>
+            </div>
+
+        {% elif report.final_selection_status | lower == 'waitlisted' %}
+            <div class="waitlist-banner-card">
+                <div class="waitlist-badge-exclusive">⏳</div>
+                <div class="selection-cert-content">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--color-warning); text-transform: uppercase; letter-spacing: 0.12em;">Waitlisted Status</span>
+                    <h2 style="background: linear-gradient(90deg, #fff, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">You are very close to being selected.</h2>
+                    <p>Your performance across prompt intelligence and logic benchmarks has qualified you for a high-priority waitlist allocation. We are continuously tracking seat availability for the AI NEXT GEN 2026 cohort and will notify you immediately if slot capacities expand.</p>
+                    <div class="workshop-meta-row" style="margin-top: 1rem; padding-top: 1rem;">
+                        <div class="workshop-meta-item">
+                            <label>Waitlist Priority</label>
+                            <span style="color:#f59e0b;">Tier-1 High Priority Allocation</span>
+                        </div>
+                        <div class="workshop-meta-item">
+                            <label>Next Allocation Cycle</label>
+                            <span>August 1, 2026</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% elif report.final_selection_status | lower == 'rejected' %}
+            <div class="rejection-banner-card">
+                <div class="waitlist-badge-exclusive" style="border-color: var(--text-muted); color: var(--text-secondary);">💪</div>
+                <div class="selection-cert-content">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em;">Assessment Review Complete</span>
+                    <h2 style="background: linear-gradient(90deg, #fff, #a1a1aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Keep Exploring and Advancing.</h2>
+                    <p>We appreciate your participation in the AI Next Gen Intelligence Challenge. While your current score profile falls slightly below our cohort threshold, your cognitive patterns show excellent baseline capabilities in structural thinking and logic. We encourage you to continue refining your AI prototyping and prompt design methodologies.</p>
+                    <div class="workshop-meta-row" style="margin-top: 1rem; padding-top: 1rem;">
+                        <div class="workshop-meta-item">
+                            <label>Cognitive Benchmark Strengths</label>
+                            <span style="color:#a1a1aa;">Strong Pattern Logic and Research Competency</span>
+                        </div>
+                        <div class="workshop-meta-item">
+                            <label>Recommended Improvement Areas</label>
+                            <span>Prompt Precision and Creative Execution Speed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% elif report.final_selection_status | lower == 'disqualified' %}
+            <div class="disqualification-banner-card">
+                <div class="waitlist-badge-exclusive" style="border-color: var(--color-danger); color: var(--color-danger);">🚫</div>
+                <div class="selection-cert-content">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--color-danger); text-transform: uppercase; letter-spacing: 0.12em;">Integrity Breach Detected</span>
+                    <h2 style="background: linear-gradient(90deg, #fff, #ef4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Arena Access Revoked</h2>
+                    <p>This assessment attempt has been flagged and disqualified by our automated Security Proctoring Engine due to multiple violations of the challenge honor code. Detailed proctoring logs have been compiled for administrator review.</p>
+                    <div class="workshop-meta-row" style="margin-top: 1rem; padding-top: 1rem;">
+                        <div class="workshop-meta-item">
+                            <label>Status Verdict</label>
+                            <span style="color:#ef4444;">DISQUALIFIED</span>
+                        </div>
+                        <div class="workshop-meta-item">
+                            <label>Violation Focus</label>
+                            <span>Proctoring Integrity Audit Required</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Main Split Dashboard -->
+        <div class="report-dashboard-grid">
+            
+            <!-- Left Grid: AI Recommendation, Subscores, Question Details -->
+            <div class="dashboard-left-col">
+                
+                <!-- AI Recommendation Alert -->
+                <div class="report-section-card" style="padding: 1.5rem;">
+                    <div class="ai-recommendation-alert">
+                        <h4>🤖 AI Evaluation Summary & Recommendation</h4>
+                        <p>{{ report.ai_recommendation }}</p>
+                    </div>
+                </div>
+
+                <!-- AI Evaluation Subscores -->
+                <div class="report-section-card">
+                    <h2>🧠 Dynamic AI Cognitive Evaluation</h2>
+                    <div class="ai-evaluation-list">
+                        <div class="evaluation-bar-item">
+                            <div class="eval-label-row">
+                                <span class="eval-name">Human Intelligence Score</span>
+                                <span class="eval-value">{{ report.ai_report.human_intelligence }}%</span>
+                            </div>
+                            <div class="eval-bar-track">
+                                <div class="eval-bar-fill" style="width: {{ report.ai_report.human_intelligence }}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="evaluation-bar-item">
+                            <div class="eval-label-row">
+                                <span class="eval-name">Innovation Score</span>
+                                <span class="eval-value">{{ report.ai_report.innovation }}%</span>
+                            </div>
+                            <div class="eval-bar-track">
+                                <div class="eval-bar-fill" style="width: {{ report.ai_report.innovation }}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="evaluation-bar-item">
+                            <div class="eval-label-row">
+                                <span class="eval-name">AI Thinking Score</span>
+                                <span class="eval-value">{{ report.ai_report.ai_thinking }}%</span>
+                            </div>
+                            <div class="eval-bar-track">
+                                <div class="eval-bar-fill" style="width: {{ report.ai_report.ai_thinking }}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="evaluation-bar-item">
+                            <div class="eval-label-row">
+                                <span class="eval-name">Problem Solving Score</span>
+                                <span class="eval-value">{{ report.ai_report.problem_solving }}%</span>
+                            </div>
+                            <div class="eval-bar-track">
+                                <div class="eval-bar-fill" style="width: {{ report.ai_report.problem_solving }}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="evaluation-bar-item">
+                            <div class="eval-label-row">
+                                <span class="eval-name">Critical Thinking Score</span>
+                                <span class="eval-value">{{ report.ai_report.critical_thinking }}%</span>
+                            </div>
+                            <div class="eval-bar-track">
+                                <div class="eval-bar-fill" style="width: {{ report.ai_report.critical_thinking }}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="evaluation-bar-item">
+                            <div class="eval-label-row">
+                                <span class="eval-name">Creativity Score</span>
+                                <span class="eval-value">{{ report.ai_report.creativity }}%</span>
+                            </div>
+                            <div class="eval-bar-track">
+                                <div class="eval-bar-fill" style="width: {{ report.ai_report.creativity }}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="evaluation-bar-item">
+                            <div class="eval-label-row">
+                                <span class="eval-name">Future Leader Score</span>
+                                <span class="eval-value">{{ report.ai_report.future_leader }}%</span>
+                            </div>
+                            <div class="eval-bar-track">
+                                <div class="eval-bar-fill" style="width: {{ report.ai_report.future_leader }}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="evaluation-bar-item">
+                            <div class="eval-label-row">
+                                <span class="eval-name">Security Integrity Score</span>
+                                <span class="eval-value" style="color: {% if report.ai_report.security >= 80 %}var(--color-success){% elif report.ai_report.security >= 50 %}var(--color-warning){% else %}var(--color-danger){% endif %};">{{ report.ai_report.security }}%</span>
+                            </div>
+                            <div class="eval-bar-track">
+                                <div class="eval-bar-fill" style="width: {{ report.ai_report.security }}%; background: {% if report.ai_report.security >= 80 %}var(--color-success){% elif report.ai_report.security >= 50 %}var(--color-warning){% else %}var(--color-danger){% endif %};"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Question Breakdown -->
+                <div class="report-section-card">
+                    <h2>📝 Cognitive Arena Resolution Breakdown</h2>
+                    <div class="report-table-wrapper">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">#</th>
+                                    <th>Challenge Details</th>
+                                    <th>Submitted Response</th>
+                                    <th>Benchmark Response</th>
+                                    <th>Verdict</th>
+                                    <th>XP</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for q in report.questions %}
+                                <tr>
+                                    <td>{{ q.number }}</td>
+                                    <td>
+                                        <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem;">{{ q.text }}</div>
+                                        <div style="display: flex; gap: 0.35rem;">
+                                            <span class="badge-diff {{ q.difficulty }}">{{ q.difficulty }}</span>
+                                            <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">{{ q.category }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if q.answered %}
+                                            {{ q.user_answer }}
+                                        {% else %}
+                                            <span class="skipped-indicator">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ q.correct_answer }}</td>
+                                    <td>
+                                        {% if not q.answered %}
+                                            <span class="skipped-indicator">Skipped</span>
+                                        {% elif q.correct %}
+                                            <span class="correct-indicator">Correct</span>
+                                        {% else %}
+                                            <span class="incorrect-indicator">Incorrect</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="font-family: var(--font-mono); font-weight: 600;">{{ q.xp }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Grid: High-level metrics, security logs, accomplishments -->
+            <div class="dashboard-right-col">
+                
+                <!-- Performance Overview Cards -->
+                <div class="report-section-card">
+                    <h2>📊 Challenge Metrics Summary</h2>
+                    <div class="score-headline-box">
+                        <div class="score-col" style="border-right: 1px solid var(--border-default);">
+                            <label>Cognitive Score</label>
+                            <span class="score-huge-val primary">{{ report.score_final }}%</span>
+                        </div>
+                        <div class="score-col">
+                            <label>Security Score</label>
+                            {% set sec_score = report.security_score %}
+                            <span class="score-huge-val security {% if sec_score >= 80 %}secure{% elif sec_score >= 50 %}warning{% else %}danger{% endif %}">{{ sec_score }}</span>
+                        </div>
+                    </div>
+                    <div class="stats-summary-list">
+                        <div class="stat-summary-row">
+                            <span>Total Attempted Challenges</span>
+                            <strong>{{ report.attempted_questions }} / {{ report.total_questions }}</strong>
+                        </div>
+                        <div class="stat-summary-row">
+                            <span>Correct Responses</span>
+                            <strong style="color: var(--color-success);">{{ report.correct_answers }}</strong>
+                        </div>
+                        <div class="stat-summary-row">
+                            <span>Incorrect Responses</span>
+                            <strong style="color: var(--color-danger);">{{ report.wrong_answers }}</strong>
+                        </div>
+                        <div class="stat-summary-row">
+                            <span>Skipped Challenges</span>
+                            <strong style="color: var(--text-muted);">{{ report.skipped_answers }}</strong>
+                        </div>
+                        <div class="stat-summary-row">
+                            <span>Time Elapsed</span>
+                            <strong>{{ report.time_taken_str }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Proctoring Violations Report -->
+                <div class="report-section-card">
+                    <h2>🛡️ Proctoring Security Summary</h2>
+                    <table class="security-violations-table">
+                        <tbody>
+                            <tr>
+                                <td class="violation-name">Fullscreen Exits</td>
+                                <td class="violation-val {% if report.violations['fullscreen'] > 0 %}alert{% else %}secure{% endif %}">
+                                    {{ report.violations['fullscreen'] }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="violation-name">Tab Switches</td>
+                                <td class="violation-val {% if report.violations['tab_switch'] > 0 %}alert{% else %}secure{% endif %}">
+                                    {{ report.violations['tab_switch'] }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="violation-name">Copy Attempts</td>
+                                <td class="violation-val {% if report.violations['copy'] > 0 %}alert{% else %}secure{% endif %}">
+                                    {{ report.violations['copy'] }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="violation-name">Paste Attempts</td>
+                                <td class="violation-val {% if report.violations['paste'] > 0 %}alert{% else %}secure{% endif %}">
+                                    {{ report.violations['paste'] }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="violation-name">DevTools Inspects</td>
+                                <td class="violation-val {% if report.violations['devtools'] > 0 %}alert{% else %}secure{% endif %}">
+                                    {{ report.violations['devtools'] }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="violation-name">Internet Disconnects</td>
+                                <td class="violation-val {% if report.violations['disconnect'] > 0 %}alert{% else %}secure{% endif %}">
+                                    {{ report.violations['disconnect'] }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="violation-name">Suspicious Actions</td>
+                                <td class="violation-val {% if report.violations['suspicious'] > 0 %}alert{% else %}secure{% endif %}">
+                                    {{ report.violations['suspicious'] }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Achievements panel -->
+                <div class="report-section-card">
+                    <h2>🏅 Candidate Accomplishments</h2>
+                    <div class="achievements-grid">
+                        {% for a in report.achievements %}
+                            <div class="achievement-pill">🏆 {{ a }}</div>
+                        {% else %}
+                            <div style="font-size: 0.8rem; color: var(--text-muted); italic: true;">No special badge achievements unlocked.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="section-card" id="challengeSection">
-            <h2>📋 Challenge Details</h2>
-            <div id="challengeDetails"></div>
-        </div>
-
-        <div class="section-card">
-            <h2>📝 Question Breakdown</h2>
-            <table class="questions-table">
-                <thead>
-                    <tr><th>#</th><th>Question</th><th>Your Answer</th><th>Correct Answer</th><th>Result</th><th>XP</th></tr>
-                </thead>
-                <tbody id="questionsBody">
-                    <tr><td colspan="6" style="text-align:center;color:var(--text-muted)">Loading...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
+        <!-- Footer -->
         <div class="report-footer">
-            <p>This report is generated by AI Next Gen &mdash; AI Research Challenge & Workshop Selection Platform.</p>
-            <p style="margin-top:.25rem">Generated on <span id="genDate"></span></p>
+            <p>© 2026 AI Next Gen Research Cohort Assessment Services. All rights reserved.</p>
+            <p style="margin-top: 0.25rem;">Report dynamically compiled on behalf of system proctoring diagnostics logic.</p>
         </div>
+
     </div>
 
-    <script src="/static/js/core/api.js"></script>
-    <script>
-    document.getElementById('genDate').textContent = new Date().toLocaleString();
-    (async function() {
-        const pathParts = window.location.pathname.split('/');
-        const testId = pathParts[2];
-        const candidateId = pathParts[3];
-        try {
-            const report = await API.get(`/api/report/${testId}/${candidateId || ''}`);
-            if (!report) return;
-            document.getElementById('candidateName').textContent = report.candidate_name || 'Unknown';
-            document.getElementById('candidateId').textContent = report.candidate_id || '—';
-            document.getElementById('candidateEmail').textContent = report.email || '—';
-            document.getElementById('candidateCollege').textContent = report.college || '—';
-            document.getElementById('candidateDept').textContent = report.department || '—';
-            document.getElementById('testName').textContent = report.test_name || '—';
-            document.getElementById('testDate').textContent = report.date || '—';
-            const score = report.score || 0;
-            document.getElementById('finalScore').textContent = score + '%';
-            const badge = document.getElementById('statusBadge');
-            if (score >= 50) { badge.textContent = 'Passed'; badge.className = 'status-badge passed'; }
-            else { badge.textContent = 'Failed'; badge.className = 'status-badge failed'; }
-            if (report.breakdown) {
-                document.getElementById('scoreBreakdown').innerHTML = report.breakdown.map(b => `
-                    <div class="breakdown-item">
-                        <div class="bi-val">${b.score}%</div>
-                        <div class="bi-label">${b.category}</div>
-                        <div class="breakdown-bar"><div class="breakdown-bar-fill" style="width:${b.score}%"></div></div>
-                    </div>
-                `).join('');
-            }
-            if (report.achievements && report.achievements.length) {
-                document.getElementById('achievements').innerHTML = report.achievements.map(a => `<div class="achievement-badge">🏅 ${a}</div>`).join('');
-            }
-            if (report.questions && report.questions.length) {
-                document.getElementById('questionsBody').innerHTML = report.questions.map((q, i) => {
-                    const isCorrect = q.correct === true;
-                    const isPartial = q.partial === true;
-                    const resultClass = q.answered === false ? 'no-answer' : isCorrect ? 'correct' : isPartial ? 'partial' : 'incorrect';
-                    const resultText = q.answered === false ? 'Skipped' : isCorrect ? 'Correct' : isPartial ? 'Partial' : 'Incorrect';
-                    return `<tr>
-                        <td>${i+1}</td>
-                        <td style="max-width:250px">${q.text}</td>
-                        <td>${q.user_answer || '<span class="no-answer">—</span>'}</td>
-                        <td>${q.correct_answer || '—'}</td>
-                        <td class="${resultClass}">${resultText}</td>
-                        <td>${q.xp || 0}</td>
-                    </tr>`;
-                }).join('');
-            }
-        } catch(e) {
-            console.error('Report load error:', e);
-        }
-    })();
-    </script>
 </body>
 </html>

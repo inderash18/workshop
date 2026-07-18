@@ -38,21 +38,11 @@ def _serialize_test(test):
 
 
 @test_management_bp.route("/admin/tests")
-@admin_required
-def tests_list_page():
-    return render_template("admin_test_list.html")
-
-
 @test_management_bp.route("/admin/tests/create")
-@admin_required
-def test_create_page():
-    return render_template("admin_test_create.html")
-
-
 @test_management_bp.route("/admin/tests/<test_id>/manage")
 @admin_required
-def test_manage_page(test_id):
-    return render_template("admin_test_manage.html", test_id=test_id)
+def redirect_to_admin(*args, **kwargs):
+    return redirect("/admin")
 
 
 @test_management_bp.route("/api/admin/tests/create", methods=["POST"])
@@ -600,6 +590,19 @@ def api_reset_candidate_attempt(test_id):
     }
 
     update_assignment(test_id, candidate_id, update_fields)
+
+    # Reset candidate collection status back to pending, incomplete, and clear score metrics
+    try:
+        db = load_db()
+        for c in db.get("candidates", []):
+            if c.get("candidate_id") == candidate_id:
+                c["selected"] = 0
+                c["completed"] = False
+                c["score_final"] = 0
+                break
+        save_db(db)
+    except Exception:
+        pass
 
     audit_log("candidate_test_reset", session.get("admin_username"), {
         "test_id": test_id, "candidate_id": candidate_id

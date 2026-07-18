@@ -380,6 +380,20 @@
       background: var(--bg-primary);
       color: var(--text-primary);
     }
+    
+    /* Layout Overrides */
+    body.admin-page .main-content,
+    body.test-page .main-content {
+        max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    body.admin-page #mainNav,
+    body.admin-page .g-footer,
+    body.test-page #mainNav,
+    body.test-page .g-footer {
+        display: none !important;
+    }
     </style>
     {% block head %}{% endblock %}
 </head>

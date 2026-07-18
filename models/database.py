@@ -1,11 +1,275 @@
+import os
 import json
 import random
 from datetime import datetime, timedelta
 from pymongo import MongoClient, ASCENDING, DESCENDING
+from bson import ObjectId
 from config.settings import Config
 
 _client = None
 _db = None
+
+class MockCursor:
+    def __init__(self, docs, projection=None):
+        self._docs = docs
+        self._projection = projection
+        self._index = 0
+
+    def sort(self, key, direction=1):
+        reverse = (direction == -1)
+        def get_sort_key(doc):
+            val = doc.get(key)
+            if val is None:
+                return ""
+            return val
+        try:
+            self._docs = sorted(self._docs, key=get_sort_key, reverse=reverse)
+        except Exception:
+            pass
+        return self
+
+    def limit(self, n):
+        self._docs = self._docs[:n]
+        return self
+
+    def skip(self, n):
+        self._docs = self._docs[n:]
+        return self
+
+    def __iter__(self):
+        for doc in self._docs:
+            yield self._apply_projection(doc)
+
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            sliced = self._docs[index]
+            return [self._apply_projection(d) for d in sliced]
+        return self._apply_projection(self._docs[index])
+
+    def _apply_projection(self, doc):
+        if not self._projection:
+            return dict(doc)
+        projected = {}
+        for k, v in self._projection.items():
+            if v:
+                if k in doc:
+                    projected[k] = doc[k]
+        if "_id" in doc and self._projection.get("_id", 1):
+            projected["_id"] = doc["_id"]
+        return projected
+
+class LocalJSONClient:
+    def __init__(self, filename):
+        self.filename = os.path.abspath(filename)
+        self._data = {}
+        self._load()
+
+    def _load(self):
+        if os.path.exists(self.filename):
+            try:
+                with open(self.filename, 'r', encoding='utf-8') as f:
+                    self._data = json.load(f)
+            except Exception as e:
+                print(f"[LocalDB] Error loading file: {e}")
+                self._data = {}
+        else:
+            self._data = {}
+
+    def _save(self):
+        try:
+            with open(self.filename, 'w', encoding='utf-8') as f:
+                json.dump(self._data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"[LocalDB] Error saving file: {e}")
+
+    def __getitem__(self, db_name):
+        return LocalJSONDatabase(self, db_name)
+
+class LocalJSONDatabase:
+    def __init__(self, client, db_name):
+        self.client = client
+        self.db_name = db_name
+
+    def __getitem__(self, col_name):
+        return LocalJSONCollection(self.client, self.db_name, col_name)
+
+class LocalJSONCollection:
+    def __init__(self, client, db_name, col_name):
+        self.client = client
+        self.db_name = db_name
+        self.col_name = col_name
+        
+        if self.db_name not in self.client._data:
+            self.client._data[self.db_name] = {}
+        if self.col_name not in self.client._data[self.db_name]:
+            self.client._data[self.db_name][self.col_name] = []
+            
+        self._docs = self.client._data[self.db_name][self.col_name]
+
+    def _save(self):
+        self.client._save()
+
+    def _match(self, doc, filter_dict):
+        if not filter_dict:
+            return True
+        for k, v in filter_dict.items():
+            doc_val = doc.get(k)
+            if isinstance(v, dict):
+                if "$in" in v:
+                    if doc_val not in v["$in"] and not any(str(doc_val) == str(item) for item in v["$in"]):
+                        return False
+                elif "$ne" in v:
+                    if doc_val == v["$ne"] or str(doc_val) == str(v["$ne"]):
+                        return False
+                else:
+                    return False
+            else:
+                if doc_val == v:
+                    continue
+                if str(doc_val) == str(v):
+                    continue
+                return False
+        return True
+
+    def create_index(self, keys, unique=False):
+        return f"{self.col_name}_index"
+
+    def count_documents(self, filter_dict):
+        count = 0
+        for doc in self._docs:
+            if self._match(doc, filter_dict):
+                count += 1
+        return count
+
+    def find_one(self, filter_dict=None):
+        filter_dict = filter_dict or {}
+        for doc in self._docs:
+            if self._match(doc, filter_dict):
+                return dict(doc)
+        return None
+
+    def find(self, filter_dict=None, projection=None):
+        filter_dict = filter_dict or {}
+        matching_docs = []
+        for doc in self._docs:
+            if self._match(doc, filter_dict):
+                matching_docs.append(dict(doc))
+        return MockCursor(matching_docs, projection)
+
+    def insert_one(self, document):
+        doc_copy = dict(document)
+        if "_id" not in doc_copy:
+            doc_copy["_id"] = str(ObjectId())
+        elif isinstance(doc_copy["_id"], ObjectId):
+            doc_copy["_id"] = str(doc_copy["_id"])
+        self._docs.append(doc_copy)
+        self._save()
+        class InsertOneResult:
+            def __init__(self, inserted_id):
+                self.inserted_id = inserted_id
+        return InsertOneResult(doc_copy["_id"])
+
+    def insert_many(self, documents):
+        inserted_ids = []
+        for doc in documents:
+            doc_copy = dict(doc)
+            if "_id" not in doc_copy:
+                doc_copy["_id"] = str(ObjectId())
+            elif isinstance(doc_copy["_id"], ObjectId):
+                doc_copy["_id"] = str(doc_copy["_id"])
+            self._docs.append(doc_copy)
+            inserted_ids.append(doc_copy["_id"])
+        self._save()
+        class InsertManyResult:
+            def __init__(self, inserted_ids):
+                self.inserted_ids = inserted_ids
+        return InsertManyResult(inserted_ids)
+
+    def replace_one(self, filter_dict, replacement, upsert=False):
+        matched = False
+        replacement_copy = dict(replacement)
+        if "_id" in replacement_copy and isinstance(replacement_copy["_id"], ObjectId):
+            replacement_copy["_id"] = str(replacement_copy["_id"])
+            
+        for idx, doc in enumerate(self._docs):
+            if self._match(doc, filter_dict):
+                if "_id" not in replacement_copy and "_id" in doc:
+                    replacement_copy["_id"] = doc["_id"]
+                self._docs[idx] = replacement_copy
+                matched = True
+                break
+        if not matched and upsert:
+            if "_id" not in replacement_copy:
+                if "_id" in filter_dict:
+                    replacement_copy["_id"] = str(filter_dict["_id"])
+                else:
+                    replacement_copy["_id"] = str(ObjectId())
+            self._docs.append(replacement_copy)
+        self._save()
+        
+        class ReplaceOneResult:
+            def __init__(self, matched_count, modified_count):
+                self.matched_count = matched_count
+                self.modified_count = modified_count
+        return ReplaceOneResult(1 if matched else 0, 1 if matched else 0)
+
+    def update_one(self, filter_dict, update, upsert=False):
+        set_data = update.get("$set", {})
+        matched = False
+        for idx, doc in enumerate(self._docs):
+            if self._match(doc, filter_dict):
+                for k, v in set_data.items():
+                    if isinstance(v, ObjectId):
+                        v = str(v)
+                    doc[k] = v
+                matched = True
+                break
+        if not matched and upsert:
+            new_doc = {}
+            for k, v in filter_dict.items():
+                new_doc[k] = v
+            for k, v in set_data.items():
+                if isinstance(v, ObjectId):
+                    v = str(v)
+                new_doc[k] = v
+            if "_id" not in new_doc:
+                new_doc["_id"] = str(ObjectId())
+            self._docs.append(new_doc)
+        self._save()
+        
+        class UpdateOneResult:
+            def __init__(self, matched_count, modified_count):
+                self.matched_count = matched_count
+                self.modified_count = modified_count
+        return UpdateOneResult(1 if matched else 0, 1 if matched else 0)
+
+    def delete_one(self, filter_dict):
+        matched = False
+        for idx, doc in enumerate(self._docs):
+            if self._match(doc, filter_dict):
+                self._docs.pop(idx)
+                matched = True
+                break
+        if matched:
+            self._save()
+        class DeleteResult:
+            def __init__(self, deleted_count):
+                self.deleted_count = deleted_count
+        return DeleteResult(1 if matched else 0)
+
+    def delete_many(self, filter_dict):
+        initial_len = len(self._docs)
+        self.client._data[self.db_name][self.col_name] = [
+            doc for doc in self._docs if not self._match(doc, filter_dict)
+        ]
+        self._docs = self.client._data[self.db_name][self.col_name]
+        deleted_count = initial_len - len(self._docs)
+        if deleted_count > 0:
+            self._save()
+        class DeleteResult:
+            def __init__(self, deleted_count):
+                self.deleted_count = deleted_count
+        return DeleteResult(deleted_count)
 
 COLLECTIONS = {
     "state": "state",
@@ -29,9 +293,18 @@ COLLECTIONS = {
 def _get_db():
     global _client, _db
     if _db is None:
-        _client = MongoClient(Config.MONGODB_URI)
-        _db = _client[Config.MONGODB_DB]
-        _ensure_indexes(_db)
+        try:
+            _client = MongoClient(Config.MONGODB_URI, serverSelectionTimeoutMS=2000)
+            _client.admin.command('ping')
+            _db = _client[Config.MONGODB_DB]
+            _ensure_indexes(_db)
+            print("[DB] Connected successfully to MongoDB Atlas")
+        except Exception as e:
+            print(f"[DB] MongoDB Atlas connection failed: {e}")
+            print("[DB] Falling back to local persistent JSON database: db.json")
+            _client = LocalJSONClient("db.json")
+            _db = _client[Config.MONGODB_DB]
+            _ensure_indexes(_db)
     return _db
 
 

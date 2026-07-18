@@ -54,7 +54,8 @@
 <script>
 (async function() {
     try {
-        const tests = await API.get('/api/student/tests');
+        const res = await API.get('/api/student/tests');
+        const tests = (res && res.tests) ? res.tests : (res || []);
         const list = document.getElementById('testList');
         const empty = document.getElementById('emptyState');
         if (!tests || !tests.length) { empty.style.display = 'block'; return; }
