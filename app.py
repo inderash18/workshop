@@ -32,7 +32,21 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, supports_credentials=True, origins=["https://workshop-eight-iota.vercel.app", "http://localhost:5000", "http://127.0.0.1:5000"])
+    
+    # Load allowed origins dynamically from env, or default to known endpoints
+    allowed_origins = os.environ.get("ALLOWED_ORIGINS")
+    if allowed_origins:
+        origins = [o.strip() for o in allowed_origins.split(",") if o.strip()]
+    else:
+        origins = [
+            "https://workshop-eight-iota.vercel.app",
+            "http://localhost:5000",
+            "http://127.0.0.1:5000",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000"
+        ]
+        
+    CORS(app, supports_credentials=True, origins=origins)
     app.secret_key = Config.SECRET_KEY
     app.config["PERMANENT_SESSION_LIFETIME"] = __import__("datetime").timedelta(
         hours=Config.SESSION_LIFETIME_HOURS

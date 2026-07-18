@@ -301,6 +301,12 @@ def _get_db():
             print("[DB] Connected successfully to MongoDB Atlas")
         except Exception as e:
             print(f"[DB] MongoDB Atlas connection failed: {e}")
+            # Do not fall back silently in production or if fallback is explicitly disabled
+            is_prod = os.environ.get("FLASK_ENV") == "production" or os.environ.get("ENV") == "production"
+            allow_fallback = os.environ.get("ALLOW_DB_FALLBACK", "False" if is_prod else "True") == "True"
+            if not allow_fallback:
+                print("[DB] Fallback database is disabled. Raising exception.")
+                raise e
             print("[DB] Falling back to local persistent JSON database: db.json")
             _client = LocalJSONClient("db.json")
             _db = _client[Config.MONGODB_DB]
