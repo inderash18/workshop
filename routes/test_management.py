@@ -40,7 +40,6 @@ def _serialize_test(test):
 @test_management_bp.route("/admin/tests")
 @test_management_bp.route("/admin/tests/create")
 @test_management_bp.route("/admin/tests/<test_id>/manage")
-@admin_required
 def redirect_to_admin(*args, **kwargs):
     return redirect("/admin")
 

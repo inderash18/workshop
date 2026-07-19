@@ -26,9 +26,7 @@ admin_bp = Blueprint("admin", __name__)
 @admin_bp.route("/admin/shortlisting")
 @admin_bp.route("/admin/security-monitoring")
 def admin():
-    if "admin_logged_in" in session:
-        return render_template("admin.html")
-    return redirect(url_for("admin.admin_login_page"))
+    return render_template("admin.html")
 
 
 @admin_bp.route("/admin-login")

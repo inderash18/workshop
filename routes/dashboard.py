@@ -18,15 +18,11 @@ def index():
 
 @dashboard_bp.route("/dashboard")
 def dashboard_page():
-    if "user_email" not in session:
-        return redirect(url_for("auth.login_page"))
     return render_template("dashboard.html")
 
 
 @dashboard_bp.route("/profile")
 def profile_page():
-    if "user_email" not in session:
-        return redirect(url_for("auth.login_page"))
     return render_template("profile.html")
 
 

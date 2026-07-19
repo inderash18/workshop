@@ -20,33 +20,9 @@ test_session_bp = Blueprint("test_session", __name__)
 
 
 @test_session_bp.route("/test/<test_id>")
-@login_required
 def test_page(test_id):
-    candidate = get_candidate_by_email(session["user_email"])
-    if not candidate:
-        return redirect(url_for("auth.login_page"))
-
-    test = get_test_by_id_str(test_id)
-    if not test:
-        return "Test not found", 404
-
-    assignment = get_assignment(test_id, candidate["candidate_id"])
-
-    # If already completed or disqualified, show denied
-    if assignment:
-        status = assignment.get("status", "assigned")
-        if status == "completed":
-            return render_template("test_session.html", test_id=test_id, denied=True,
-                                   reason="You have already completed this test.")
-        if status == "disqualified":
-            reason = assignment.get("locked_reason", "You have been disqualified from this test.")
-            return render_template("test_session.html", test_id=test_id, denied=True, reason=reason)
-
-    # Check if the test window is currently open (admin toggle)
-    can_access, reason = can_student_access_test(candidate["candidate_id"], test_id)
-    if not can_access:
-        return render_template("test_session.html", test_id=test_id, denied=True, reason=reason)
-
+    # Simply render the template. The frontend client-side code will handle
+    # authentication check and assignment state/denials via the secure API endpoints.
     return render_template("test_session.html", test_id=test_id, denied=False)
 
 
