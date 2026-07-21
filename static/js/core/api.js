@@ -1,4 +1,4 @@
-const API_URL = "https://workshop-0mk8.onrender.com";
+const API_URL = "https://workshop-gu9k.onrender.com/";
 
 const API = {
   async request(method, url, body = null) {
