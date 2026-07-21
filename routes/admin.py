@@ -3,15 +3,15 @@ import csv
 import io
 from datetime import datetime
 from flask import Blueprint, request, jsonify, session, redirect, url_for, render_template, Response
-
-from config.settings import Config
-from models.database import (
-    load_db, save_db, get_candidate_by_id, get_candidate_by_email, audit_log,
-    get_setting, update_setting, get_security_events_for_test, get_all_tests,
+from core.config.settings import Config
+from core.database.models import (
+    load_db, save_db, get_candidate_by_id, get_candidate_by_email,
+    audit_log, get_setting, update_setting, get_security_events_for_test,
+    get_all_tests,
 )
-from middleware.security import sanitize_input, verify_password
-from middleware.rate_limiter import is_rate_limited, record_login_attempt
-from middleware.auth import admin_required
+from core.middleware.security import sanitize_input, verify_password
+from core.middleware.rate_limiter import is_rate_limited, record_login_attempt, rate_limit
+from core.middleware.auth import admin_required
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -54,11 +54,11 @@ def admin_login():
     admin_user = next((a for a in db["admins"] if a.get("username") == username), None)
 
     if not admin_user or not verify_password(password, admin_user.get("password_hash", "")):
-        record_login_attempt(ip_key, success=False)
+        record_login_attempt(ip_key, success=False, max_attempts=Config.ADMIN_MAX_LOGIN_ATTEMPTS, lockout_minutes=Config.ADMIN_LOCKOUT_MINUTES)
         audit_log("admin_login_failed", username, {"ip": request.remote_addr}, ip=request.remote_addr)
         return jsonify({"error": "Invalid credentials"}), 401
 
-    record_login_attempt(ip_key, success=True)
+    record_login_attempt(ip_key, success=True, max_attempts=Config.ADMIN_MAX_LOGIN_ATTEMPTS, lockout_minutes=Config.ADMIN_LOCKOUT_MINUTES)
     session["admin_logged_in"] = True
     session["admin_username"] = username
     session.permanent = True
@@ -86,6 +86,7 @@ def get_publish_status():
 
 @admin_bp.route("/api/admin/toggle_publish", methods=["POST"])
 @admin_required
+@rate_limit("admin_toggle_publish", Config.ADMIN_ACTION_MAX_ATTEMPTS, Config.ADMIN_ACTION_LOCKOUT_MINUTES)
 def toggle_publish():
     db = load_db()
     current = db.get("results_published", False)
@@ -206,6 +207,7 @@ def get_candidates():
 @admin_bp.route("/api/admin/auto_shortlist", methods=["POST"])
 @admin_bp.route("/api/admin/auto-shortlist", methods=["POST"])
 @admin_required
+@rate_limit("admin_auto_shortlist", Config.ADMIN_ACTION_MAX_ATTEMPTS, Config.ADMIN_ACTION_LOCKOUT_MINUTES)
 def auto_shortlist():
     """AI-driven auto-shortlisting based on test scores and security behavior.
     
@@ -299,6 +301,7 @@ def auto_shortlist():
 
 @admin_bp.route("/api/admin/toggle_selection", methods=["POST"])
 @admin_required
+@rate_limit("admin_toggle_selection", Config.ADMIN_ACTION_MAX_ATTEMPTS, Config.ADMIN_ACTION_LOCKOUT_MINUTES)
 def toggle_selection():
     data = request.json or {}
     candidate_id = data.get("candidate_id")
@@ -314,7 +317,6 @@ def toggle_selection():
         return jsonify({"error": "Candidate not found"}), 404
 
     candidate["selected"] = selected
-    save_db(load_db())
 
     audit_log("toggle_selection", session.get("admin_username"), {"candidate": candidate_id, "status": selected}, ip=request.remote_addr)
 
@@ -566,6 +568,7 @@ def admin_security_logs():
 
 @admin_bp.route("/api/admin/settings", methods=["GET", "POST"])
 @admin_required
+@rate_limit("admin_settings", Config.ADMIN_ACTION_MAX_ATTEMPTS, Config.ADMIN_ACTION_LOCKOUT_MINUTES)
 def get_or_update_platform_settings():
     from models.database import get_setting, update_setting
     if request.method == "GET":
@@ -666,6 +669,7 @@ def get_audit_logs():
 
 @admin_bp.route("/api/admin/candidates/<candidate_id>/shortlist", methods=["POST"])
 @admin_required
+@rate_limit("admin_shortlist_candidate", Config.ADMIN_ACTION_MAX_ATTEMPTS, Config.ADMIN_ACTION_LOCKOUT_MINUTES)
 def shortlist_candidate_direct(candidate_id):
     db = load_db()
     candidate = None
@@ -686,6 +690,7 @@ def shortlist_candidate_direct(candidate_id):
 
 @admin_bp.route("/api/admin/candidates/<candidate_id>/status", methods=["POST"])
 @admin_required
+@rate_limit("admin_set_status", Config.ADMIN_ACTION_MAX_ATTEMPTS, Config.ADMIN_ACTION_LOCKOUT_MINUTES)
 def set_candidate_status(candidate_id):
     """Set a candidate's selection status. Valid values: selected, waitlisted, rejected, disqualified."""
     data = request.json or {}
@@ -773,6 +778,7 @@ def get_test_access():
 
 @admin_bp.route("/api/admin/test-access/toggle", methods=["POST"])
 @admin_required
+@rate_limit("admin_toggle_test", Config.ADMIN_ACTION_MAX_ATTEMPTS, Config.ADMIN_ACTION_LOCKOUT_MINUTES)
 def toggle_test_access():
     """Admin toggle: open or close the test for all students."""
     from models.database import get_setting, update_setting
@@ -794,6 +800,7 @@ def toggle_test_access():
 
 @admin_bp.route("/api/admin/assign-all", methods=["POST"])
 @admin_required
+@rate_limit("admin_assign_all", 5, 60)
 def assign_test_to_all():
     """Assign the active published test to ALL existing candidates who don't already have an assignment."""
     from models.database import _col, create_assignment

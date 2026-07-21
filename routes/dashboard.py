@@ -2,11 +2,11 @@ import json
 from datetime import datetime
 from flask import Blueprint, request, jsonify, session, redirect, url_for, render_template
 
-from models.database import (
+from core.database.models import (
     get_candidate_by_email, get_assignments_for_candidate,
     get_test_by_id_str, get_setting, load_db,
 )
-from middleware.auth import login_required
+from core.middleware.auth import login_required
 
 dashboard_bp = Blueprint("dashboard", __name__)
 

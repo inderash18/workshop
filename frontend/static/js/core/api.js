@@ -1,12 +1,20 @@
-const API_URL = "https://workshop-gu9k.onrender.com/";
+const API_URL = "";
+
+let csrfToken = null;
 
 const API = {
   async request(method, url, body = null) {
     const opts = {
       method,
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Allow cross-domain cookies
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      credentials: 'include',
     };
+    if (csrfToken) {
+      opts.headers['X-CSRF-Token'] = csrfToken;
+    }
     if (body && method !== 'GET') {
       opts.body = JSON.stringify(body);
     }
@@ -43,5 +51,9 @@ const API = {
 
   delete(url) {
     return this.request('DELETE', url);
+  },
+
+  setCsrfToken(token) {
+    csrfToken = token;
   },
 };

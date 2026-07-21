@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
-from models.database import get_candidate_by_id
-from services.achievement_engine import get_badge_details
+from core.database.models import get_candidate_by_id
+from core.services.achievement_engine import get_badge_details
 
 
 def generate_report_data(candidate_id, test_id=None):
@@ -51,7 +51,7 @@ def generate_report_data(candidate_id, test_id=None):
     candidate.setdefault("github", "")
 
     level_results = []
-    from services.challenge_engine import LEVELS
+    from core.services.challenge_engine import LEVELS
     for level in LEVELS:
         lid = level["id"]
         level_answers = answers.get(str(lid), {})
@@ -89,7 +89,7 @@ def generate_report_data(candidate_id, test_id=None):
 
 
 def generate_test_report(candidate_id, test_id):
-    from models.database import get_assignment, get_test_by_id_str
+    from core.database.models import get_assignment, get_test_by_id_str
     candidate = get_candidate_by_id(candidate_id)
     if not candidate:
         return None
@@ -161,7 +161,7 @@ def generate_test_report(candidate_id, test_id):
 
 
 def get_all_candidates_summary():
-    from models.database import load_db
+    from core.database.models import load_db
     db = load_db()
     candidates = [
         dict(c) for c in db["candidates"]

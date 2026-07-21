@@ -4,7 +4,7 @@ import random
 from datetime import datetime, timedelta
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from bson import ObjectId
-from config.settings import Config
+from core.config.settings import Config
 
 _client = None
 _db = None
@@ -294,21 +294,24 @@ def _get_db():
     global _client, _db
     if _db is None:
         try:
-            _client = MongoClient(Config.MONGODB_URI, serverSelectionTimeoutMS=2000)
+            _client = MongoClient(
+                Config.MONGODB_URI,
+                serverSelectionTimeoutMS=Config.MONGODB_SERVER_SELECTION_TIMEOUT_MS,
+                maxPoolSize=Config.MONGODB_MAX_POOL_SIZE,
+            )
             _client.admin.command('ping')
             _db = _client[Config.MONGODB_DB]
             _ensure_indexes(_db)
             print("[DB] Connected successfully to MongoDB Atlas")
         except Exception as e:
             print(f"[DB] MongoDB Atlas connection failed: {e}")
-            # Do not fall back silently in production or if fallback is explicitly disabled
             is_prod = os.environ.get("FLASK_ENV") == "production" or os.environ.get("ENV") == "production"
             allow_fallback = os.environ.get("ALLOW_DB_FALLBACK", "False" if is_prod else "True") == "True"
             if not allow_fallback:
                 print("[DB] Fallback database is disabled. Raising exception.")
                 raise e
-            print("[DB] Falling back to local persistent JSON database: db.json")
-            _client = LocalJSONClient("db.json")
+            print("[DB] Falling back to local persistent JSON database: data/db.json")
+            _client = LocalJSONClient("data/db.json")
             _db = _client[Config.MONGODB_DB]
             _ensure_indexes(_db)
     return _db
@@ -612,7 +615,7 @@ def load_db():
     except Exception as e:
         print(f"[DB] Read error: {e}")
 
-    from middleware.security import hash_password
+    from core.middleware.security import hash_password
     doc = {
         "_id": "global_state",
         "admins": [{"username": "admin", "password_hash": hash_password("admin2026")}],
@@ -686,8 +689,6 @@ def audit_log(action, user=None, details=None, ip=None):
     col.insert_one(entry)
 
 
-# ─── TEST OPERATIONS ───
-
 def create_test(test_data):
     col = _col("tests")
     test_data["created_at"] = datetime.now().isoformat()
@@ -748,8 +749,6 @@ def get_tests_by_status(status):
     col = _col("tests")
     return list(col.find({"status": status}).sort("created_at", DESCENDING))
 
-
-# ─── TEST ATTEMPT / ASSIGNMENT OPERATIONS ───
 
 def create_assignment(test_id, candidate_id):
     col = _col("test_assignments")
@@ -817,8 +816,6 @@ def get_assignments_for_test_by_status(test_id, status):
     return list(col.find({"test_id": test_id, "status": status}))
 
 
-# ─── SECURITY LOGS / EVENTS ───
-
 def log_security_event(event_data):
     col = _col("security_events")
     event_data["timestamp"] = datetime.now().isoformat()
@@ -847,8 +844,6 @@ def get_security_events_for_candidate(candidate_id):
     return list(col.find({"candidate_id": candidate_id}).sort("timestamp", DESCENDING))
 
 
-# ─── CONFIGURATION SETTINGS ───
-
 def get_setting(key, default=None):
     col = _col("test_configuration")
     doc = col.find_one({"key": key})
@@ -866,8 +861,6 @@ def update_setting(key, value):
     db.setdefault("settings", {})[key] = value
     save_db(db)
 
-
-# ─── SYNCHRONIZATION HELPERS ───
 
 def sync_test_questions_to_bank(test_data):
     try:

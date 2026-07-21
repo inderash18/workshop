@@ -25,7 +25,7 @@ The system addresses ALL requirements from the original issue:
 - Final workflow implementation
 """
 
-from services.processing_controller import AIWorkshopProcessingController
+from core.services.processing_controller import AIWorkshopProcessingController
 from datetime import datetime
 import json
 

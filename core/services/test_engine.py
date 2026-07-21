@@ -9,7 +9,7 @@ def get_test_questions(test, candidate_id=None):
 
     questions_list = []
     if candidate_id:
-        from models.database import get_assignment, update_assignment, _col, get_setting
+        from core.database.models import get_assignment, update_assignment, _col, get_setting
         assignment = get_assignment(str(test["_id"]), candidate_id)
         if assignment and assignment.get("questions"):
             questions_list = assignment["questions"]
@@ -40,7 +40,6 @@ def get_test_questions(test, candidate_id=None):
     else:
         questions_list = test.get("questions", [])
 
-    # Normalize fields for frontend (type, text)
     normalized = []
     for q in questions_list:
         q_copy = dict(q)
@@ -49,7 +48,6 @@ def get_test_questions(test, candidate_id=None):
         if "id" not in q_copy:
             q_copy["id"] = q_copy.get("_id")
         
-        # Populate type and text if missing
         if "type" not in q_copy:
             q_copy["type"] = q_copy.get("question_type") or "mcq"
         if "text" not in q_copy:
@@ -61,7 +59,7 @@ def get_test_questions(test, candidate_id=None):
 
 
 def get_test_security_rules(test):
-    from models.database import get_setting
+    from core.database.models import get_setting
 
     defaults = {
         "fullscreen_mandatory": bool(get_setting("sec_fullscreen_enabled", True)),
@@ -88,7 +86,7 @@ def get_test_security_rules(test):
 
 
 def compute_scores_from_answers(test, answers, time_taken=0, violation_count=0):
-    from models.database import get_setting
+    from core.database.models import get_setting
     questions = test.get("questions", [])
     if not questions:
         return {"score_final": 0.0, "scores": {}, "correct_count": 0, "total_questions": 0}
@@ -96,11 +94,9 @@ def compute_scores_from_answers(test, answers, time_taken=0, violation_count=0):
     total_questions = len(questions)
     correct_count = 0
     
-    # Track points per dimension
     dimension_max = {"logic": 0, "creativity": 0, "innovation": 0, "problem_solving": 0, "human_intelligence": 0}
     dimension_obtained = {"logic": 0, "creativity": 0, "innovation": 0, "problem_solving": 0, "human_intelligence": 0}
 
-    # Map categories to our 5 AI assessment dimensions
     category_mapping = {
         "logic": ["logic", "pattern recognition", "critical thinking"],
         "creativity": ["creativity", "future thinking", "startup thinking"],
@@ -114,7 +110,7 @@ def compute_scores_from_answers(test, answers, time_taken=0, violation_count=0):
         for dim, cats in category_mapping.items():
             if any(c in cat_lower for c in cats):
                 return dim
-        return "logic"  # fallback
+        return "logic"
 
     for q in questions:
         q_id = q.get("id", "")
@@ -138,19 +134,15 @@ def compute_scores_from_answers(test, answers, time_taken=0, violation_count=0):
             if word_count >= min_words:
                 dimension_obtained[dim] += xp_points * 0.5
 
-    # Compute percentages (0 to 100) for each dimension
     dim_scores = {}
     for dim in dimension_max:
         if dimension_max[dim] > 0:
             dim_scores[dim] = (dimension_obtained[dim] / dimension_max[dim]) * 100.0
         else:
-            dim_scores[dim] = 80.0  # default base score if no questions in dimension
+            dim_scores[dim] = 80.0
 
-    # Compute security score (0 to 100)
-    # Deduct penalty per violation
     security_score = max(0.0, 100.0 - (violation_count * 15.0))
 
-    # Retrieve weightages from database settings
     w_logic = float(get_setting("weight_logic", 40)) / 100.0
     w_creativity = float(get_setting("weight_creativity", 20)) / 100.0
     w_innovation = float(get_setting("weight_innovation", 10)) / 100.0
@@ -168,15 +160,13 @@ def compute_scores_from_answers(test, answers, time_taken=0, violation_count=0):
     )
     score_final = round(min(100.0, raw_final), 2)
 
-    # Disqualification threshold limit check (max major violations allowed)
     max_violations = int(get_setting("sec_tab_switch_limit", 3))
     if violation_count >= max_violations:
         score_final = 0.0
-        selected_status = 3  # Disqualified
+        selected_status = 3
     else:
-        selected_status = 0  # Completed/assigned
+        selected_status = 0
 
-    # Time bonus calculation
     time_bonus = 0.0
     time_limit = test.get("duration_minutes", 15) * 60
     if time_limit > 0 and time_taken > 0:

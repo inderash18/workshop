@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import session, jsonify, request
 
-from middleware.rate_limiter import is_rate_limited
+from core.middleware.rate_limiter import is_rate_limited
 
 
 def login_required(f):

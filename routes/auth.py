@@ -1,16 +1,16 @@
 import json
 from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify, session, redirect, url_for, render_template
-
-from config.settings import Config
-from models.database import (
-    load_db, save_db, get_candidate_by_email, generate_candidate_id, audit_log,
+from core.config.settings import Config
+from core.database.models import (
+    load_db, save_db, get_candidate_by_email,
+    generate_candidate_id, audit_log,
 )
-from middleware.security import (
+from core.middleware.security import (
     hash_password, verify_password, sanitize_input, validate_email, validate_phone,
 )
-from middleware.rate_limiter import is_rate_limited, record_login_attempt
-from middleware.auth import login_required
+from core.middleware.rate_limiter import is_rate_limited, record_login_attempt
+from core.middleware.auth import login_required
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -35,6 +35,10 @@ def login_page():
 def api_signup():
     from models.database import get_setting
     from datetime import datetime
+
+    ip_key = f"signup_{request.remote_addr}"
+    if is_rate_limited(ip_key, Config.SIGNUP_MAX_ATTEMPTS, Config.SIGNUP_LOCKOUT_MINUTES):
+        return jsonify({"error": "Too many signup attempts. Please try again later."}), 429
 
     reg_status = get_setting("registration_status", "open")
     if reg_status != "open":
@@ -73,12 +77,16 @@ def api_signup():
     github = sanitize_input(data.get("github", ""))
 
     if not all([name, college, department, year, email, phone, password]):
+        record_login_attempt(ip_key, success=False)
         return jsonify({"error": "Missing required fields"}), 400
     if not validate_email(email):
+        record_login_attempt(ip_key, success=False)
         return jsonify({"error": "Invalid email format"}), 400
     if not validate_phone(phone):
+        record_login_attempt(ip_key, success=False)
         return jsonify({"error": "Invalid phone number format"}), 400
     if len(password) < 8:
+        record_login_attempt(ip_key, success=False)
         return jsonify({"error": "Password must be at least 8 characters"}), 400
     if linkedin and not linkedin.startswith(("https://", "http://")):
         return jsonify({"error": "Invalid LinkedIn URL"}), 400

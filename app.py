@@ -24,14 +24,38 @@ def _load_env():
 
 _load_env()
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from config.settings import Config
+from core.config.settings import Config
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
+def _csrf_check():
+    if request.method in {"POST", "PUT", "DELETE", "PATCH"}:
+        is_api = request.path.startswith("/api/")
+        if is_api:
+            header = request.headers.get("X-Requested-With", "")
+            token = request.headers.get("X-CSRF-Token", "")
+            if header != "XMLHttpRequest" and not token:
+                if Config.ENFORCE_CSRF:
+                    from flask import abort
+                    import logging
+                    logging.getLogger(__name__).warning(
+                        f"CSRF blocked: {request.method} {request.path} from {request.remote_addr}"
+                    )
+                    return abort(403, description="CSRF validation failed")
+                import logging
+                logging.getLogger(__name__).warning(
+                    f"CSRF check (not enforced): {request.method} {request.path} "
+                    f"from {request.remote_addr}"
+                )
+
+
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__,
+                template_folder='frontend/templates',
+                static_folder='frontend/static',
+                static_url_path='/static')
     
     # Load allowed origins dynamically from env, or default to known endpoints
     allowed_origins = os.environ.get("ALLOWED_ORIGINS")
@@ -56,9 +80,26 @@ def create_app():
     app.config["SESSION_COOKIE_SAMESITE"] = Config.SESSION_COOKIE_SAMESITE
     app.wsgi_app = ProxyFix(app.wsgi_app)
 
+    app.before_request(_csrf_check)
+
+    @app.after_request
+    def add_security_headers(response):
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        if request.is_secure:
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
     from routes import ALL_BLUEPRINTS
     for bp in ALL_BLUEPRINTS:
         app.register_blueprint(bp)
+
+    @app.route("/health")
+    @app.route("/api/health")
+    def health():
+        return jsonify({"status": "ok"})
 
     @app.errorhandler(404)
     def not_found(error):
@@ -79,8 +120,8 @@ if __name__ == "__main__":
 
     app = create_app()
 
-    from models.database import load_db, save_db
-    from middleware.security import hash_password
+    from core.database.models import load_db, save_db
+    from core.middleware.security import hash_password
 
     db = load_db()
     if not db.get("admins"):

@@ -1,21 +1,8 @@
-"""
-Enterprise-Grade Security & Violation Management Engine
-AI NEXT GEN 2026 Workshop Selection Platform
-
-Violation Hierarchy:
-  CRITICAL  → Immediate disqualification
-  MAJOR     → Limited attempts before disqualification
-  SUSPICIOUS → Logged, not disqualifying
-  POLICY    → Policy violations, logged
-"""
-
 from datetime import datetime
-from models.database import (
+from core.database.models import (
     update_assignment, log_security_event, get_assignment,
     get_test_by_id_str, _col,
 )
-
-# ─── VIOLATION REGISTRY ─────────────────────────────────────────────────────
 
 CRITICAL_VIOLATIONS = {
     "fullscreen_exit",
@@ -75,8 +62,6 @@ POLICY_VIOLATIONS = {
     "unauthenticated_attempt",
 }
 
-# ─── LIMITS ─────────────────────────────────────────────────────────────────
-
 TAB_SWITCH_LIMIT = 3
 WINDOW_BLUR_LIMIT = 3
 BROWSER_RESIZE_LIMIT = 2
@@ -85,10 +70,7 @@ SUSPICIOUS_KEYBOARD_LIMIT = 3
 IDLE_TIMEOUT_SECONDS = 60
 DISCONNECT_GRACE_SECONDS = 30
 
-# ─── SECURITY SCORE WEIGHTS ─────────────────────────────────────────────────
-
 VIOLATION_SCORE_PENALTIES = {
-    # Critical — maximum penalty
     "fullscreen_exit": 100,
     "copy_attempt": 100,
     "paste_attempt": 100,
@@ -106,14 +88,12 @@ VIOLATION_SCORE_PENALTIES = {
     "network_manipulation": 100,
     "security_bypass_attempt": 100,
     "test_data_manipulation": 100,
-    # Major
     "tab_switch": 15,
     "window_blur": 10,
     "browser_resize": 8,
     "idle_timeout": 20,
     "focus_change": 5,
     "suspicious_keyboard": 5,
-    # Suspicious
     "fast_answer": 3,
     "slow_answer": 2,
     "suspicious_typing": 5,
@@ -139,7 +119,6 @@ def get_violation_level(event_type):
 
 
 def compute_security_score(assignment):
-    """Compute 0–100 security score based on violation history."""
     if assignment.get("status") == "disqualified":
         return 0
 
@@ -154,16 +133,9 @@ def compute_security_score(assignment):
     return round(score, 1)
 
 
-# ─── CORE SECURITY EVENT PROCESSOR ─────────────────────────────────────────
-
 def process_security_event(assignment, test, event_type,
                            ip_address=None, user_agent=None, detail=None,
                            question_number=None, time_remaining=None, session_id=None):
-    """
-    Process every security event. Validates, logs, updates assignment.
-    Never trusts the frontend — all enforcement is server-side.
-    Returns action dict for frontend to act on.
-    """
     if not assignment or not test:
         return {"action": "none"}
 
@@ -172,7 +144,6 @@ def process_security_event(assignment, test, event_type,
     security_rules = test.get("security_rules", {})
     level = get_violation_level(event_type)
 
-    # Enrich event record with full context
     event_record = _build_event_record(
         assignment=assignment,
         test=test,
@@ -186,10 +157,8 @@ def process_security_event(assignment, test, event_type,
         session_id=session_id,
     )
 
-    # Always persist to MongoDB Atlas — no event is ever lost
     log_security_event(event_record)
 
-    # Route to appropriate handler
     if level == "CRITICAL":
         return _handle_critical(test_id, candidate_id, assignment, event_type, event_record, security_rules)
     elif level == "MAJOR":
@@ -199,15 +168,11 @@ def process_security_event(assignment, test, event_type,
     elif level == "POLICY":
         return _handle_policy(test_id, candidate_id, assignment, event_type, event_record)
 
-    # Fallback: log and warn
     _append_violation(test_id, candidate_id, assignment, event_type, detail)
     return {"action": "logged", "level": "UNKNOWN", "event": event_type}
 
 
-# ─── HANDLERS ───────────────────────────────────────────────────────────────
-
 def _handle_critical(test_id, candidate_id, assignment, event_type, event_record, security_rules):
-    """Immediately terminate the test and disqualify the candidate."""
     new_violation_count = assignment.get("violation_count", 0) + 1
     violations = assignment.get("violations", []) + [{
         "type": event_type,
@@ -244,10 +209,8 @@ def _handle_critical(test_id, candidate_id, assignment, event_type, event_record
 
 
 def _handle_major(test_id, candidate_id, assignment, event_type, event_record, security_rules):
-    """Handle major violations with configurable limits."""
     new_violation_count = assignment.get("violation_count", 0) + 1
 
-    # Internet disconnect — special grace period handling
     if event_type == "internet_disconnect":
         _append_violation(test_id, candidate_id, assignment, event_type, event_record.get("detail"))
         return {"action": "pause_timer", "pause_seconds": DISCONNECT_GRACE_SECONDS}
@@ -255,7 +218,6 @@ def _handle_major(test_id, candidate_id, assignment, event_type, event_record, s
     if event_type == "internet_reconnect":
         return {"action": "resume_timer"}
 
-    # Tab switch — limited attempts
     if event_type == "tab_switch":
         new_tab_count = assignment.get("tab_switch_count", 0) + 1
         tab_limit = security_rules.get("tab_switch_limit", TAB_SWITCH_LIMIT)
@@ -281,7 +243,6 @@ def _handle_major(test_id, candidate_id, assignment, event_type, event_record, s
             "message": f"Warning: {remaining} tab switch(es) remaining before disqualification.",
         }
 
-    # Window blur
     if event_type == "window_blur":
         new_blur_count = assignment.get("window_blur_count", 0) + 1
         blur_limit = security_rules.get("window_blur_limit", WINDOW_BLUR_LIMIT)
@@ -307,7 +268,6 @@ def _handle_major(test_id, candidate_id, assignment, event_type, event_record, s
             "message": f"Warning: {remaining} window leave(s) remaining before disqualification.",
         }
 
-    # Browser resize
     if event_type == "browser_resize":
         new_resize_count = assignment.get("resize_count", 0) + 1
         resize_limit = security_rules.get("browser_resize_limit", BROWSER_RESIZE_LIMIT)
@@ -331,16 +291,14 @@ def _handle_major(test_id, candidate_id, assignment, event_type, event_record, s
             "message": f"Warning: excessive browser resizing detected.",
         }
 
-    # Idle timeout — auto advance question
     if event_type == "idle_timeout":
         _append_violation(test_id, candidate_id, assignment, event_type, "Idle timeout exceeded")
         update_assignment(test_id, candidate_id, {"violation_count": new_violation_count})
         return {"action": "advance_question", "level": "MAJOR", "message": "Idle timeout: moving to next question."}
 
-    # Focus change / suspicious keyboard
     if event_type in ("focus_change", "suspicious_keyboard"):
         count_key = "focus_change_count" if event_type == "focus_change" else "suspicious_keyboard_count"
-        limit = FOCUS_CHANGE_LIMIT if event_type == "focus_change" else SUSPICIOUS_KEYBOARD_LIMIT
+        limit_val = FOCUS_CHANGE_LIMIT if event_type == "focus_change" else SUSPICIOUS_KEYBOARD_LIMIT
         new_count = assignment.get(count_key, 0) + 1
         _append_violation(test_id, candidate_id, assignment, event_type, event_record.get("detail"))
         update_assignment(test_id, candidate_id, {
@@ -348,12 +306,11 @@ def _handle_major(test_id, candidate_id, assignment, event_type, event_record, s
             "violation_count": new_violation_count,
         })
 
-        if new_count >= limit:
+        if new_count >= limit_val:
             return _disqualify_major(test_id, candidate_id, assignment, event_type,
-                                     f"{event_type} limit exceeded ({limit})")
-        return {"action": "warn", "level": "MAJOR", "count": new_count, "limit": limit}
+                                     f"{event_type} limit exceeded ({limit_val})")
+        return {"action": "warn", "level": "MAJOR", "count": new_count, "limit": limit_val}
 
-    # Generic major
     _append_violation(test_id, candidate_id, assignment, event_type, event_record.get("detail"))
     update_assignment(test_id, candidate_id, {"violation_count": new_violation_count})
     _notify_admin_realtime(test_id, candidate_id, event_type, "MAJOR", event_record)
@@ -361,7 +318,6 @@ def _handle_major(test_id, candidate_id, assignment, event_type, event_record, s
 
 
 def _handle_suspicious(test_id, candidate_id, assignment, event_type, event_record):
-    """Log suspicious activity — does NOT terminate test."""
     _append_violation(test_id, candidate_id, assignment, event_type, event_record.get("detail"), level="SUSPICIOUS")
     new_count = assignment.get("suspicious_activity_count", 0) + 1
     update_assignment(test_id, candidate_id, {
@@ -372,7 +328,6 @@ def _handle_suspicious(test_id, candidate_id, assignment, event_type, event_reco
 
 
 def _handle_policy(test_id, candidate_id, assignment, event_type, event_record):
-    """Log policy violation."""
     _append_violation(test_id, candidate_id, assignment, event_type, event_record.get("detail"), level="POLICY")
     update_assignment(test_id, candidate_id, {
         "violation_count": assignment.get("violation_count", 0) + 1,
@@ -381,7 +336,6 @@ def _handle_policy(test_id, candidate_id, assignment, event_type, event_record):
 
 
 def _disqualify_major(test_id, candidate_id, assignment, event_type, reason):
-    """Disqualify after major violation limit exceeded."""
     new_violation_count = assignment.get("violation_count", 0) + 1
     violations = assignment.get("violations", []) + [{
         "type": event_type,
@@ -410,16 +364,12 @@ def _disqualify_major(test_id, candidate_id, assignment, event_type, reason):
     }
 
 
-# ─── HELPERS ─────────────────────────────────────────────────────────────────
-
 def _build_event_record(assignment, test, event_type, level,
                          ip_address, user_agent, detail,
                          question_number, time_remaining, session_id):
-    """Build complete, enriched event record for MongoDB storage."""
     candidate_id = assignment.get("candidate_id", "")
     test_id = assignment.get("test_id", "")
 
-    # Enrich with candidate data
     candidate_name = ""
     candidate_email = ""
     college_name = ""
@@ -432,11 +382,9 @@ def _build_event_record(assignment, test, event_type, level,
     except Exception:
         pass
 
-    # Parse browser/device info from user agent
     browser_info = _parse_user_agent(user_agent or "")
 
     return {
-        # Identity
         "candidate_id": candidate_id,
         "candidate_name": candidate_name,
         "candidate_email": candidate_email,
@@ -445,17 +393,14 @@ def _build_event_record(assignment, test, event_type, level,
         "test_name": test.get("name", ""),
         "session_id": session_id or str(assignment.get("_id", "")),
         "test_assignment_id": str(assignment.get("_id", "")),
-        # Event
         "event_type": event_type,
         "violation_type": event_type,
         "violation_level": level,
         "detail": detail or "",
-        # Context
         "question_number": question_number or (assignment.get("current_question_index", 0) + 1),
         "time_remaining": time_remaining or max(0,
             test.get("duration_minutes", 15) * 60 - (assignment.get("time_taken", 0) or 0)),
         "test_status": assignment.get("status", ""),
-        # Device
         "ip_address": ip_address or "unknown",
         "user_agent": user_agent or "",
         "browser": browser_info.get("browser", ""),
@@ -463,7 +408,6 @@ def _build_event_record(assignment, test, event_type, level,
         "os": browser_info.get("os", ""),
         "device_type": browser_info.get("device", "desktop"),
         "device_info": browser_info,
-        # Meta
         "timestamp": datetime.now().isoformat(),
         "processed": True,
         "action_taken": "",
@@ -472,14 +416,12 @@ def _build_event_record(assignment, test, event_type, level,
 
 
 def _parse_user_agent(ua):
-    """Lightweight UA parser."""
     result = {"browser": "Unknown", "version": "", "os": "Unknown", "device": "desktop"}
     if not ua:
         return result
 
     ua_lower = ua.lower()
 
-    # Browser
     if "chrome" in ua_lower and "edg" not in ua_lower:
         result["browser"] = "Chrome"
     elif "firefox" in ua_lower:
@@ -491,7 +433,6 @@ def _parse_user_agent(ua):
     elif "opera" in ua_lower or "opr" in ua_lower:
         result["browser"] = "Opera"
 
-    # OS
     if "windows" in ua_lower:
         result["os"] = "Windows"
     elif "mac os" in ua_lower or "macos" in ua_lower:
@@ -509,7 +450,6 @@ def _parse_user_agent(ua):
 
 
 def _append_violation(test_id, candidate_id, assignment, event_type, detail=None, level=None):
-    """Append a violation record to the assignment's violation list."""
     if level is None:
         level = get_violation_level(event_type)
     violations = list(assignment.get("violations", []))
@@ -527,9 +467,8 @@ def _append_violation(test_id, candidate_id, assignment, event_type, detail=None
 
 
 def _notify_admin_realtime(test_id, candidate_id, event_type, level, event_record):
-    """Store a real-time admin notification in the activity_logs collection."""
     try:
-        from models.database import audit_log
+        from core.database.models import audit_log
         audit_log(
             action=f"security_{level.lower()}_{event_type}",
             user=candidate_id,
@@ -565,10 +504,7 @@ def _violation_message(event_type):
     return messages.get(event_type, f"Security violation: {event_type}")
 
 
-# ─── SECURITY ANALYTICS ──────────────────────────────────────────────────────
-
 def get_security_analytics_for_assignment(assignment):
-    """Return comprehensive security analytics for a given assignment."""
     violations = assignment.get("violations", [])
 
     by_type = {}
@@ -576,20 +512,18 @@ def get_security_analytics_for_assignment(assignment):
 
     for v in violations:
         vtype = v.get("type", "unknown")
-        level = v.get("level", get_violation_level(vtype))
+        level_val = v.get("level", get_violation_level(vtype))
         by_type[vtype] = by_type.get(vtype, 0) + 1
-        if level in by_level:
-            by_level[level] += 1
+        if level_val in by_level:
+            by_level[level_val] += 1
 
     security_score = compute_security_score(assignment)
 
-    # Build detailed analytics
     analytics = {
         "security_score": security_score,
         "total_violations": len(violations),
         "by_level": by_level,
         "by_type": by_type,
-        # Specific counters for dashboard display
         "fullscreen_violations": by_type.get("fullscreen_exit", 0),
         "tab_switch_count": assignment.get("tab_switch_count", 0),
         "copy_attempts": by_type.get("copy_attempt", 0),
@@ -630,17 +564,11 @@ def get_security_analytics_for_assignment(assignment):
     return analytics
 
 
-# ─── TEST WINDOW ─────────────────────────────────────────────────────────────
-
 def is_test_window_active(test):
-    """
-    Check if the test window is currently open for students.
-    Controlled by admin via the test_open global setting.
-    """
     status = test.get("status", "draft")
     if status not in ("published",):
         return False
-    from models.database import get_setting
+    from core.database.models import get_setting
     test_open = get_setting("test_open", False)
     return bool(test_open)
 
@@ -666,20 +594,18 @@ def can_student_access_test(candidate_id, test_id):
     if not test:
         return False, "Test not found"
 
-    from models.database import get_setting
+    from core.database.models import get_setting
     from datetime import datetime
 
-    # Check global test availability settings
     test_availability = get_setting("test_availability", "open")
     test_open = get_setting("test_open", False)
     if test_availability != "open" or not test_open:
         return False, "Test is not currently open. Please wait for admin to open the test."
 
-    test_status = get_setting("test_status", "published")
-    if test_status != "published":
+    test_status_val = get_setting("test_status", "published")
+    if test_status_val != "published":
         return False, "Test is not in active/published state."
 
-    # Validate test window dates
     now = datetime.now()
     start_str = get_setting("test_start_date")
     end_str = get_setting("test_end_date")

@@ -1,5 +1,5 @@
 from datetime import datetime
-from services.test_engine import compute_scores_from_answers
+from core.services.test_engine import compute_scores_from_answers
 
 
 def compute_scores(candidate, submission, test=None):
@@ -22,7 +22,7 @@ def compute_scores(candidate, submission, test=None):
                 "detail": f"Absurd typing velocity: {typing_speed_avg} CPM",
             })
     else:
-        from services.challenge_engine import get_challenge_data, get_total_time
+        from core.services.challenge_engine import get_challenge_data, get_total_time
         levels = get_challenge_data(candidate["candidate_id"])
         scores, selected_status = _compute_legacy_scores(levels, answers, time_taken, violation_count, telemetry)
         if typing_speed_avg > 1500:
@@ -32,7 +32,7 @@ def compute_scores(candidate, submission, test=None):
                 "detail": f"Absurd typing velocity: {typing_speed_avg} CPM",
             })
 
-    from services.achievement_engine import compute_badges
+    from core.services.achievement_engine import compute_badges
     badges = compute_badges(scores, selected_status)
 
     return {

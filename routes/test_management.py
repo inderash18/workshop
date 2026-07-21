@@ -4,17 +4,17 @@ import io
 from datetime import datetime
 from flask import Blueprint, request, jsonify, session, redirect, url_for, render_template, Response
 from bson import ObjectId
-
-from models.database import (
+from core.database.models import (
     load_db, save_db, get_candidate_by_email, get_candidate_by_id,
-    create_test, get_test_by_id, get_test_by_id_str, update_test, delete_test,
-    get_all_tests, create_assignment, get_assignment, update_assignment,
-    get_assignments_for_test, get_assignments_for_test_by_status,
-    get_security_events_for_test, audit_log, get_setting,
+    create_test, get_test_by_id, get_test_by_id_str, update_test,
+    delete_test, get_all_tests, create_assignment, get_assignment,
+    update_assignment, get_assignments_for_test,
+    get_assignments_for_test_by_status, get_security_events_for_test,
+    audit_log, get_setting,
 )
-from middleware.security import sanitize_input
-from middleware.auth import admin_required
-from services.test_engine import (
+from core.middleware.security import sanitize_input
+from core.middleware.auth import admin_required
+from core.services.test_engine import (
     get_test_questions, get_test_security_rules,
     compute_scores_from_answers, format_test_for_display,
 )

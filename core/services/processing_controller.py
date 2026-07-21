@@ -8,10 +8,10 @@ from enum import Enum
 from dataclasses import dataclass, asdict
 import uuid
 
-from models.database import load_db, save_db, get_candidate_by_email, get_assignment, create_assignment
-from services.test_engine import get_test_questions, get_test_security_rules, compute_scores_from_answers
-from services.security_engine import process_security_event, is_test_window_active, can_student_access_test
-from services.scoring_engine import compute_scores
+from core.database.models import load_db, save_db, get_candidate_by_email, get_assignment, create_assignment
+from core.services.test_engine import get_test_questions, get_test_security_rules, compute_scores_from_answers
+from core.services.security_engine import process_security_event, is_test_window_active, can_student_access_test
+from core.services.scoring_engine import compute_scores
 
 # Main Processing Controller - The heart of the AI Workshop Selection System
 class AIWorkshopProcessingController:

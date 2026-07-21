@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, jsonify, render_template, abort
 
-from models.database import load_db, get_assignments_for_test, get_test_by_id_str, get_setting
+from core.database.models import load_db, get_assignments_for_test, get_test_by_id_str, get_setting
 
 leaderboard_bp = Blueprint("leaderboard", __name__)
 

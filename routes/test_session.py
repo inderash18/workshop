@@ -2,19 +2,19 @@ import json
 from datetime import datetime
 from flask import Blueprint, request, jsonify, session, render_template, redirect, url_for
 
-from models.database import (
-    load_db, save_db, get_candidate_by_email,
-    get_test_by_id_str, get_assignment, update_assignment,
-    get_assignments_for_candidate, audit_log, get_setting,
+from core.database.models import (
+    load_db, save_db, get_candidate_by_email, get_test_by_id_str,
+    get_assignment, update_assignment, get_assignments_for_candidate,
+    audit_log, get_setting,
 )
-from middleware.auth import login_required
-from middleware.security import sanitize_input
-from services.security_engine import (
-    process_security_event, is_test_window_active, can_student_access_test,
-    DISCONNECT_GRACE_SECONDS,
+from core.middleware.auth import login_required
+from core.middleware.security import sanitize_input
+from core.services.security_engine import (
+    process_security_event, is_test_window_active,
+    can_student_access_test, DISCONNECT_GRACE_SECONDS,
 )
-from services.test_engine import get_test_questions, get_test_security_rules, compute_scores_from_answers
-from services.scoring_engine import compute_scores
+from core.services.test_engine import get_test_questions, get_test_security_rules, compute_scores_from_answers
+from core.services.scoring_engine import compute_scores
 
 test_session_bp = Blueprint("test_session", __name__)
 
