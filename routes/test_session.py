@@ -190,7 +190,7 @@ def submit_test(test_id):
         update_fields["scores"] = {"score_final": 0.0}
         update_fields["selected"] = 3
 
-    from models.database import save_db
+    from core.database.models import save_db
     db = load_db()
     candidate_data = next((c for c in db["candidates"] if c.get("candidate_id") == candidate_id), None)
     if candidate_data:
@@ -213,7 +213,7 @@ def submit_test(test_id):
 
     update_assignment(test_id, candidate_id, update_fields)
 
-    from services.achievement_engine import compute_badges
+    from core.services.achievement_engine import compute_badges
     badges = compute_badges(scores, selected_status)
 
     audit_log("test_submitted", session["user_email"], {
@@ -553,8 +553,8 @@ def api_admin_candidate_security(candidate_id, test_id):
     if not session.get("admin_logged_in"):
         return jsonify({"error": "Admin access required"}), 403
 
-    from models.database import get_candidate_by_id, get_security_events_for_candidate
-    from services.security_engine import get_security_analytics_for_assignment
+    from core.database.models import get_candidate_by_id, get_security_events_for_candidate
+    from core.services.security_engine import get_security_analytics_for_assignment
 
     assignment = get_assignment(test_id, candidate_id)
     if not assignment:
@@ -566,7 +566,7 @@ def api_admin_candidate_security(candidate_id, test_id):
     analytics = get_security_analytics_for_assignment(assignment)
 
     # Get all security events from MongoDB for this candidate+test
-    from models.database import _col
+    from core.database.models import _col
     from bson import ObjectId
     events = list(_col("security_events").find(
         {"test_id": test_id, "candidate_id": candidate_id}
@@ -676,8 +676,8 @@ def generate_ai_recommendation(scores, violations_count):
 
 
 def build_test_report_data(test_id, candidate_id):
-    from models.database import get_candidate_by_id, get_assignment, get_test_by_id_str, get_candidate_by_email
-    from services.security_engine import get_security_analytics_for_assignment
+    from core.database.models import get_candidate_by_id, get_assignment, get_test_by_id_str, get_candidate_by_email
+    from core.services.security_engine import get_security_analytics_for_assignment
     
     test = get_test_by_id_str(test_id)
     if not test:
@@ -868,7 +868,7 @@ def show_test_report(test_id, candidate_id=None):
     is_admin = session.get("admin_logged_in", False)
     student_email = session.get("user_email")
     
-    from models.database import get_candidate_by_email
+    from core.database.models import get_candidate_by_email
     if not is_admin:
         candidate = get_candidate_by_email(student_email)
         if not candidate:
@@ -898,7 +898,7 @@ def api_get_test_report(test_id, candidate_id=None):
     if not is_admin and not student_email:
         return jsonify({"error": "Authentication required"}), 401
         
-    from models.database import get_candidate_by_email
+    from core.database.models import get_candidate_by_email
     if not is_admin:
         candidate = get_candidate_by_email(student_email)
         if not candidate:

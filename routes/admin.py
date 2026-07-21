@@ -99,7 +99,7 @@ def toggle_publish():
 @admin_bp.route("/api/admin/candidates", methods=["GET"])
 @admin_required
 def get_candidates():
-    from models.database import _col
+    from core.database.models import _col
 
     sort_by = request.args.get("sort_by", "score")
     college_filter = sanitize_input(request.args.get("college", ""))
@@ -217,7 +217,7 @@ def auto_shortlist():
       < 60%  => Rejected (2)
       Disqualified stays 3
     """
-    from models.database import _col
+    from core.database.models import _col
 
     db = load_db()
 
@@ -329,7 +329,7 @@ def toggle_selection():
 @admin_bp.route("/api/admin/analytics-data", methods=["GET"])
 @admin_required
 def api_admin_analytics_data():
-    from models.database import _col
+    from core.database.models import _col
     db = load_db()
     candidates = list(db["candidates"])
     
@@ -434,7 +434,7 @@ def admin_stats():
         college = c.get("college", "Unknown")
         college_dist[college] = college_dist.get(college, 0) + 1
 
-    from models.database import get_all_tests, _col
+    from core.database.models import get_all_tests, _col
     tests = get_all_tests()
     total_tests = len(tests)
     published_tests = sum(1 for t in tests if t.get("status") == "published")
@@ -521,7 +521,7 @@ def export_csv():
 @admin_bp.route("/admin/report/<candidate_id>")
 @admin_required
 def candidate_report(candidate_id):
-    from services.report_generator import generate_report_data
+    from core.services.report_generator import generate_report_data
     candidate_id = sanitize_input(candidate_id)
     data = generate_report_data(candidate_id)
     if not data:
@@ -532,7 +532,7 @@ def candidate_report(candidate_id):
 @admin_bp.route("/api/admin/report/<candidate_id>")
 @admin_required
 def candidate_report_api(candidate_id):
-    from services.report_generator import generate_report_data
+    from core.services.report_generator import generate_report_data
     candidate_id = sanitize_input(candidate_id)
     data = generate_report_data(candidate_id)
     if not data:
@@ -551,7 +551,7 @@ def candidate_report_api(candidate_id):
 @admin_bp.route("/api/admin/security-logs", methods=["GET"])
 @admin_required
 def admin_security_logs():
-    from models.database import get_security_events_for_candidate
+    from core.database.models import get_security_events_for_candidate
     candidate_id = sanitize_input(request.args.get("candidate_id", ""))
     limit = request.args.get("limit", 100, type=int)
 
@@ -570,7 +570,7 @@ def admin_security_logs():
 @admin_required
 @rate_limit("admin_settings", Config.ADMIN_ACTION_MAX_ATTEMPTS, Config.ADMIN_ACTION_LOCKOUT_MINUTES)
 def get_or_update_platform_settings():
-    from models.database import get_setting, update_setting
+    from core.database.models import get_setting, update_setting
     if request.method == "GET":
         settings = {
             # Cohort
@@ -771,7 +771,7 @@ def get_admin_activity():
 @admin_required
 def get_test_access():
     """Get current test open/close state."""
-    from models.database import get_setting
+    from core.database.models import get_setting
     is_open = get_setting("test_open", False)
     return jsonify({"test_open": bool(is_open)})
 
@@ -781,7 +781,7 @@ def get_test_access():
 @rate_limit("admin_toggle_test", Config.ADMIN_ACTION_MAX_ATTEMPTS, Config.ADMIN_ACTION_LOCKOUT_MINUTES)
 def toggle_test_access():
     """Admin toggle: open or close the test for all students."""
-    from models.database import get_setting, update_setting
+    from core.database.models import get_setting, update_setting
     current = get_setting("test_open", False)
     new_state = not bool(current)
     update_setting("test_open", new_state)
@@ -803,7 +803,7 @@ def toggle_test_access():
 @rate_limit("admin_assign_all", 5, 60)
 def assign_test_to_all():
     """Assign the active published test to ALL existing candidates who don't already have an assignment."""
-    from models.database import _col, create_assignment
+    from core.database.models import _col, create_assignment
 
     # Find the published test
     test = _col("tests").find_one({"status": "published"})

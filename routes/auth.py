@@ -33,7 +33,7 @@ def login_page():
 @auth_bp.route("/api/auth/register", methods=["POST"])
 @auth_bp.route("/api/auth/signup", methods=["POST"])
 def api_signup():
-    from models.database import get_setting
+    from core.database.models import get_setting
     from datetime import datetime
 
     ip_key = f"signup_{request.remote_addr}"
@@ -155,7 +155,7 @@ def api_signup():
     save_db(db)
 
     # Assign all currently published tests to this new student
-    from models.database import get_all_tests, create_assignment
+    from core.database.models import get_all_tests, create_assignment
     try:
         tests = get_all_tests()
         for test in tests:
@@ -257,7 +257,7 @@ def get_session():
         except Exception:
             c_data[field] = []
 
-    from services.achievement_engine import get_badge_details
+    from core.services.achievement_engine import get_badge_details
     c_data["badge_details"] = get_badge_details(c_data.get("badges", []))
 
     c_data["session_expires"] = (

@@ -12,7 +12,8 @@ from datetime import datetime
 
 # Import the DB helper
 try:
-    from models.database import _col, load_db, Config
+    from core.database.models import _col, load_db
+from core.config.settings import Config
 except Exception as e:
     print(f"[Audit] Failed to import DB module: {e}")
     sys.exit(1)

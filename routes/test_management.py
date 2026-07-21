@@ -162,7 +162,7 @@ def api_list_tests():
         if status_filter == "all":
             tests = get_all_tests()
         else:
-            from models.database import get_tests_by_status
+            from core.database.models import get_tests_by_status
             tests = get_tests_by_status(status_filter)
     else:
         tests = get_all_tests()
@@ -217,7 +217,7 @@ def api_publish_test(test_id):
         update_test(test_id, {"status": "published"})
         
         # Assign to all existing candidates automatically
-        from models.database import create_assignment
+        from core.database.models import create_assignment
         try:
             db = load_db()
             candidates = db.get("candidates", [])
@@ -811,7 +811,7 @@ def api_export_test_results(test_id):
 @test_management_bp.route("/api/admin/questions", methods=["GET"])
 @admin_required
 def api_get_questions():
-    from models.database import _col
+    from core.database.models import _col
     questions = list(_col("question_bank").find())
     results = []
     for q in questions:
@@ -825,7 +825,7 @@ def api_get_questions():
 @test_management_bp.route("/api/admin/questions", methods=["POST"])
 @admin_required
 def api_add_question():
-    from models.database import _col
+    from core.database.models import _col
     data = request.json or {}
     
     title = sanitize_input(data.get("title", ""))
@@ -874,7 +874,7 @@ def api_add_question():
 @test_management_bp.route("/api/admin/questions/<q_id>", methods=["PUT", "PATCH"])
 @admin_required
 def api_edit_question(q_id):
-    from models.database import _col
+    from core.database.models import _col
     question = _col("question_bank").find_one({"id": q_id})
     if not question:
         return jsonify({"error": "Question not found"}), 404
@@ -910,7 +910,7 @@ def api_edit_question(q_id):
 @test_management_bp.route("/api/admin/questions/<q_id>", methods=["DELETE"])
 @admin_required
 def api_delete_question(q_id):
-    from models.database import _col
+    from core.database.models import _col
     res = _col("question_bank").delete_one({"id": q_id})
     if res.deleted_count == 0:
         return jsonify({"error": "Question not found"}), 404

@@ -54,7 +54,7 @@ def student_tests():
 
     candidate_id = candidate["candidate_id"]
     
-    from models.database import _col, get_assignment, create_assignment
+    from core.database.models import _col, get_assignment, create_assignment
     test = _col("tests").find_one({"status": "published"})
     if not test:
         test = _col("tests").find_one()
@@ -66,7 +66,7 @@ def student_tests():
         if not assignment:
             assignment = create_assignment(test_id, candidate_id)
             
-        from services.security_engine import is_test_window_active
+        from core.services.security_engine import is_test_window_active
         test_status = test.get("status", "draft")
         is_active = is_test_window_active(test) if test_status == "published" else False
 
